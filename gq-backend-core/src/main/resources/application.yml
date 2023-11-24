@@ -73,6 +73,7 @@ cas:
   server-url: ${gq.cas.url}
 app:
   url: ${gq.cas.app}
+  pattern: ${gq.pattern}
 
 minio:
   endpoint: ${gq.minio.endpoint}
