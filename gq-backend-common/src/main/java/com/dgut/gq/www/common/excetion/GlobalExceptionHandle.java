@@ -4,6 +4,7 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * @author hyj
  */
 //@ControllerAdvice
-//@RestControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandle {
 
     /**

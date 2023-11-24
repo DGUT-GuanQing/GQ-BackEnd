@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Data
 @NoArgsConstructor
-@Component
-@Configuration
+
 public class GlobalSystemException extends  RuntimeException{
 
     public int  code;
