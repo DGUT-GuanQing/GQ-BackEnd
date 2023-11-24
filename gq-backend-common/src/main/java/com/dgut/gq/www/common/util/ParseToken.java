@@ -2,7 +2,7 @@ package com.dgut.gq.www.common.util;
 
 
 import com.dgut.gq.www.common.common.GlobalResponseCode;
-import com.dgut.guangqing.gq_common.excetion.GlobalSystemException;
+import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import io.jsonwebtoken.Claims;
 
 /**
