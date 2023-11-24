@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.example</groupId>
         <artifactId>GQ-BackEnd</artifactId>
@@ -9,12 +10,11 @@
         <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
 
-
-    <groupId>com.dgut.gq.www.core</groupId>
-    <artifactId>gq-backend-core</artifactId>
+    <groupId>com.dgut.gq.www.recruit</groupId>
+    <artifactId>gq-backend-recruit</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>gq-backend-core</name>
-    <description>gq-backend-core</description>
+    <name>gq-backend-recruit</name>
+    <description>gq-backend-recruit</description>
 
     <dependencies>
         <dependency>
@@ -63,41 +63,13 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
-        <!--rabbitmq依赖-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
             <version>3.4.1</version>
         </dependency>
-        <!--中央认证-->
-        <dependency>
-            <groupId>org.jasig.cas.client</groupId>
-            <artifactId>cas-client-core</artifactId>
-        </dependency>
-        <!--分布式文件系统-->
-        <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-        </dependency>
-        <!--限流工具-->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-        <!--redis锁引入-->
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-        </dependency>
     </dependencies>
+
 
     <build>
         <plugins>
