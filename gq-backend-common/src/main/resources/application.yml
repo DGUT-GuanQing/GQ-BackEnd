@@ -1,0 +1,4 @@
+jwt:
+  secret: ${gq.jwt.secret}
+
+
