@@ -1,6 +1,8 @@
+server:
+  port: ${gq.server.port}
 spring:
   profiles:
-    active: dev  #dev(开发)   #pro(生产)
+    active: test  #dev(开发)   #pro(生产)
   banner:
     image:
       location: banner.jpg
@@ -12,6 +14,7 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 20MB
+
 
   #数据库配置
   datasource:
@@ -69,11 +72,12 @@ mybatis-plus:
         id-type: ASSIGN_ID
 
 #中央认证
+#中央认证
 cas:
   server-url: ${gq.cas.url}
+
 app:
   url: ${gq.cas.app}
-  pattern: ${gq.pattern}
 
 minio:
   endpoint: ${gq.minio.endpoint}

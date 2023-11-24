@@ -1,7 +1,6 @@
 package com.dgut.gq.www.core.config;
 
 
-import com.dgut.gq.www.common.util.JwtUtil;
 import org.jasig.cas.client.authentication.AuthenticationFilter;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
@@ -31,13 +30,9 @@ public class CasFilterConfig {
     /**
      * 需要走cas拦截的地址（/* 所有地址都拦截）
      */
-    private  static String URL_PATTERN ;
+    private  final static String URL_PATTERN="/user/getUserInfo" ;
 
 
-    @Value("${app.pattern}")
-    public void setJwtKey(String url){
-        CasFilterConfig.URL_PATTERN = url;
-    }
 
 
     /**
