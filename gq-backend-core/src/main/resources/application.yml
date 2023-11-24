@@ -1,0 +1,84 @@
+spring:
+  profiles:
+    active: dev  #dev(开发)   #pro(生产)
+  banner:
+    image:
+      location: banner.jpg
+  security:
+    user:
+      name:  ${gq.security.name}
+      password:  ${gq.security.password}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+
+  #数据库配置
+  datasource:
+    druid:
+      url: jdbc:mysql://${gq.mysql.host}:${gq.mysql.port}/${gq.mysql.db}?serverTimezone=Asia/Shanghai
+      username: ${gq.mysql.username}
+      password: ${gq.mysql.password}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+  #redis配置
+  redis:
+    host: ${gq.redis.host}
+    port: ${gq.redis.port}
+    password: ${gq.redis.password}
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 100ms
+
+
+  #消息队列配置
+  rabbitmq:
+    host: ${gq.rabbitmq.host}
+    port: ${gq.rabbitmq.port}
+    username: ${gq.rabbitmq.username}
+    password: ${gq.rabbitmq.password}
+    virtual-host: /
+    listener:
+      #手动确认
+      direct:
+        acknowledge-mode: manual
+        #每次从队列拉取的消息最大数量
+        prefetch: 20
+      simple:
+        #acknowledge-mode: manual
+        prefetch: 20
+
+
+#mybatiesplus配置
+mybatis-plus:
+  #mybaties xml 加载sql
+  mapper-locations: classpath:mapper/*Mapper.xml
+  configuration:
+    # 驼峰
+    map-underscore-to-camel-case: true
+    # 自动配置日志
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    global-config:
+      db-config:
+        #匹配数据库id增长
+        id-type: ASSIGN_ID
+
+#中央认证
+cas:
+  server-url: ${gq.cas.url}
+app:
+  url: ${gq.cas.app}
+
+minio:
+  endpoint: ${gq.minio.endpoint}
+  accessKey: ${gq.minio.accessKey}
+  secretKey: ${gq.minio.secretKey}
+
+logging:
+  level:
+    root: error

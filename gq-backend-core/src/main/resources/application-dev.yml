@@ -1,0 +1,3 @@
+server:
+  port: ${gq.server.port}
+
