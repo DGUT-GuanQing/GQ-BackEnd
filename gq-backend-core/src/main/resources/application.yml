@@ -83,3 +83,7 @@ minio:
 logging:
   level:
     root: error
+
+wx:
+  appid: ${gq.wx.appid}
+  secret: ${gq.wx.secret}

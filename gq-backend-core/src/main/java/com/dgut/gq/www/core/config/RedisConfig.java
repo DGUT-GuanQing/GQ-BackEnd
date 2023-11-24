@@ -1,6 +1,6 @@
 package com.dgut.gq.www.core.config;
 
-import com.gq.util.FastJsonRedisSerializer;
+import com.dgut.gq.www.core.util.FastJsonRedisSerializer;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
