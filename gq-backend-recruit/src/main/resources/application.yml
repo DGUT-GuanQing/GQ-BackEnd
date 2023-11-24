@@ -1,0 +1,56 @@
+server:
+  port: ${gq.server.port}
+spring:
+  profiles:
+    active: test  #dev(开发)   #pro(生产)
+  banner:
+    image:
+      location: banner.jpg
+  security:
+    user:
+      name:  ${gq.security.name}
+      password:  ${gq.security.password}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+
+
+  #数据库配置
+  datasource:
+    druid:
+      url: jdbc:mysql://${gq.mysql.host}:${gq.mysql.port}/${gq.mysql.db}?serverTimezone=Asia/Shanghai
+      username: ${gq.mysql.username}
+      password: ${gq.mysql.password}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+  #redis配置
+  redis:
+    host: ${gq.redis.host}
+    port: ${gq.redis.port}
+    password: ${gq.redis.password}
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 100ms
+
+
+
+#mybatiesplus配置
+mybatis-plus:
+  #mybaties xml 加载sql
+  mapper-locations: classpath:mapper/*Mapper.xml
+  configuration:
+    # 驼峰
+    map-underscore-to-camel-case: true
+    # 自动配置日志
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    global-config:
+      db-config:
+        #匹配数据库id增长
+        id-type: ASSIGN_ID
+

@@ -33,7 +33,7 @@ public class SwaggerConfig implements WebMvcConfigurer{
                     .apiInfo(apiInfo())
                     .enable(!flag)
                     .select()
-                    .apis(RequestHandlerSelectors.basePackage("com.gq"))
+                    .apis(RequestHandlerSelectors.basePackage("com.dgut.gq.www.core"))
                     .paths(PathSelectors.any())
                     .build();
 
@@ -43,7 +43,7 @@ public class SwaggerConfig implements WebMvcConfigurer{
         private ApiInfo apiInfo() {
             return new ApiInfoBuilder()
                     .title("莞青小程序")
-                    .description("接口说明")
+                    .description("核心模块接口")
                     .version("1.0.0")
                     // 作者信息
                     .contact(new Contact("莞青技术组", "", ""))
