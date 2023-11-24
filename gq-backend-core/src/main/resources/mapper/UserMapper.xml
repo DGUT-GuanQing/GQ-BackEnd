@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gq.mapper.UserMapper">
+    
+
+    <select id="robTicket" parameterType="Map" resultType="int">
+        select  count(*)  from gq_user_info where now()>(
+        select grab_tickets_start  from gq_lecture_info where  id=#{lectureId})
+        and (select grab_tickets_end  from gq_lecture_info where  id=#{lectureId})>now()
+        and ticket_state=0
+        and  gq_user_info.openid=#{openid};
+    </select>
+
+</mapper>
