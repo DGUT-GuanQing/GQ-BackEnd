@@ -39,6 +39,7 @@ public class GqLoginInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("sss");
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.DGUT_LOGIN + openid);

@@ -34,7 +34,6 @@ public class JwtUtil {
 
     @Value("${jwt.secret}")
     public void setJwtKey(String secret){
-        System.out.println("引入");
         JwtUtil.JWT_KEY = secret;
     }
 
@@ -110,7 +109,6 @@ public class JwtUtil {
      * @return
      */
     public static SecretKey generalKey() {
-        System.out.println(JWT_KEY);
         byte[] encodedKey = Base64.getDecoder().decode(JwtUtil.JWT_KEY);
         SecretKey key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
         return key;

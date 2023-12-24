@@ -16,6 +16,18 @@ spring:
       max-request-size: 20MB
 
 
+    #redis配置
+  redis:
+      host: ${gq.redis.host}
+      port: ${gq.redis.port}
+      password: ${gq.redis.password}
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 100ms
   #数据库配置
   datasource:
     druid:
