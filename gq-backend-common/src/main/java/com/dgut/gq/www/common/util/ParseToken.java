@@ -26,7 +26,6 @@ public class ParseToken {
                     GlobalResponseCode.USER_NOT_LOGIN.getCode(),
                     GlobalResponseCode.USER_NOT_LOGIN.getMessage());
         }
-        String openid = claims.getSubject();
-        return openid;
+        return claims.getSubject();
     }
 }

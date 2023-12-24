@@ -5,7 +5,12 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -17,6 +22,8 @@ import java.util.UUID;
  * @author hyj
  * @since  2022-9-26
  */
+
+@Configuration
 public class JwtUtil {
 
     /**
@@ -27,6 +34,7 @@ public class JwtUtil {
 
     @Value("${jwt.secret}")
     public void setJwtKey(String secret){
+        System.out.println("引入");
         JwtUtil.JWT_KEY = secret;
     }
 
@@ -73,7 +81,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setId(uuid)              //唯一的ID
                 .setSubject(subject)   // 主题  可以是JSON数据
-                .setIssuer("sg")     // 签发者
+                .setIssuer("hyj")     // 签发者
                 .setIssuedAt(now)      // 签发时间
                 .signWith(signatureAlgorithm, secretKey) //使用HS256对称加密算法签名, 第二个参数为秘钥
                 .setExpiration(expDate);
@@ -102,6 +110,7 @@ public class JwtUtil {
      * @return
      */
     public static SecretKey generalKey() {
+        System.out.println(JWT_KEY);
         byte[] encodedKey = Base64.getDecoder().decode(JwtUtil.JWT_KEY);
         SecretKey key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
         return key;

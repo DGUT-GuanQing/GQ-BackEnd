@@ -40,3 +40,5 @@ mybatis-plus:
         #匹配数据库id增长
         id-type: ASSIGN_ID
 
+jwt:
+  secret: ${gq.jwt.secret}

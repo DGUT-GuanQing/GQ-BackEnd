@@ -101,7 +101,6 @@ public class UserServiceImpl implements UserService {
         String key = RedisGlobalKey.PERMISSION+openid;
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
         stringRedisTemplate.expire(key,1,TimeUnit.DAYS);
-
         //加密openid，返回token
         return  JwtUtil.createJWT(openid);
     }

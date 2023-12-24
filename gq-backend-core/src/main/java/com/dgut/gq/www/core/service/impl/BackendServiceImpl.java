@@ -531,17 +531,14 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         LambdaQueryWrapper<User>lq=new LambdaQueryWrapper<>();
         lq.eq(User::getUserName,userName);
         User user = userMapper.selectOne(lq);
-
         //判断用户是否存在数据库中
         Optional<User> optionalUser=Optional.ofNullable(user);
-
         //不存在就抛出异常
         if(!optionalUser.isPresent()){
             throw  new GlobalSystemException(
                     GlobalResponseCode.OPERATE_FAIL.getCode(),
                     "账户不存在");
         }
-
         //权限信息
         String permission = user.getPermission();
         List<String> list = new ArrayList<>();

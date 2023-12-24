@@ -30,7 +30,7 @@ public class GlobalExceptionHandle {
     @ExceptionHandler(Exception.class)
     public  SystemJsonResponse  commonException(Exception e){
         return SystemJsonResponse.fail(GlobalResponseCode.SYSTEM_TIMEOUT.getCode()
-                ,GlobalResponseCode.SYSTEM_TIMEOUT.getMessage());
+                ,e.getMessage());
     }
 
 }
