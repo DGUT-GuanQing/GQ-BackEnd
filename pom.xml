@@ -60,8 +60,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-
             <!--nacos的管理依赖-->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
@@ -70,14 +68,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-urlconnection -->
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp-urlconnection</artifactId>
                 <version>3.0.0-RC1</version>
             </dependency>
-
             <!--Jsoup: Response解析工具-->
             <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
             <dependency>
@@ -85,8 +81,6 @@
                 <artifactId>jsoup</artifactId>
                 <version>${jsoup.version}</version>
             </dependency>
-
-
             <!--mybatis-plus-->
             <dependency>
                 <groupId>com.baomidou</groupId>
@@ -99,27 +93,23 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
-
             <!--swagger-->
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger2</artifactId>
                 <version>${springfox-swagger2.version}</version>
             </dependency>
-
             <!--swagger ui-->
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${springfox-swagger-ui.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-starter</artifactId>
                 <version>${druid-spring-boot-starter.version}</version>
             </dependency>
-
             <!--小程序申请openid-->
             <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
             <dependency>
@@ -127,66 +117,54 @@
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
-
-
-
             <!-- jwt权限校验 -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>${jjwt.version}</version>
             </dependency>
-
-
             <!--连接池-->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
                 <version>${commons-pool2.version}</version>
             </dependency>
-
             <!--hutool工具类-->
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool-all.version}</version>
             </dependency>
-
             <!--二维码-->
             <dependency>
                 <groupId>com.google.zxing</groupId>
                 <artifactId>core</artifactId>
                 <version>${core}</version>
             </dependency>
-
             <!--中央认证-->
             <dependency>
                 <groupId>org.jasig.cas.client</groupId>
                 <artifactId>cas-client-core</artifactId>
                 <version>${cas-client-core}</version>
             </dependency>
-
             <!--分布式文件系统-->
             <dependency>
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
                 <version>${minio}</version>
             </dependency>
-
             <!--redis锁引入-->
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson}</version>
             </dependency>
-
             <!--限流-->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

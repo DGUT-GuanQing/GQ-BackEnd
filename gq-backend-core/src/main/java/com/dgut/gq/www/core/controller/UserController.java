@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -138,21 +139,24 @@ public class UserController {
      * @param request
      * @return
      */
-    // @PreAuthorize("hasAnyAuthority('user', 'admin')")
     @ApiOperation(value = "回调接口")
     @RequestMapping(value = "/getUserInfo",
             produces = { "application/json" },
             method = RequestMethod.GET)
 
     public SystemJsonResponse getLoginUserInfo(HttpServletRequest request,String id){
-        User user1 = userMapper.selectById(id);
-        if(user1 == null || user1.getOpenid() == null)return SystemJsonResponse.fail();
-        String openid = user1.getOpenid();
-        Object object = request.getSession().getAttribute(CAS);
-        if ( null == object ) {
+        Optional<User> optionalUser = Optional.ofNullable(userMapper.selectById(id));
+        if (!optionalUser.isPresent() || optionalUser.get().getOpenid() == null) {
+            return SystemJsonResponse.fail();
+        }
+        String openid = optionalUser.get().getOpenid();
+        Object cas = request.getSession().getAttribute(CAS);
+        Optional<Object> optionalObject = Optional.ofNullable(cas);
+
+        if (!optionalObject.isPresent()) {
             return SystemJsonResponse.fail("中央认证失败");
         }
-        Assertion assertion = ( Assertion ) object;
+        Assertion assertion = ( Assertion ) cas;
         String userName = assertion.getPrincipal().getName();
         log.error("cas对接登录用户buildUserInfoByCas：" + userName);
         //获取属性值
@@ -165,8 +169,7 @@ public class UserController {
         user.setStudentId((String) attributes.get("bindUserList"));
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getOpenid,openid);
-        int update = userMapper.update(user, lambdaQueryWrapper);
-        if(update == 0)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"该中央认证已经绑定过微信号,请联系管理员解绑");
+        if(userMapper.update(user, lambdaQueryWrapper) == 0)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"该中央认证已经绑定过微信号,请联系管理员解绑");
         //删除redis
         stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
         //设置中央认证缓存
