@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -67,6 +68,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse updateOrSave(String openid, CurriculumVitaeDto curriculumVitaeDto) {
+        if(2 <1)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"系统已经关闭");
         //先查询用户是否上传过简历
         LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CurriculumVitae::getOpenid,openid);
@@ -173,10 +175,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             positionLambdaQueryWrapper.eq(Position::getId,record.getPositionId());
             Position position = positionMapper.selectOne(positionLambdaQueryWrapper);
             CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
-            System.out.println(openid);
-            System.out.println(user);
-            System.out.println(position);
-            System.out.println(department);
             //对象转换
             BeanUtils.copyProperties(record,curriculumVitaeVo);
             //将学生信息添加到返回对象集合
