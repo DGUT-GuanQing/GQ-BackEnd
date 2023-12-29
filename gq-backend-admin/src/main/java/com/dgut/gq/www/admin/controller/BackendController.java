@@ -1,5 +1,12 @@
 package com.dgut.gq.www.admin.controller;
 
+import com.dgut.gq.www.admin.model.dto.DepartmentDto;
+import com.dgut.gq.www.admin.model.dto.LectureDto;
+import com.dgut.gq.www.admin.model.dto.PositionDto;
+import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.model.vo.CurriculumVitaeVo;
+import com.dgut.gq.www.admin.model.vo.LectureVo;
+import com.dgut.gq.www.admin.model.vo.UserVo;
 import com.dgut.gq.www.admin.service.BackendService;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.model.entity.User;
@@ -23,15 +30,10 @@ public class BackendController {
     private BackendService backendService;
 
 
-    @Autowired
-    private PosterTweetService posterTweetService;
 
-
-    @Autowired
-    private LectureService lectureService;
 
     /**
-     * 后台的登录接口
+     * 后台的登录
      * @param
      * @return
      */
@@ -41,16 +43,13 @@ public class BackendController {
             @ApiImplicitParam(value = "密码",name = "password",required = true),
     })
     public SystemJsonResponse backendLogin(String userName, String password){
-        User user = new User();
-        user.setUserName(userName);
-        user.setPassword(password);
-        return backendService.login(user);
+        return backendService.login(userName,password);
     }
 
 
 
     /**
-     * 后台登出接口
+     * 后台登出
      * @return
      */
     @PostMapping("/logout")
@@ -79,10 +78,10 @@ public class BackendController {
             @ApiResponse(code = 200, message = "查询成功", response = UserVo.class)
     }
     )
-    public  SystemJsonResponse getAllUserBackend( int page,
+    public  SystemJsonResponse getAttendLectureUser( int page,
                                                  int pageSize,
                                                  String id,Integer status){
-      return   backendService.getAllUser(page,pageSize,id,status);
+      return   backendService.getAttendLectureUser(page,pageSize,id,status);
     }
 
 
@@ -108,7 +107,7 @@ public class BackendController {
             @ApiImplicitParam(value = "抢票结束时间",name = "grabTicketsEnd",required = true)
     })
     public  SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto){
-        return backendService.updateOrSave(lectureDto);
+        return backendService.updateOrSaveLecture(lectureDto);
     }
 
 
@@ -283,7 +282,7 @@ public class BackendController {
     })
     public  SystemJsonResponse bandTicket(@RequestParam("studentId") String studentId,
                                           @RequestParam("ticketId") String ticketId){
-        return backendService.bandTicket(studentId,ticketId);
+        return SystemJsonResponse.success();
     }
 
     /**
@@ -301,6 +300,6 @@ public class BackendController {
     })
     public  SystemJsonResponse exportTicketBand(@RequestParam("startId") String startId,
                                           @RequestParam("endId") String endId){
-        return backendService.exportTicketBand(startId,endId);
+        return SystemJsonResponse.success();
     }
 }
