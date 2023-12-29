@@ -1,2 +1,5 @@
 server:
-  port: 8085
+  port: ${gq.server.port}
+spring:
+  profiles:
+    active: test
