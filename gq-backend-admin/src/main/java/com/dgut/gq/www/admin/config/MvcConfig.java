@@ -1,6 +1,7 @@
 package com.dgut.gq.www.admin.config;
 
-import com.dgut.gq.www.core.handler.GqLoginInterceptor;
+
+import com.dgut.gq.www.admin.handler.GqLoginInterceptor;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -65,20 +66,6 @@ public class MvcConfig implements WebMvcConfigurer {
         //中央认证登录拦截器配置不用拦截的接口
         registry.addInterceptor(new GqLoginInterceptor(stringRedisTemplate))
                 .excludePathPatterns(
-                     "/user/wxLogin/{code}",
-                        "/user/me",
-                        "/user/getUserInfo",
-                        "/user/DgutLogin",
-                        "/user/getId",
-                        "/lecture/allLecture",
-                        "/lecture/unStartLecture",
-                        "/lecture/allLectureReview",
-                        "/lecture/allLectureTrailer",
-                        "/recruitment/getAllCurriculumVitae",
-                        "/recruitment/getDepartment",
-                        "/recruitment/getDepartment",
-                        "/recruitment/getPosition",
-                        "/common/**",
                         "/backend/**",
                         "/lecture/page",
                         "/*.svg","/*.png","/*.js","/*.css","/*.html",
