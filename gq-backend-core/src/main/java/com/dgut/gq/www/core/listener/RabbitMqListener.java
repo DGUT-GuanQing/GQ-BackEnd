@@ -39,9 +39,6 @@ public class RabbitMqListener {
     private LectureMapper lectureMapper;
 
 
-    @Autowired
-    private UserMapper userMapper;
-
     /**
      * rabbitmq监听将抢票信息写入数据库
      */

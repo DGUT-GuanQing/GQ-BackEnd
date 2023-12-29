@@ -1,11 +1,22 @@
 server:
   port: ${gq.server.port}
 spring:
+  application:
+    name: gq-backend-core
   profiles:
     active: test  #dev(开发)   #pro(生产)
   banner:
     image:
       location: banner.jpg
+
+  #微服务
+  cloud:
+    nacos:
+      server-addr: ${gq.cloud.nacos.server-addr}:${gq.cloud.nacos.port} #nacos地址
+      discovery:
+        username: ${gq.cloud.nacos.username}
+        password: ${gq.cloud.nacos.password}
+
   security:
     user:
       name:  ${gq.security.name}
@@ -15,7 +26,6 @@ spring:
       max-file-size: 5MB
       max-request-size: 20MB
 
-
   #数据库配置
   datasource:
     druid:
@@ -23,7 +33,6 @@ spring:
       username: ${gq.mysql.username}
       password: ${gq.mysql.password}
       driver-class-name: com.mysql.cj.jdbc.Driver
-
 
   #redis配置
   redis:
@@ -37,7 +46,6 @@ spring:
         max-idle: 8
         min-idle: 0
         max-wait: 100ms
-
 
   #消息队列配置
   rabbitmq:
@@ -56,7 +64,6 @@ spring:
         #acknowledge-mode: manual
         prefetch: 20
 
-
 #mybatiesplus配置
 mybatis-plus:
   #mybaties xml 加载sql
@@ -71,7 +78,7 @@ mybatis-plus:
         #匹配数据库id增长
         id-type: ASSIGN_ID
 
-#中央认证
+
 #中央认证
 cas:
   server-url: ${gq.cas.url}

@@ -6,10 +6,20 @@ spring:
   banner:
     image:
       location: banner.jpg
+
+  #微服务
+  cloud:
+    nacos:
+      server-addr: ${gq.cloud.nacos.server-addr}:${gq.cloud.nacos.port} #nacos地址
+      discovery:
+        username: ${gq.cloud.nacos.username}
+        password: ${gq.cloud.nacos.password}
+
   security:
     user:
       name:  ${gq.security.name}
       password:  ${gq.security.password}
+
   servlet:
     multipart:
       max-file-size: 5MB
@@ -28,6 +38,7 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: 100ms
+
   #数据库配置
   datasource:
     druid:
