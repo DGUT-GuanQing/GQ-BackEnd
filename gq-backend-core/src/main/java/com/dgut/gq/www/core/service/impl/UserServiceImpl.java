@@ -282,5 +282,12 @@ public class UserServiceImpl implements UserService {
         return  SystemJsonResponse.success(flag);
     }
 
+    @Override
+    public User getUserByUsername(String username) {
+        LambdaQueryWrapper<User>lq=new LambdaQueryWrapper<>();
+        lq.eq(User::getUserName,username);
+        return userMapper.selectOne(lq);
+    }
+
 
 }

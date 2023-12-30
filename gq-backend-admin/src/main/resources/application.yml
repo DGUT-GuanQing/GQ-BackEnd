@@ -54,7 +54,7 @@ mybatis-plus:
     # 驼峰
     map-underscore-to-camel-case: true
     # 自动配置日志
-    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     global-config:
       db-config:
         #匹配数据库id增长

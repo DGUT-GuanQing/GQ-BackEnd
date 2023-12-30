@@ -18,11 +18,11 @@ public interface BackendService {
 
     /**
      * 登陆
-     * @param userName
+     * @param username
      * @param password
      * @return
      */
-    SystemJsonResponse login(String userName, String password);
+    SystemJsonResponse login(String username, String password);
 
     /**
      * 登出

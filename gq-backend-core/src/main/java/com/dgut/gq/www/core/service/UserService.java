@@ -2,6 +2,7 @@ package com.dgut.gq.www.core.service;
 
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
+import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.core.model.dto.UserDto;
 
 public interface UserService {
@@ -63,4 +64,11 @@ public interface UserService {
      * @return
      */
     SystemJsonResponse isBlack(String openid);
+
+    /**
+     * 根据用户名获取用户信息
+     * @param username
+     * @return
+     */
+    User getUserByUsername(String username);
 }
