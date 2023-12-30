@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Feign讲座模块客户端
  */
-@FeignClient("gq-backend-core")
+@FeignClient(name = "gq-backend-core",contextId="lecture")
 public interface LectureClient {
 
     /**
