@@ -94,17 +94,6 @@ public class BackendController {
     @PostMapping("/updateSaveLecture")
     @PreAuthorize("hasAuthority('admin')")
     @ApiOperation(value = "更新或者新增讲座预告信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "讲座id,如果为空就是新增",name = "id",required = true),
-            @ApiImplicitParam(value = "微信公众号地址",name = "officialAccountUrl",required = true),
-            @ApiImplicitParam(value = "第几期",name = "term",required = true),
-            @ApiImplicitParam(value = "讲座名称和主题",name = "lectureName",required = true),
-            @ApiImplicitParam(value = "讲座图片",name = "image",required = true),
-            @ApiImplicitParam(value = "票数",name = "ticketNumber",required = true),
-            @ApiImplicitParam(value = "嘉宾名称",name = "guestName",required = true),
-            @ApiImplicitParam(value = "抢票开始时间",name = "grabTicketsStart",required = true),
-            @ApiImplicitParam(value = "抢票结束时间",name = "grabTicketsEnd",required = true)
-    })
     public  SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto){
         return backendService.updateOrSaveLecture(lectureDto);
     }
@@ -120,11 +109,6 @@ public class BackendController {
     @PostMapping("/updatePosterTweet")
     @PreAuthorize("hasAuthority('admin')")
     @ApiOperation(value = "更新或者新增推文信息")
-    @ApiImplicitParams({@ApiImplicitParam(value = "id,如果是空就是新增",name = "id",required = true),
-            @ApiImplicitParam(value = "图片",name = "image",required = true),
-            @ApiImplicitParam(value = "微信公众地址",name = "officialAccountUrl",required = true),
-            @ApiImplicitParam(value = "类型，0-活动,1-招新",name = "type",required = true),
-    })
     public  SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto){
        return  backendService.saveUpdatePosterTweet(posterTweetDto);
     }

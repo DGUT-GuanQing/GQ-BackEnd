@@ -2,6 +2,7 @@ package com.dgut.gq.www.admin.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.dgut.gq.www.admin.feign.client.LectureClient;
 import com.dgut.gq.www.admin.feign.client.UserClient;
 import com.dgut.gq.www.admin.model.dto.DepartmentDto;
 import com.dgut.gq.www.admin.model.dto.LectureDto;
@@ -54,6 +55,10 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Autowired
     private UserClient userClient;
 
+
+    @Autowired
+    private LectureClient lectureClient;
+
     @Override
     public SystemJsonResponse login(String userName, String password) {
         //后台管理密码,
@@ -96,7 +101,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
-        return SystemJsonResponse.success(userClient.getAttendLectureUser(page,pageSize,id,status));
+        return SystemJsonResponse.success(lectureClient.getAttendLectureUser(page,pageSize,id,status));
     }
 
     @Override

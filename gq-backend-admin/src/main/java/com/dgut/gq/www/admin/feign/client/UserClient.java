@@ -24,15 +24,4 @@ public interface UserClient {
 
 
 
-    /**
-     * 远程调用获取参加讲座的人员
-     * @param
-     * @return
-     */
-    @GetMapping("/feign-lecture/AttendLectureUser")
-    SystemResultList getAttendLectureUser(@RequestParam int page,
-                                          @RequestParam int pageSize,
-                                          @RequestParam String id,
-                                          @RequestParam Integer status);
-
 }
