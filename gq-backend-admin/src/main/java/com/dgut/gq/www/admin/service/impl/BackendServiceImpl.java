@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dgut.gq.www.admin.feign.client.LectureClient;
 import com.dgut.gq.www.admin.feign.client.PosterClient;
+import com.dgut.gq.www.admin.feign.client.RecruitClient;
 import com.dgut.gq.www.admin.feign.client.UserClient;
 import com.dgut.gq.www.admin.model.dto.DepartmentDto;
 import com.dgut.gq.www.admin.model.dto.LectureDto;
@@ -63,6 +64,10 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Autowired
     private PosterClient posterClient;
+
+
+    @Autowired
+    private RecruitClient recruitClient;
 
     @Override
     public SystemJsonResponse login(String userName, String password) {
@@ -131,7 +136,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
-        return null;
+        return recruitClient.exportCurriculumVitae(departmentId,term);
     }
 
     @Override

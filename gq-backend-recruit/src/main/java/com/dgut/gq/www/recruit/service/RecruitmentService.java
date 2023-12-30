@@ -51,4 +51,12 @@ public interface RecruitmentService {
      * @return
      */
     SystemJsonResponse getPosition(String departmentId);
+
+
+    /**
+     * 导出简历
+     * @param departmentId
+     * @param term
+     */
+    SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term);
 }

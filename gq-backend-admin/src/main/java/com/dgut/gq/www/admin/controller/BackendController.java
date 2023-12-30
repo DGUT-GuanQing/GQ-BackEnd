@@ -113,6 +113,9 @@ public class BackendController {
        return  backendService.saveUpdatePosterTweet(posterTweetDto);
     }
 
+
+
+
     /**
      * 获取讲座
      * @param page
@@ -134,6 +137,9 @@ public class BackendController {
     public SystemJsonResponse getLecture(int page ,int pageSize,String name){
         return backendService.getLecture(page,pageSize,name);
     }
+
+
+
 
     /**
      * 导出参加讲座的用户
@@ -181,6 +187,8 @@ public class BackendController {
     }
 
 
+
+
     /**
      * 删除讲座
      * @param id
@@ -193,6 +201,8 @@ public class BackendController {
     public SystemJsonResponse deleteLecture(@PathVariable String id){
         return backendService.deleteLecture(id);
     }
+
+
 
 
     /**

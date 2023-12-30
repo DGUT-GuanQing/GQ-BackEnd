@@ -73,15 +73,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                // 对于登录接口 允许匿名访问
-                .antMatchers("/user/wxLogin/{code}").anonymous()
                 .antMatchers("/25fVBQwXXS.txt").permitAll()
-                //后台的登录
-                .antMatchers("/backend/login").anonymous()
-                //讲座全部信息所有人都可以访问
-                .antMatchers("/lecture/**").permitAll()
-                .antMatchers("/user/getUserInfo").permitAll()
-                .antMatchers("/common/posterTweet/{type}").permitAll()
+                .antMatchers("/feign-recruit/**").permitAll()
                 //swagger
                 .antMatchers("/swagger-resources/**", "/webjars/**",
                         "/v2/**", "/swagger-ui.html/**").permitAll()

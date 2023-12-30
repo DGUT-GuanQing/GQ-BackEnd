@@ -69,6 +69,7 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/recruitment/getAllCurriculumVitae",
                         "/recruitment/getDepartment",
                         "/recruitment/getPosition",
+                        "/feign-recruit/**",
                         "/*.svg","/*.png","/*.js","/*.css","/*.html",
                         "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**",
                         "/getLoginData",

@@ -236,4 +236,55 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return SystemJsonResponse.success(positionVos);
     }
 
+
+    /**
+     * 导出简历
+     * @param departmentId
+     * @param term
+     * @return
+     */
+    @Override
+    public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
+        LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        //未被删除
+        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0);
+        //按更新时间降序
+        lambdaQueryWrapper.orderByDesc(CurriculumVitae::getUpdateTime);
+        //部门
+        lambdaQueryWrapper.eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId);
+        //第几期
+        lambdaQueryWrapper.eq(term != null,CurriculumVitae::getTerm,term);
+        List<CurriculumVitaeVo>curriculumVitaeVoList = new ArrayList<>();
+        Integer count = curriculumVitaeMapper.selectCount(lambdaQueryWrapper);
+        List<CurriculumVitae> curriculumVitaes = curriculumVitaeMapper.selectList(lambdaQueryWrapper);
+        for (CurriculumVitae record : curriculumVitaes) {
+            String openid = record.getOpenid();
+            //查询用户信息
+            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            userLambdaQueryWrapper.eq(User::getOpenid,openid);
+            User user = userMapper.selectOne(userLambdaQueryWrapper);
+            //查询部门信息
+            LambdaQueryWrapper<Department>departmentLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            departmentLambdaQueryWrapper.eq(Department::getId,record.getDepartmentId());
+            Department department = departmentMapper.selectOne(departmentLambdaQueryWrapper);
+            //查询职位信息
+            LambdaQueryWrapper<Position>positionLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            positionLambdaQueryWrapper.eq(Position::getId,record.getPositionId());
+            Position position = positionMapper.selectOne(positionLambdaQueryWrapper);
+            CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
+            //对象转换
+            BeanUtils.copyProperties(record,curriculumVitaeVo);
+            //将学生信息添加到返回对象集合
+            curriculumVitaeVo.setCollege(user.getCollege());
+            curriculumVitaeVo.setName(user.getName());
+            curriculumVitaeVo.setStudentId(user.getStudentId());
+            curriculumVitaeVo.setNaturalClass(user.getNaturalClass());
+            curriculumVitaeVo.setDepartmentName(department.getDepartmentName());
+            curriculumVitaeVo.setPositionName(position.getPositionName());
+            curriculumVitaeVoList.add(curriculumVitaeVo);
+        }
+        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
+        return SystemJsonResponse.success(systemResultList);
+    }
+
 }
