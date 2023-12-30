@@ -3,9 +3,7 @@ package com.dgut.gq.www.admin.feign.client;
 
 import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
