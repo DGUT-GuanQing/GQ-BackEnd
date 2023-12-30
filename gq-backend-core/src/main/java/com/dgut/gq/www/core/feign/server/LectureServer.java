@@ -67,4 +67,15 @@ public class LectureServer {
         return lectureService.exportAttendLectureUser(id,status);
     }
 
+
+
+    /**
+     * 远程调用删除讲座
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/deleteLecture/{id}")
+    SystemJsonResponse deleteLecture(@PathVariable String id){
+        return lectureService.deleteLecture(id);
+    }
 }

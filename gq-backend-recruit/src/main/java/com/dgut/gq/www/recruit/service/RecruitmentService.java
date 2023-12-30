@@ -3,6 +3,8 @@ package com.dgut.gq.www.recruit.service;
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.recruit.model.dto.CurriculumVitaeDto;
+import com.dgut.gq.www.recruit.model.dto.DepartmentDto;
+import com.dgut.gq.www.recruit.model.dto.PositionDto;
 
 
 /**
@@ -59,4 +61,34 @@ public interface RecruitmentService {
      * @param term
      */
     SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term);
+
+    /**
+     * 删除部门
+     * @param id
+     * @return
+     */
+    SystemJsonResponse deleteDepartment(String id);
+
+    /**
+     * 删除职位
+     * @param id
+     * @return
+     */
+    SystemJsonResponse deletePosition(String id);
+
+
+    /**
+     * 新增或者更新部门
+     * @param departmentDto
+     * @return
+     */
+    SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto);
+
+
+    /**
+     * 新增或者更新职位
+     * @param positionDto
+     * @return
+     */
+    SystemJsonResponse saveAndUpdatePos(PositionDto positionDto);
 }

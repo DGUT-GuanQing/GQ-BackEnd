@@ -487,6 +487,29 @@ public class LectureServiceImpl  implements LectureService {
         return SystemJsonResponse.success(systemResultList);
     }
 
+    /**
+     * 删除讲座
+     * @param id
+     * @return
+     */
+    @Override
+    public SystemJsonResponse deleteLecture(String id) {
+        Lecture lecture = new Lecture();
+        lecture.setIsDeleted(1);
+        lecture.setId(id);
+        lectureMapper.updateById(lecture);
+        //看redis的讲座是否要更新
+        String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.UNSTART_LECTURE);
+        Lecture lec = JSONUtil.toBean(s, Lecture.class);
+        //如果当前删除的讲座是还没开始的就删除redis
+        if (s != null && !s.equals("") && lec != null && lec.getId().equals(id) ){
+            stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
+            stringRedisTemplate.delete(RedisGlobalKey.UNSTART_LECTURE);
+            stringRedisTemplate.delete(RedisGlobalKey.TICKET_NUMBER);
+        }
+        return SystemJsonResponse.success();
+    }
+
 
     /**
      * 设置互斥锁

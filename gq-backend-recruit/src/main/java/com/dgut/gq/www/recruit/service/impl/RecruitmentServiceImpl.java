@@ -13,6 +13,8 @@ import com.dgut.gq.www.recruit.mapper.DepartmentMapper;
 import com.dgut.gq.www.recruit.mapper.PositionMapper;
 import com.dgut.gq.www.recruit.mapper.UserMapper;
 import com.dgut.gq.www.recruit.model.dto.CurriculumVitaeDto;
+import com.dgut.gq.www.recruit.model.dto.DepartmentDto;
+import com.dgut.gq.www.recruit.model.dto.PositionDto;
 import com.dgut.gq.www.recruit.model.entity.CurriculumVitae;
 import com.dgut.gq.www.recruit.model.entity.Department;
 import com.dgut.gq.www.recruit.model.entity.Position;
@@ -285,6 +287,85 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
         SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
         return SystemJsonResponse.success(systemResultList);
+    }
+
+    /**
+     * 删除部门
+     * @param id
+     * @return
+     */
+    @Override
+    public SystemJsonResponse deleteDepartment(String id) {
+        Department department = new Department();
+        department.setIsDeleted(1);
+        department.setId(id);
+        departmentMapper.updateById(department);
+        return SystemJsonResponse.success();
+    }
+
+
+
+    /**
+     * 删除职位
+     * @param id
+     * @return
+     */
+    @Override
+    public SystemJsonResponse deletePosition(String id) {
+        Position position = new Position();
+        position.setIsDeleted(1);
+        position.setId(id);
+        positionMapper.updateById(position);
+        return SystemJsonResponse.success();
+    }
+
+
+    /**
+     * 新增或者修稿部门
+     * @param departmentDto
+     * @return
+     */
+    @Override
+    public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
+        String id = departmentDto.getId();
+        Department department = new Department();
+        BeanUtils.copyProperties(departmentDto,department);
+        department.setUpdateTime(LocalDateTime.now());
+        String status;
+        //新增
+        if(id == null || id.equals("")){
+            department.setCreateTime(LocalDateTime.now());
+            departmentMapper.insert(department);
+            status = "新增成功";
+        }else {
+            departmentMapper.updateById(department);
+            status = "修改成功";
+        }
+        return SystemJsonResponse.success(status);
+    }
+
+
+    /**
+     * 新增或者修改职位
+     * @param positionDto
+     * @return
+     */
+    @Override
+    public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
+        String id = positionDto.getId();
+        Position position = new Position();
+        BeanUtils.copyProperties(positionDto,position);
+        position.setUpdateTime(LocalDateTime.now());
+        String status;
+        if(id == null || id.equals("")){
+            position.setCreateTime(LocalDateTime.now());
+            positionMapper.insert(position);
+            status = "新增成功";
+        }else {
+            positionMapper.updateById(position);
+            status = "修改成功";
+        }
+        return SystemJsonResponse.success(status);
     }
 
 }

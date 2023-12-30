@@ -9,10 +9,7 @@ import com.dgut.gq.www.common.common.SystemResultList;
 import io.swagger.annotations.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -56,7 +53,7 @@ public interface LectureClient {
 
 
     /**
-     * 导出参加讲座的用户
+     * 远程调用导出参加讲座的用户
      * @param
      * @param
      * @return
@@ -65,6 +62,15 @@ public interface LectureClient {
     SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status);
 
 
+
+
+    /**
+     * 远程调用删除讲座
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/feign-lecture/deleteLecture/{id}")
+    SystemJsonResponse deleteLecture(@PathVariable String id);
 
 
 }

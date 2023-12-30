@@ -102,4 +102,12 @@ public interface LectureService {
      * @return
      */
     SystemJsonResponse exportAttendLectureUser(String id, Integer status);
+
+
+    /**
+     * 删除讲座
+     * @param id
+     * @return
+     */
+    SystemJsonResponse deleteLecture(String id);
 }

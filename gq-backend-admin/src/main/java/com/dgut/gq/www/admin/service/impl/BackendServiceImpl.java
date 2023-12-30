@@ -69,6 +69,9 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Autowired
     private RecruitClient recruitClient;
 
+
+
+
     @Override
     public SystemJsonResponse login(String userName, String password) {
         //后台管理密码,
@@ -94,6 +97,9 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         String jwt = JwtUtil.createJWT(userName);
         return  SystemJsonResponse.success(jwt);
     }
+
+
+
 
     @Override
     public void logout() {
@@ -124,45 +130,63 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         return posterClient.saveUpdatePosterTweet(posterTweetDto);
     }
 
+
+
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
         return lectureClient.getLecture(page,pageSize,name);
     }
+
+
 
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
         return lectureClient.exportAttendLectureUser(id,status);
     }
 
+
+
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
         return recruitClient.exportCurriculumVitae(departmentId,term);
     }
 
+
+
     @Override
     public SystemJsonResponse deleteLecture(String id) {
-        return null;
+        return lectureClient.deleteLecture(id);
     }
+
+
 
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
-        return null;
+       return  recruitClient.deleteDepartment(id);
     }
+
+
 
     @Override
     public SystemJsonResponse deletePosition(String id) {
-        return null;
+        return recruitClient.deletePosition(id);
     }
+
+
 
     @Override
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
-        return null;
+        return recruitClient.saveAndUpdateDep(departmentDto);
     }
+
+
 
     @Override
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
-        return null;
+        return recruitClient.saveAndUpdatePos(positionDto);
     }
+
+
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
