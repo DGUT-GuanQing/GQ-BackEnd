@@ -15,6 +15,7 @@ import com.dgut.gq.www.core.config.RabbitmqConfig;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.core.mapper.UserMapper;
+import com.dgut.gq.www.core.model.dto.LectureDto;
 import com.dgut.gq.www.core.model.entity.Lecture;
 import com.dgut.gq.www.core.model.entity.UserLectureInfo;
 import com.dgut.gq.www.core.model.vo.LectureReviewVo;
@@ -333,7 +334,7 @@ public class LectureServiceImpl  implements LectureService {
      * @return
      */
     @Override
-    public SystemResultList getAttendLectureUser(int page, int pageSize, String id, Integer status) {
+    public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
         //构造分页构造器
         Page<UserLectureInfo> pageInfo =new Page<>(page,pageSize);
         //条件构造器
@@ -368,7 +369,45 @@ public class LectureServiceImpl  implements LectureService {
         userPage.setRecords(list);
         //封装返回结果
         SystemResultList systemResultList = new SystemResultList(list,count);
-        return systemResultList;
+        return SystemJsonResponse.success(systemResultList);
+    }
+
+    /**
+     * 新增或者更新讲座
+     * @param lectureDto
+     */
+    @Override
+    public SystemJsonResponse updateSaveLecture(LectureDto lectureDto) {
+        String key = RedisGlobalKey.UNSTART_LECTURE;
+        Lecture lecture = new Lecture();
+        BeanUtils.copyProperties(lectureDto, lecture);
+        lecture.setUpdateTime(LocalDateTime.now());
+        String id = lectureDto.getId();
+        String state;
+        //新增
+        if (id == null) {
+            //插入数据库
+            lecture.setCreateTime(LocalDateTime.now());
+            lectureMapper.insert(lecture);
+            //删除原来抢票的人
+            stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
+            //删除讲座
+            stringRedisTemplate.delete(RedisGlobalKey.UNSTART_LECTURE);
+            state = "新增成功";
+        } else {
+            lectureMapper.updateById(lecture);
+            //看redis的讲座是否要更新
+            String s = stringRedisTemplate.opsForValue().get(key);
+            Lecture lec = JSONUtil.toBean(s, Lecture.class);
+            //如果当前更新的讲座是还没开始的就更新redis
+            if (s != null && !s.equals("") && lec != null && lec.getId().equals(lectureDto.getId())) {
+                stringRedisTemplate.delete(key);
+                //更新票的数量
+                stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, lectureDto.getTicketNumber().toString());
+            }
+            state = "更新成功";
+        }
+        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),state);
     }
 
 

@@ -3,6 +3,7 @@ package com.dgut.gq.www.core.service;
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
+import com.dgut.gq.www.core.model.dto.LectureDto;
 
 /**
  * 讲座
@@ -72,5 +73,12 @@ public interface LectureService {
      * @param id
      * @param status
      */
-    SystemResultList getAttendLectureUser(int page, int pageSize, String id, Integer status);
+    SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status);
+
+
+    /**
+     * 更新或者新增讲座
+     * @param lectureDto
+     */
+    SystemJsonResponse updateSaveLecture(LectureDto lectureDto);
 }

@@ -1,6 +1,7 @@
 package com.dgut.gq.www.admin.feign.client;
 
 import com.dgut.gq.www.admin.model.dto.LectureDto;
+import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,16 +22,16 @@ public interface LectureClient {
      * @return
      */
     @GetMapping("/feign-lecture/AttendLectureUser")
-    SystemResultList getAttendLectureUser(@RequestParam int page,
-                                          @RequestParam int pageSize,
-                                          @RequestParam String id,
-                                          @RequestParam Integer status);
+    SystemJsonResponse getAttendLectureUser(@RequestParam int page,
+                                            @RequestParam int pageSize,
+                                            @RequestParam String id,
+                                            @RequestParam Integer status);
 
     /**
      * 远程调用新增或者更新讲座
      * @param lectureDto
      * @return
      */
-    @PostMapping("/updateSaveLecture")
-    void  updateOrSaveLecture(@RequestBody LectureDto lectureDto);
+    @PostMapping("/feign-lecture/updateSaveLecture")
+    SystemJsonResponse  updateOrSaveLecture(@RequestBody LectureDto lectureDto);
 }
