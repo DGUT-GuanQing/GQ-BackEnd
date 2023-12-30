@@ -9,7 +9,6 @@ import com.dgut.gq.www.admin.model.vo.LectureVo;
 import com.dgut.gq.www.admin.model.vo.UserVo;
 import com.dgut.gq.www.admin.service.BackendService;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.common.model.entity.User;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -17,7 +17,6 @@ import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.LoginUser;
 import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.common.util.JwtUtil;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -142,15 +141,18 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        //远程调用用户模块
         User user = userClient.getUserByUserName(userName);
         //判断用户是否存在数据库中
         Optional<User> optionalUser=Optional.ofNullable(user);
+
         //不存在就抛出异常
         if(!optionalUser.isPresent()){
             throw  new GlobalSystemException(
                     GlobalResponseCode.OPERATE_FAIL.getCode(),
                     "账户不存在");
         }
+
         //权限信息
         String permission = user.getPermission();
         List<String> list = new ArrayList<>();
