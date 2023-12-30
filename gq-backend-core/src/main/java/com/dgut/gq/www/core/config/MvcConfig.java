@@ -75,6 +75,7 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/lecture/allLectureReview",
                         "/lecture/allLectureTrailer",
                         "/feign-user/**",
+                        "/feign-lecture/**",
                         "/common/**",
                         "/lecture/page",
                         "/*.svg","/*.png","/*.js","/*.css","/*.html",

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 封装vo集合
+ * 封装返回值集合集合
  */
 @Data
 @NoArgsConstructor

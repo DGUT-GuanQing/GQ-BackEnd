@@ -22,6 +22,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -81,12 +82,21 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public void logout() {
+        //获取 SecurityContextHolder信息
+        UsernamePasswordAuthenticationToken authentication =
+                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
+        LoginUser loginUser= (LoginUser) authentication.getPrincipal();
+        String userName = loginUser.getUser().getUserName();
+
+        //删除redis对应信息
+        String key = RedisGlobalKey.PERMISSION+userName;
+        stringRedisTemplate.delete(key);
     }
 
     @Override
     public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
-        return null;
+        return SystemJsonResponse.success(userClient.getAttendLectureUser(page,pageSize,id,status));
     }
 
     @Override

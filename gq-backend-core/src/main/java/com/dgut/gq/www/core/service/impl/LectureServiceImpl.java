@@ -10,6 +10,7 @@ import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
+import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.core.config.RabbitmqConfig;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
@@ -19,6 +20,7 @@ import com.dgut.gq.www.core.model.entity.UserLectureInfo;
 import com.dgut.gq.www.core.model.vo.LectureReviewVo;
 import com.dgut.gq.www.core.model.vo.LectureTrailerVo;
 import com.dgut.gq.www.core.model.vo.LectureVo;
+import com.dgut.gq.www.core.model.vo.UserVo;
 import com.dgut.gq.www.core.service.LectureService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -320,6 +322,53 @@ public class LectureServiceImpl  implements LectureService {
         }
 
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"扫码成功");
+    }
+
+    /**
+     * 获取参加讲座的用户信息
+     * @param page
+     * @param pageSize
+     * @param id
+     * @param status
+     * @return
+     */
+    @Override
+    public SystemResultList getAttendLectureUser(int page, int pageSize, String id, Integer status) {
+        //构造分页构造器
+        Page<UserLectureInfo> pageInfo =new Page<>(page,pageSize);
+        //条件构造器
+        LambdaQueryWrapper<UserLectureInfo> lectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getLectureId, id);
+        //如果是1查询参加讲座的
+        if(status == 1){
+            lectureInfoLambdaQueryWrapper.ge(UserLectureInfo::getStatus,1);
+        }
+        //查询
+        userLectureInfoMapper.selectPage(pageInfo,lectureInfoLambdaQueryWrapper);
+        Integer count = userLectureInfoMapper.selectCount(lectureInfoLambdaQueryWrapper);
+        //实际返回的构造器
+        Page<UserVo>userPage=new Page<>();
+        //对象转换  忽略records
+        BeanUtils.copyProperties(pageInfo,userPage,"records");
+
+        //把信息封装到List并加入到userPage
+        List<UserVo>list = new ArrayList<>();
+        List<UserLectureInfo> records = pageInfo.getRecords();
+        LambdaQueryWrapper<User> lambdaQueryWrapper;
+
+        for(UserLectureInfo k:records){
+            String openid = k.getOpenid();
+            lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(User::getOpenid,openid);
+            User user = userMapper.selectOne(lambdaQueryWrapper);
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user,userVo);
+            list.add(userVo);
+        }
+        userPage.setRecords(list);
+        //封装返回结果
+        SystemResultList systemResultList = new SystemResultList(list,count);
+        return systemResultList;
     }
 
 

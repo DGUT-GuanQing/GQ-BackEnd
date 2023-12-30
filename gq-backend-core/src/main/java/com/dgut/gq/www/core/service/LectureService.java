@@ -2,6 +2,7 @@ package com.dgut.gq.www.core.service;
 
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
+import com.dgut.gq.www.common.common.SystemResultList;
 
 /**
  * 讲座
@@ -63,4 +64,13 @@ public interface LectureService {
      * @return
      */
     SystemJsonResponse ScanCheckout(String openid, String id);
+
+    /**
+     * 获取参加讲座的人员信息
+     * @param page
+     * @param pageSize
+     * @param id
+     * @param status
+     */
+    SystemResultList getAttendLectureUser(int page, int pageSize, String id, Integer status);
 }

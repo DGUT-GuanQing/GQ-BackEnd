@@ -1,6 +1,8 @@
 package com.dgut.gq.www.core.feign.server;
 
+import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.core.service.LectureService;
 import com.dgut.gq.www.core.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ public class UserServer {
     @Autowired
     private UserService userService;
 
+
     /**
      * 远程调用根据用户名获取用户信息
      * @return
@@ -26,4 +29,6 @@ public class UserServer {
     User getUserByUserName(@RequestParam String userName){
         return userService.getUserByUsername(userName);
     }
+
+
 }
