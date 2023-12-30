@@ -412,6 +412,46 @@ public class LectureServiceImpl  implements LectureService {
 
 
     /**
+     * 后台获取讲座信息
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @Override
+    public SystemJsonResponse getLecture(int page, int pageSize, String name) {
+        //构造分页构造器
+        Page<Lecture> pageInfo =new Page<>(page,pageSize);
+        //条件构造器
+        LambdaQueryWrapper<Lecture> lq = new LambdaQueryWrapper<>();
+        //添加过滤条件  模糊查询
+        if (name != null) {
+            lq.or();
+            lq.like(Lecture::getGuestName, name);
+            lq.like(Lecture::getIntroduction,name);
+        }
+        //排序条件
+        lq.eq(Lecture::getIsDeleted,0);
+        lq.orderByDesc(Lecture::getCreateTime);
+        //查询
+        lectureMapper.selectPage(pageInfo,lq);
+        Integer count = lectureMapper.selectCount(lq);
+        //对象转换
+        List<Lecture> records = pageInfo.getRecords();
+        List<LectureVo>lectureVos = new ArrayList<>();
+        //转换为vo
+        for (Lecture record : records) {
+            LectureVo lectureVo = new LectureVo();
+            BeanUtils.copyProperties(record,lectureVo);
+            lectureVos.add(lectureVo);
+        }
+        //包装对象
+        SystemResultList systemResultList  = new SystemResultList(lectureVos,count);
+        return SystemJsonResponse.success(systemResultList);
+    }
+
+
+    /**
      * 设置互斥锁
      * @param key
      * @return

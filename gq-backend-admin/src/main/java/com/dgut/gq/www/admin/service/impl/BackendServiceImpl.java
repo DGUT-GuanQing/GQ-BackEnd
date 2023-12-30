@@ -121,7 +121,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
-        return null;
+        return lectureClient.getLecture(page,pageSize,name);
     }
 
     @Override

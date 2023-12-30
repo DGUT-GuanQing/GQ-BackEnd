@@ -39,4 +39,19 @@ public class LectureServer {
     SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto){
         return lectureService.updateSaveLecture(lectureDto);
     }
+
+
+    /**
+     * 远程调用获取讲座
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @GetMapping("/getLecture")
+    SystemJsonResponse getLecture(@RequestParam int page ,
+                                  @RequestParam int pageSize,
+                                  @RequestParam String name){
+        return lectureService.getLecture(page,pageSize,name);
+    }
 }

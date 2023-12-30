@@ -81,4 +81,15 @@ public interface LectureService {
      * @param lectureDto
      */
     SystemJsonResponse updateSaveLecture(LectureDto lectureDto);
+
+
+
+    /**
+     * 后台获取讲座信息
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    SystemJsonResponse getLecture(int page, int pageSize, String name);
 }
