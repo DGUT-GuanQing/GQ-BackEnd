@@ -452,6 +452,43 @@ public class LectureServiceImpl  implements LectureService {
 
 
     /**
+     * 导出参加讲座的用户信息
+     * @param id
+     * @param status
+     * @return
+     */
+    @Override
+    public SystemJsonResponse exportAttendLectureUser(String id, Integer status) {
+        //条件构造器
+        LambdaQueryWrapper<UserLectureInfo> lectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getLectureId,id);
+        lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getIsDeleted,0);
+        //如果是1查询参加讲座的
+        if(status == 1){
+            lectureInfoLambdaQueryWrapper.ge(UserLectureInfo::getStatus,1);
+        }
+        List<UserVo>list = new ArrayList<>();
+        List<UserLectureInfo> records = userLectureInfoMapper.selectList(lectureInfoLambdaQueryWrapper);
+        LambdaQueryWrapper<User> lambdaQueryWrapper;
+        for(UserLectureInfo k:records){
+            String openid = k.getOpenid();
+            lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(User::getOpenid,openid);
+            User user = userMapper.selectOne(lambdaQueryWrapper);
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user,userVo);
+            list.add(userVo);
+        }
+        Integer count = list.size();
+        //封装返回结果
+        SystemResultList systemResultList = new SystemResultList();
+        systemResultList.setList(list);
+        systemResultList.setCount(count);
+        return SystemJsonResponse.success(systemResultList);
+    }
+
+
+    /**
      * 设置互斥锁
      * @param key
      * @return

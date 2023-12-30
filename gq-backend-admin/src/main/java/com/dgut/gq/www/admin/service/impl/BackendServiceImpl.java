@@ -126,7 +126,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
-        return null;
+        return lectureClient.exportAttendLectureUser(id,status);
     }
 
     @Override

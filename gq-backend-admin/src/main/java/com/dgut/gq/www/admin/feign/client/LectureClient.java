@@ -3,6 +3,7 @@ package com.dgut.gq.www.admin.feign.client;
 import com.dgut.gq.www.admin.model.dto.LectureDto;
 import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
 import com.dgut.gq.www.admin.model.vo.LectureVo;
+import com.dgut.gq.www.admin.model.vo.UserVo;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
 import io.swagger.annotations.*;
@@ -51,4 +52,19 @@ public interface LectureClient {
     SystemJsonResponse getLecture(@RequestParam int page ,
                                   @RequestParam int pageSize,
                                   @RequestParam String name);
+
+
+
+    /**
+     * 导出参加讲座的用户
+     * @param
+     * @param
+     * @return
+     */
+    @GetMapping("/feign-lecture/exportAttendLectureUser")
+    SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status);
+
+
+
+
 }

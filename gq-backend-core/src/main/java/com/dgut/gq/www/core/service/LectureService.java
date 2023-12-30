@@ -92,4 +92,14 @@ public interface LectureService {
      * @return
      */
     SystemJsonResponse getLecture(int page, int pageSize, String name);
+
+
+
+    /**
+     * 导出参加讲座的用户信息
+     * @param id
+     * @param status
+     * @return
+     */
+    SystemJsonResponse exportAttendLectureUser(String id, Integer status);
 }

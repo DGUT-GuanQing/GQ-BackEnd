@@ -1,5 +1,6 @@
 server:
   port: ${gq.server.port}
+
 spring:
   application:
     name: ${gq.cloud.application.name}
@@ -25,7 +26,6 @@ spring:
         username: ${gq.cloud.nacos.username}
         password: ${gq.cloud.nacos.password}
 
-  #数据库配置
   datasource:
     druid:
       url: jdbc:mysql://${gq.mysql.host}:${gq.mysql.port}/${gq.mysql.db}?serverTimezone=Asia/Shanghai
@@ -54,17 +54,24 @@ mybatis-plus:
     # 驼峰
     map-underscore-to-camel-case: true
     # 自动配置日志
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     global-config:
       db-config:
         #匹配数据库id增长
         id-type: ASSIGN_ID
 
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000 #单位毫秒
+        readTimeout: 3000 #单位毫秒
 
 logging:
   level:
     root: error
 
-
 jwt:
   secret: ${gq.jwt.secret}
+
+

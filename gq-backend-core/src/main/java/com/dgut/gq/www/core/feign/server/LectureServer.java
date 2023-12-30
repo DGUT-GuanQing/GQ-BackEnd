@@ -54,4 +54,17 @@ public class LectureServer {
                                   @RequestParam String name){
         return lectureService.getLecture(page,pageSize,name);
     }
+
+
+    /**
+     * 导出参加讲座的用户
+     * @param
+     * @param
+     * @return
+     */
+    @GetMapping("/exportAttendLectureUser")
+    SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status){
+        return lectureService.exportAttendLectureUser(id,status);
+    }
+
 }
