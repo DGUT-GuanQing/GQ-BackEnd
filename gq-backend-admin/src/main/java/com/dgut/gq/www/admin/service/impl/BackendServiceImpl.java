@@ -3,6 +3,7 @@ package com.dgut.gq.www.admin.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dgut.gq.www.admin.feign.client.LectureClient;
+import com.dgut.gq.www.admin.feign.client.PosterClient;
 import com.dgut.gq.www.admin.feign.client.UserClient;
 import com.dgut.gq.www.admin.model.dto.DepartmentDto;
 import com.dgut.gq.www.admin.model.dto.LectureDto;
@@ -59,6 +60,10 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Autowired
     private LectureClient lectureClient;
 
+
+    @Autowired
+    private PosterClient posterClient;
+
     @Override
     public SystemJsonResponse login(String userName, String password) {
         //后台管理密码,
@@ -111,7 +116,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse saveUpdatePosterTweet(PosterTweetDto posterTweetDto) {
-        return null;
+        return posterClient.saveUpdatePosterTweet(posterTweetDto);
     }
 
     @Override

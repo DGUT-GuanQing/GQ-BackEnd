@@ -37,7 +37,6 @@ public class LectureServer {
      */
     @PostMapping("/updateSaveLecture")
     SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto){
-        System.out.println(lectureDto);
         return lectureService.updateSaveLecture(lectureDto);
     }
 }
