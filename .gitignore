@@ -20,7 +20,7 @@ target/
 *.ipr
 *.properties
 bootstrap.yml
-
+*.txt
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
