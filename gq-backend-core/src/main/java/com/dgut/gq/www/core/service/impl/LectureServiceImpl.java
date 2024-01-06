@@ -37,7 +37,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 讲座操作
@@ -50,13 +52,8 @@ public class LectureServiceImpl  implements LectureService {
     @Autowired
     private LectureMapper lectureMapper;
 
-
-
-
-
     @Autowired
     private UserMapper userMapper;
-
 
     @Autowired
     private UserLectureInfoMapper userLectureInfoMapper;
@@ -66,7 +63,6 @@ public class LectureServiceImpl  implements LectureService {
 
     @Autowired
     public RedissonClient redissonClient;
-
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -92,33 +88,41 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse findUnStartLecture() {
-        LectureVo lectureVo = new LectureVo();
-        //在redis查询
+        // 尝试从Redis获取讲座信息
         String key = RedisGlobalKey.UNSTART_LECTURE;
         String str = stringRedisTemplate.opsForValue().get(key);
-        lectureVo = JSONUtil.toBean(str,LectureVo.class);
-        Lecture lecture ;
-        //查询失败  就在数据库里查询未结束的讲座
-        if(str == null || str.equals("")){
-            //查找最新讲座
-            LambdaQueryWrapper<Lecture> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.orderByDesc(Lecture::getCreateTime);
-            lambdaQueryWrapper.last("LIMIT 1");
-            //未被删除
-            lambdaQueryWrapper.eq(Lecture::getIsDeleted,0);
-            lecture = lectureMapper.selectOne(lambdaQueryWrapper);
-            if(lecture.getLectureName() == null)return SystemJsonResponse.fail(999,"还没新的讲座");
-            //存入redis
-            BeanUtils.copyProperties(lecture,lectureVo);
-            stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(lectureVo));
-            stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER,lectureVo.getTicketNumber().toString());
-         }
-        //获取票的数量
-        String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.TICKET_NUMBER);
-        Integer count  = Integer.valueOf(s);
-        lectureVo.setTicketNumber(count);
+        LectureVo lectureVo = Optional.ofNullable(str)
+                .map(s -> JSONUtil.toBean(s, LectureVo.class))
+                .orElseGet(() -> {
+                    // 从数据库中查询最新未结束的讲座
+                    Lecture lecture = lectureMapper.selectOne(
+                            new LambdaQueryWrapper<Lecture>()
+                                    .orderByDesc(Lecture::getCreateTime)
+                                    .eq(Lecture::getIsDeleted, 0)
+                                    .last("LIMIT 1")
+                    );
+
+                    // 检查是否查询到讲座
+                    if (lecture == null || lecture.getLectureName() == null) {
+                        throw new GlobalSystemException(999, "还没新的讲座");
+                    }
+
+                    // 转换为LectureVo并存入Redis
+                    LectureVo newLectureVo = new LectureVo();
+                    BeanUtils.copyProperties(lecture, newLectureVo);
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newLectureVo));
+                    stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, newLectureVo.getTicketNumber().toString());
+                    return newLectureVo;
+                });
+
+        // 获取票的数量
+        String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue().get(RedisGlobalKey.TICKET_NUMBER))
+                .orElse("0");
+        lectureVo.setTicketNumber(Integer.parseInt(ticketNumberStr));
+
         return SystemJsonResponse.success(lectureVo);
     }
+
 
     /**
      * 抢票
@@ -128,15 +132,16 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse robTicket(String openid,String id) {
-        LectureVo lectureVo = new LectureVo();
+        LectureVo lectureVo;
         //在redis查询
-        String key1 = RedisGlobalKey.UNSTART_LECTURE;
-        String str1 = stringRedisTemplate.opsForValue().get(key1);
-        lectureVo = JSONUtil.toBean(str1,LectureVo.class);
+        String key = RedisGlobalKey.UNSTART_LECTURE;
+        String str = stringRedisTemplate.opsForValue().get(key);
+        lectureVo = JSONUtil.toBean(str,LectureVo.class);
         if(lectureVo.getGrabTicketsStart().isAfter(LocalDateTime.now())){
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票时间未到，已经被拉入黑名单");
         }
-        String key = RedisGlobalKey.LOCK_USER + openid;
+
+        key = RedisGlobalKey.LOCK_USER + openid;
         //获取锁
         RLock lock = redissonClient.getLock(key);
         boolean b = lock.tryLock();
@@ -159,18 +164,16 @@ public class LectureServiceImpl  implements LectureService {
             lectureInfo.setLectureId(id);
             lectureInfo.setOpenid(openid);
 
-            //将信息传入rabbitmq
-           String  str = JSONUtil.toJsonStr(lectureInfo);
-            rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE,"gqyyds");
+            str = JSONUtil.toJsonStr(lectureInfo);
+            rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE,"gqyyds",str);
         }finally {
-            //释放锁
             lock.unlock();
-
         }
 
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"抢票成功");
 
     }
+
 
     /**
      * 获取讲座回顾
@@ -181,39 +184,37 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse getLectureReview(int page, int pageSize, String name) {
-        //构造分页构造器
-        Page<Lecture> pageInfo =new Page<>(page,pageSize);
-        //条件构造器
-        LambdaQueryWrapper<Lecture> lq = new LambdaQueryWrapper<>();
-        //添加过滤条件  模糊查询
-        if (name != null) {
-            lq.and(wrapper ->wrapper.
-                    like(Lecture::getGuestName, name)
-                    .or()
-                    .like(Lecture::getReviewName,name)
-            );
-        }
-        //排序条件
-        lq.orderByDesc(Lecture::getCreateTime);
-        lq.eq(Lecture::getIsDeleted,0);
-        lq.ne(Lecture::getReviewName,"");
-        //查询
-        lectureMapper.selectPage(pageInfo,lq);
-        Integer count = lectureMapper.selectCount(lq);
-        //对象转换
-        List<Lecture> records = pageInfo.getRecords();
-        List<LectureReviewVo>lectureVos = new ArrayList<>();
-        //转换为vo
-        for (Lecture record : records) {
-            if(record.getReviewName() == null)continue;;
-            LectureReviewVo lectureVo = new LectureReviewVo();
-            BeanUtils.copyProperties(record,lectureVo);
-            lectureVos.add(lectureVo);
-        }
-        //包装对象
-        SystemResultList systemResultList  = new SystemResultList(Collections.singletonList(lectureVos),count);
+        Page<Lecture> pageInfo = new Page<>(page, pageSize);
+        LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+        // 添加过滤条件 - 模糊查询
+        Optional.ofNullable(name).ifPresent(
+                n -> lectureLambdaQueryWrapper.and(
+                        wrapper -> wrapper
+                                .like(Lecture::getGuestName, name)
+                                .or()
+                                .like(Lecture::getReviewName, name)
+                )
+        );
+        // 排序和其他条件
+        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
+                .eq(Lecture::getIsDeleted, 0)
+                .ne(Lecture::getReviewName, "");
+
+        lectureMapper.selectPage(pageInfo, lectureLambdaQueryWrapper);
+        List<LectureReviewVo> lectureVos = pageInfo.getRecords().stream()
+                .filter(record -> record.getReviewName() != null)
+                .map(record -> {
+                    LectureReviewVo lectureVo = new LectureReviewVo();
+                    BeanUtils.copyProperties(record, lectureVo);
+                    return lectureVo;
+                })
+                .collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
+
         return SystemJsonResponse.success(systemResultList);
     }
+
 
     /**
      * 讲座预告
@@ -227,103 +228,36 @@ public class LectureServiceImpl  implements LectureService {
         //构造分页构造器
         Page<Lecture> pageInfo =new Page<>(page,pageSize);
         //条件构造器
-        LambdaQueryWrapper<Lecture> lq = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
         //添加过滤条件  模糊查询
-        if (name != null) {
-            lq.and(wrapper ->wrapper.
-                    like(Lecture::getGuestName, name)
-                    .or()
-                    .like(Lecture::getLectureName,name)
-            );
-        }
+        Optional.ofNullable(name).ifPresent(
+                n -> lectureLambdaQueryWrapper.and(
+                        wrapper ->wrapper
+                                .like(Lecture::getGuestName, name)
+                                .or()
+                                .like(Lecture::getLectureName,name)
+                )
+        );
+
         //排序条件
-        lq.orderByDesc(Lecture::getCreateTime);
-        lq.eq(Lecture::getIsDeleted,0);
-        //查询
-        lectureMapper.selectPage(pageInfo,lq);
-        Integer count = lectureMapper.selectCount(lq);
-        //对象转换
-        List<Lecture> records = pageInfo.getRecords();
-        List<LectureTrailerVo>lectureVos = new ArrayList<>();
-        //转换为vo
-        for (Lecture record : records) {
-            LectureTrailerVo lectureVo = new LectureTrailerVo();
-            BeanUtils.copyProperties(record,lectureVo);
-            lectureVos.add(lectureVo);
-        }
-        //包装对象
+        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime);
+        lectureLambdaQueryWrapper.eq(Lecture::getIsDeleted,0);
+        lectureMapper.selectPage(pageInfo,lectureLambdaQueryWrapper);
+        Integer count = lectureMapper.selectCount(lectureLambdaQueryWrapper);
+
+        List<LectureTrailerVo> lectureVos = pageInfo.getRecords().stream()
+                .filter(record -> record.getReviewName() != null)
+                .map(record -> {
+                    LectureTrailerVo lectureVo = new LectureTrailerVo();
+                    BeanUtils.copyProperties(record, lectureVo);
+                    return lectureVo;
+                })
+                .collect(Collectors.toList());
         SystemResultList systemResultList  = new SystemResultList(lectureVos,count);
+
         return SystemJsonResponse.success(systemResultList);
     }
 
-    /**
-     * 扫码签到
-     * @param openid
-     * @param id
-     * @return
-     */
-    @Override
-    public SystemJsonResponse ScanCheckin(String openid, String id) {
-        //判断用户有没有是否有抢到票
-        Boolean member = stringRedisTemplate.opsForSet().isMember(RedisGlobalKey.IS_GRAB_TICKETS, openid);
-        if(member == null || !member) return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"没有相关抢票记录，扫码失败");
-        String key = RedisGlobalKey.LOCK_USER + openid;
-        //获取锁
-        RLock lock = redissonClient.getLock(key);
-        boolean b = lock.tryLock();
-        if(!b)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"扫码失败");
-        try{
-            UserLectureInfo lectureInfo = new UserLectureInfo();
-            lectureInfo.setOpenid(openid);
-            lectureInfo.setLectureId(id);
-            //将信息传入rabbitmq
-            String  str = JSONUtil.toJsonStr(lectureInfo);
-            rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_SCAN_CHECKIN_EXCHANGE,"gqyyds",str);
-        }catch (Exception e){
-            throw  new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(), "扫码失败");
-        }
-        finally {
-            //释放锁
-            lock.unlock();
-        }
-
-        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"扫码成功");
-    }
-
-
-    /**
-     * 扫码签退
-     * @param openid
-     * @param id
-     * @return
-     */
-    @Override
-    public SystemJsonResponse ScanCheckout(String openid, String id) {
-        //判断用户有没有是否有抢到票
-        Boolean member = stringRedisTemplate.opsForSet().isMember(RedisGlobalKey.IS_GRAB_TICKETS, openid);
-        if(member == null || !member) return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"没有相关抢票记录，扫码失败");
-        String key = RedisGlobalKey.LOCK_USER + openid;
-        //获取锁
-        RLock lock = redissonClient.getLock(key);
-        boolean b = lock.tryLock();
-        if(!b)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"扫码失败");
-        try{
-            UserLectureInfo lectureInfo = new UserLectureInfo();
-            lectureInfo.setOpenid(openid);
-            lectureInfo.setLectureId(id);
-            //将信息传入rabbitmq
-            String  str = JSONUtil.toJsonStr(lectureInfo);
-            rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_SCAN_CHECKOUT_EXCHANGE,"gqyyds",str);
-        }catch (Exception e){
-            throw  new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(), "扫码失败");
-        }
-        finally {
-            //释放锁
-            lock.unlock();
-        }
-
-        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"扫码成功");
-    }
 
     /**
      * 获取参加讲座的用户信息
@@ -335,42 +269,38 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
-        //构造分页构造器
         Page<UserLectureInfo> pageInfo =new Page<>(page,pageSize);
-        //条件构造器
         LambdaQueryWrapper<UserLectureInfo> lectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getLectureId, id);
+
         //如果是1查询参加讲座的
         if(status == 1){
             lectureInfoLambdaQueryWrapper.ge(UserLectureInfo::getStatus,1);
         }
-        //查询
         userLectureInfoMapper.selectPage(pageInfo,lectureInfoLambdaQueryWrapper);
         Integer count = userLectureInfoMapper.selectCount(lectureInfoLambdaQueryWrapper);
-        //实际返回的构造器
-        Page<UserVo>userPage=new Page<>();
-        //对象转换  忽略records
-        BeanUtils.copyProperties(pageInfo,userPage,"records");
 
-        //把信息封装到List并加入到userPage
-        List<UserVo>list = new ArrayList<>();
         List<UserLectureInfo> records = pageInfo.getRecords();
-        LambdaQueryWrapper<User> lambdaQueryWrapper;
+        List<String> userOpenidList = records.stream()
+                .map(UserLectureInfo::getOpenid)
+                .collect(Collectors.toList());
 
-        for(UserLectureInfo k:records){
-            String openid = k.getOpenid();
-            lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(User::getOpenid,openid);
-            User user = userMapper.selectOne(lambdaQueryWrapper);
-            UserVo userVo = new UserVo();
-            BeanUtils.copyProperties(user,userVo);
-            list.add(userVo);
-        }
-        userPage.setRecords(list);
-        //封装返回结果
-        SystemResultList systemResultList = new SystemResultList(list,count);
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.in(User::getOpenid,userOpenidList);
+        List<User> users = userMapper.selectList(userLambdaQueryWrapper);
+
+        List<UserVo> userVoList = users.stream()
+                .map(user -> {
+                    UserVo userVo = new UserVo();
+                    BeanUtils.copyProperties(user, userVo);
+                    return userVo;
+                })
+                .collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(userVoList,count);
+
         return SystemJsonResponse.success(systemResultList);
     }
+
 
     /**
      * 新增或者更新讲座
@@ -383,6 +313,7 @@ public class LectureServiceImpl  implements LectureService {
         BeanUtils.copyProperties(lectureDto, lecture);
         lecture.setUpdateTime(LocalDateTime.now());
         String id = lectureDto.getId();
+
         String state;
         //新增
         if (id == null) {
@@ -407,6 +338,7 @@ public class LectureServiceImpl  implements LectureService {
             }
             state = "更新成功";
         }
+
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),state);
     }
 
@@ -420,33 +352,31 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
-        //构造分页构造器
         Page<Lecture> pageInfo =new Page<>(page,pageSize);
-        //条件构造器
-        LambdaQueryWrapper<Lecture> lq = new LambdaQueryWrapper<>();
-        //添加过滤条件  模糊查询
-        if (name != null) {
-            lq.or();
-            lq.like(Lecture::getGuestName, name);
-            lq.like(Lecture::getIntroduction,name);
-        }
-        //排序条件
-        lq.eq(Lecture::getIsDeleted,0);
-        lq.orderByDesc(Lecture::getCreateTime);
-        //查询
-        lectureMapper.selectPage(pageInfo,lq);
-        Integer count = lectureMapper.selectCount(lq);
-        //对象转换
+        LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        Optional.ofNullable(name).ifPresent(
+            n -> lectureLambdaQueryWrapper.and(
+                    wrapper ->wrapper
+                            .like(Lecture::getGuestName, name)
+                            .or()
+                            .like(Lecture::getIntroduction,name)
+            )
+        );
+        lectureLambdaQueryWrapper.eq(Lecture::getIsDeleted,0);
+        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime);
+        lectureMapper.selectPage(pageInfo,lectureLambdaQueryWrapper);
+        Integer count = lectureMapper.selectCount(lectureLambdaQueryWrapper);
+
         List<Lecture> records = pageInfo.getRecords();
-        List<LectureVo>lectureVos = new ArrayList<>();
-        //转换为vo
-        for (Lecture record : records) {
-            LectureVo lectureVo = new LectureVo();
-            BeanUtils.copyProperties(record,lectureVo);
-            lectureVos.add(lectureVo);
-        }
-        //包装对象
+        List<Object> lectureVos = records.stream()
+                .map(lecture -> {
+                    LectureVo lectureVo = new LectureVo();
+                    BeanUtils.copyProperties(lecture, lectureVo);
+                    return lectureVo;
+                })
+                .collect(Collectors.toList());
         SystemResultList systemResultList  = new SystemResultList(lectureVos,count);
+
         return SystemJsonResponse.success(systemResultList);
     }
 
@@ -463,27 +393,30 @@ public class LectureServiceImpl  implements LectureService {
         LambdaQueryWrapper<UserLectureInfo> lectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getLectureId,id);
         lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getIsDeleted,0);
+
         //如果是1查询参加讲座的
         if(status == 1){
             lectureInfoLambdaQueryWrapper.ge(UserLectureInfo::getStatus,1);
         }
-        List<UserVo>list = new ArrayList<>();
         List<UserLectureInfo> records = userLectureInfoMapper.selectList(lectureInfoLambdaQueryWrapper);
-        LambdaQueryWrapper<User> lambdaQueryWrapper;
-        for(UserLectureInfo k:records){
-            String openid = k.getOpenid();
-            lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(User::getOpenid,openid);
-            User user = userMapper.selectOne(lambdaQueryWrapper);
-            UserVo userVo = new UserVo();
-            BeanUtils.copyProperties(user,userVo);
-            list.add(userVo);
-        }
-        Integer count = list.size();
-        //封装返回结果
-        SystemResultList systemResultList = new SystemResultList();
-        systemResultList.setList(list);
-        systemResultList.setCount(count);
+        List<String> userOpenidList = records.stream()
+                .map(UserLectureInfo::getOpenid)
+                .collect(Collectors.toList());
+
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.in(User::getOpenid,userOpenidList);
+        List<User> users = userMapper.selectList(userLambdaQueryWrapper);
+
+        List<UserVo> userVoList = users.stream()
+                .map(user -> {
+                    UserVo userVo = new UserVo();
+                    BeanUtils.copyProperties(user, userVo);
+                    return userVo;
+                })
+                .collect(Collectors.toList());
+        Integer count = userVoList.size();
+        SystemResultList systemResultList = new SystemResultList(userVoList,count);
+
         return SystemJsonResponse.success(systemResultList);
     }
 
@@ -494,41 +427,25 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse deleteLecture(String id) {
+        // 更新讲座记录
         Lecture lecture = new Lecture();
         lecture.setIsDeleted(1);
         lecture.setId(id);
         lectureMapper.updateById(lecture);
-        //看redis的讲座是否要更新
-        String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.UNSTART_LECTURE);
-        Lecture lec = JSONUtil.toBean(s, Lecture.class);
-        //如果当前删除的讲座是还没开始的就删除redis
-        if (s != null && !s.equals("") && lec != null && lec.getId().equals(id) ){
-            stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
-            stringRedisTemplate.delete(RedisGlobalKey.UNSTART_LECTURE);
-            stringRedisTemplate.delete(RedisGlobalKey.TICKET_NUMBER);
-        }
+
+        // 检查Redis中的讲座记录是否需要更新
+        Optional.ofNullable(stringRedisTemplate.opsForValue().get(RedisGlobalKey.UNSTART_LECTURE))
+                .map(s -> JSONUtil.toBean(s, Lecture.class))
+                .ifPresent(lec -> {
+                    if (lec.getId().equals(id)) {
+                        stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
+                        stringRedisTemplate.delete(RedisGlobalKey.UNSTART_LECTURE);
+                        stringRedisTemplate.delete(RedisGlobalKey.TICKET_NUMBER);
+                    }
+                });
+
         return SystemJsonResponse.success();
     }
-
-
-    /**
-     * 设置互斥锁
-     * @param key
-     * @return
-     */
-    public  boolean tryLock(String key){
-        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 10, TimeUnit.SECONDS);
-        return BooleanUtil.isTrue(flag);
-    }
-
-    /**
-     * 释放锁
-     * @param key
-     */
-    public  void unlock(String key){
-        stringRedisTemplate.delete(key);
-    }
-
 
 }
 

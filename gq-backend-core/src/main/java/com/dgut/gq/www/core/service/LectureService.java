@@ -13,13 +13,12 @@ import com.dgut.gq.www.core.model.dto.LectureDto;
  */
 public interface LectureService {
 
-
-
     /**
      * 获取正在进行的讲座
      * @return
      */
     SystemJsonResponse findUnStartLecture();
+
 
     /**
      * 抢票
@@ -28,6 +27,7 @@ public interface LectureService {
      * @return
      */
     SystemJsonResponse robTicket(String openid,String id);
+
 
     /**
      * 获取讲座回顾
@@ -38,6 +38,7 @@ public interface LectureService {
      */
     SystemJsonResponse getLectureReview(int page, int pageSize, String name);
 
+
     /**
      * 获取讲座预告
      * @param page
@@ -47,24 +48,6 @@ public interface LectureService {
      */
     SystemJsonResponse getLectureTrailer(int page, int pageSize, String name);
 
-
-    /**
-     * 扫码签到
-     * @param openid
-     * @param id
-     * @return
-     */
-    SystemJsonResponse ScanCheckin(String openid, String id);
-
-
-
-    /**
-     * 扫码签退
-     * @param openid
-     * @param id
-     * @return
-     */
-    SystemJsonResponse ScanCheckout(String openid, String id);
 
     /**
      * 获取参加讲座的人员信息
@@ -83,7 +66,6 @@ public interface LectureService {
     SystemJsonResponse updateSaveLecture(LectureDto lectureDto);
 
 
-
     /**
      * 后台获取讲座信息
      * @param page
@@ -92,7 +74,6 @@ public interface LectureService {
      * @return
      */
     SystemJsonResponse getLecture(int page, int pageSize, String name);
-
 
 
     /**
