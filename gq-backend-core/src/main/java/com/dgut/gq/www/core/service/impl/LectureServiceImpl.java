@@ -199,8 +199,8 @@ public class LectureServiceImpl  implements LectureService {
         );
         // 排序和其他条件
         lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
-                .eq(Lecture::getIsDeleted, 0)
-                .ne(Lecture::getReviewName, "");
+                                 .eq(Lecture::getIsDeleted, 0)
+                                 .ne(Lecture::getReviewName, "");
 
         lectureMapper.selectPage(pageInfo, lectureLambdaQueryWrapper);
         List<LectureReviewVo> lectureVos = pageInfo.getRecords().stream()
@@ -211,7 +211,8 @@ public class LectureServiceImpl  implements LectureService {
                     return lectureVo;
                 })
                 .collect(Collectors.toList());
-        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
+        System.out.println(lectureVos);
+        SystemResultList systemResultList = new SystemResultList(Collections.singletonList(lectureVos), (int) pageInfo.getTotal());
 
         return SystemJsonResponse.success(systemResultList);
     }
@@ -241,13 +242,13 @@ public class LectureServiceImpl  implements LectureService {
         );
 
         //排序条件
-        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime);
-        lectureLambdaQueryWrapper.eq(Lecture::getIsDeleted,0);
+        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
+                                 .eq(Lecture::getIsDeleted,0);
         lectureMapper.selectPage(pageInfo,lectureLambdaQueryWrapper);
         Integer count = lectureMapper.selectCount(lectureLambdaQueryWrapper);
 
         List<LectureTrailerVo> lectureVos = pageInfo.getRecords().stream()
-                .filter(record -> record.getReviewName() != null)
+                .filter(record -> record.getLectureName() != null)
                 .map(record -> {
                     LectureTrailerVo lectureVo = new LectureTrailerVo();
                     BeanUtils.copyProperties(record, lectureVo);
