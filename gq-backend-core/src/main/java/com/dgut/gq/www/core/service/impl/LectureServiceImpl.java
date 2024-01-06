@@ -211,7 +211,6 @@ public class LectureServiceImpl  implements LectureService {
                     return lectureVo;
                 })
                 .collect(Collectors.toList());
-        System.out.println(lectureVos);
         SystemResultList systemResultList = new SystemResultList(Collections.singletonList(lectureVos), (int) pageInfo.getTotal());
 
         return SystemJsonResponse.success(systemResultList);
