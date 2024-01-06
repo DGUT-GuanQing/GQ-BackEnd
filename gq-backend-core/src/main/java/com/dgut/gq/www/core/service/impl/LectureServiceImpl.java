@@ -316,7 +316,7 @@ public class LectureServiceImpl  implements LectureService {
 
         String state;
         //新增
-        if (id == null) {
+        if (id == null|| id.equals("")) {
             //插入数据库
             lecture.setCreateTime(LocalDateTime.now());
             lectureMapper.insert(lecture);
@@ -328,14 +328,15 @@ public class LectureServiceImpl  implements LectureService {
         } else {
             lectureMapper.updateById(lecture);
             //看redis的讲座是否要更新
-            String s = stringRedisTemplate.opsForValue().get(key);
-            Lecture lec = JSONUtil.toBean(s, Lecture.class);
-            //如果当前更新的讲座是还没开始的就更新redis
-            if (s != null && !s.equals("") && lec != null && lec.getId().equals(lectureDto.getId())) {
-                stringRedisTemplate.delete(key);
-                //更新票的数量
-                stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, lectureDto.getTicketNumber().toString());
-            }
+            Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
+                    .map(lec -> JSONUtil.toBean(lec, Lecture.class))
+                    .ifPresent(lec -> {
+                        if(lec.getId() .equals(id)){
+                            stringRedisTemplate.delete(key);
+                            //更新票的数量
+                            stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, lectureDto.getTicketNumber().toString());
+                        }
+                    });
             state = "更新成功";
         }
 
@@ -435,7 +436,7 @@ public class LectureServiceImpl  implements LectureService {
 
         // 检查Redis中的讲座记录是否需要更新
         Optional.ofNullable(stringRedisTemplate.opsForValue().get(RedisGlobalKey.UNSTART_LECTURE))
-                .map(s -> JSONUtil.toBean(s, Lecture.class))
+                .map(lec -> JSONUtil.toBean(lec, Lecture.class))
                 .ifPresent(lec -> {
                     if (lec.getId().equals(id)) {
                         stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
