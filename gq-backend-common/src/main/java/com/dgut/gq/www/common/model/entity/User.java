@@ -39,17 +39,17 @@ public class User {
 
 
 
-    private LocalDateTime createTime;
+    private LocalDateTime createTime = null;
 
 
 
 
-    private  LocalDateTime updateTime;
+    private  LocalDateTime updateTime = null;
 
 
 
 
-    private  LocalDateTime deleteTime ;
+    private  LocalDateTime deleteTime = null;
 
 
 

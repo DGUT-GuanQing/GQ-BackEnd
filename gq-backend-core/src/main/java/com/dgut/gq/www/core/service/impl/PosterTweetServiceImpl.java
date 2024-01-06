@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class PosterTweetServiceImpl implements PosterTweetService {
@@ -34,26 +35,27 @@ public class PosterTweetServiceImpl implements PosterTweetService {
      */
     @Override
     public SystemJsonResponse getByType(Integer type) {
-        PosterTweet posterTweet = new PosterTweet();
-        PosterTweetVo posterTweetVo = new PosterTweetVo();
         String key = RedisGlobalKey.POSTER_TWEET + type;
-        String s = stringRedisTemplate.opsForValue().get(key);
-        //为空就去数据库查询
-        if(s == null || s.equals("")){
-            LambdaQueryWrapper<PosterTweet>lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            //查询最新的推文
-            lambdaQueryWrapper.orderByDesc(PosterTweet::getCreateTime);
-            lambdaQueryWrapper.last("LIMIT 1");
-            lambdaQueryWrapper.eq(PosterTweet::getIsDeleted,0);
-            lambdaQueryWrapper.eq(PosterTweet::getType,type);
 
-            posterTweet= posterTweetMapper.selectOne(lambdaQueryWrapper);
-            //存入redis
-            BeanUtils.copyProperties(posterTweet,posterTweetVo);
-            stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(posterTweetVo));
-        }else {
-            posterTweetVo =  JSONUtil.toBean(s,PosterTweetVo.class);
-        }
+        PosterTweetVo posterTweetVo = Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
+                .map(s -> JSONUtil.toBean(s, PosterTweetVo.class))
+                .orElseGet(() -> {
+                    LambdaQueryWrapper<PosterTweet> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    //查询最新的推文
+                    lambdaQueryWrapper.orderByDesc(PosterTweet::getCreateTime);
+                    lambdaQueryWrapper.last("LIMIT 1");
+                    lambdaQueryWrapper.eq(PosterTweet::getIsDeleted, 0);
+                    lambdaQueryWrapper.eq(PosterTweet::getType, type);
+                    PosterTweet posterTweet = posterTweetMapper.selectOne(lambdaQueryWrapper);
+                    PosterTweetVo newPosterTweetVo = new PosterTweetVo();
+
+                    //存入redis
+                    BeanUtils.copyProperties(posterTweet, newPosterTweetVo);
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newPosterTweetVo));
+
+                    return newPosterTweetVo;
+                });
+
         return SystemJsonResponse.success(posterTweetVo);
     }
 

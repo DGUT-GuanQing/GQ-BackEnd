@@ -47,10 +47,8 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Autowired
     private CurriculumVitaeMapper curriculumVitaeMapper;
 
-
     @Autowired
     private UserMapper userMapper;
-
 
     @Autowired
     private DepartmentMapper departmentMapper;
@@ -58,9 +56,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Autowired
     private PositionMapper positionMapper;
 
-
     @Autowired
     private  StringRedisTemplate stringRedisTemplate;
+
 
     /**
      * 上传或者修改简历
@@ -101,6 +99,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),msg);
     }
+
 
     /**
      * 获取我的简历
@@ -191,8 +190,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
         return SystemJsonResponse.success(systemResultList);
     }
-
-
 
 
     /**
@@ -289,6 +286,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return SystemJsonResponse.success(systemResultList);
     }
 
+
     /**
      * 删除部门
      * @param id
@@ -302,7 +300,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         departmentMapper.updateById(department);
         return SystemJsonResponse.success();
     }
-
 
 
     /**

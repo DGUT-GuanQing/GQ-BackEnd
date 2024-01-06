@@ -112,6 +112,7 @@ public class LectureServiceImpl  implements LectureService {
                     BeanUtils.copyProperties(lecture, newLectureVo);
                     stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newLectureVo));
                     stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, newLectureVo.getTicketNumber().toString());
+
                     return newLectureVo;
                 });
 
