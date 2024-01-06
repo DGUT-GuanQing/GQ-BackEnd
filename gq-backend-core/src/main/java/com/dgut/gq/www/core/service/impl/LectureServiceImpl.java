@@ -197,7 +197,6 @@ public class LectureServiceImpl  implements LectureService {
                                 .like(Lecture::getReviewName, name)
                 )
         );
-        // 排序和其他条件
         lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
                                  .eq(Lecture::getIsDeleted, 0)
                                  .ne(Lecture::getReviewName, "");
@@ -226,11 +225,8 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse getLectureTrailer(int page, int pageSize, String name) {
-        //构造分页构造器
         Page<Lecture> pageInfo =new Page<>(page,pageSize);
-        //条件构造器
         LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        //添加过滤条件  模糊查询
         Optional.ofNullable(name).ifPresent(
                 n -> lectureLambdaQueryWrapper.and(
                         wrapper ->wrapper
@@ -240,7 +236,6 @@ public class LectureServiceImpl  implements LectureService {
                 )
         );
 
-        //排序条件
         lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
                                  .eq(Lecture::getIsDeleted,0);
         lectureMapper.selectPage(pageInfo,lectureLambdaQueryWrapper);

@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String wxLogin(String code) {
         //获取用户的openid
-        String openid = httpUtil.getOpenid(code);
+         String openid = httpUtil.getOpenid(code);
         //String openid = code;
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenid, openid));
         Optional<User> optionalUser=Optional.ofNullable(user);
@@ -154,7 +154,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse getMyLecture(String openid, Integer page, Integer pageSize) {
-        //查询数据库
         Page<UserLectureInfo> pageInfo =  new Page<>(page,pageSize);
         LambdaQueryWrapper<UserLectureInfo>lectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         //条件
@@ -162,16 +161,17 @@ public class UserServiceImpl implements UserService {
                                      .orderByDesc(UserLectureInfo::getCreateTime)
                                      .eq(UserLectureInfo::getIsDeleted,0)
                                      .eq(UserLectureInfo::getIsDeleted,0);
-        //查询数量
         Integer count = userLectureInfoMapper.selectCount(lectureInfoLambdaQueryWrapper);
-        //分页查询
         userLectureInfoMapper.selectPage(pageInfo,lectureInfoLambdaQueryWrapper);
         List<UserLectureInfo> records = pageInfo.getRecords();
 
         //记录当前讲座的观看情况
-        Map<String, Integer> map = records.stream()
-                .collect(Collectors.toMap(UserLectureInfo::getLectureId, UserLectureInfo::getStatus));
-        List<String> list = new ArrayList<>(map.keySet());
+        HashMap< String,Integer>map = new HashMap<>();
+        List<String >list = new ArrayList<>();
+        for (UserLectureInfo record : records) {
+            list.add(record.getLectureId());
+            map.put(record.getLectureId(),record.getStatus());
+        }
 
         //拼接字符串,按照给的id顺序返回
         String s = StrUtil.join(",",list);
@@ -190,7 +190,6 @@ public class UserServiceImpl implements UserService {
             }).collect(Collectors.toList());
         }
         SystemResultList systemResultList = new SystemResultList(lectureVos,count);
-
         return SystemJsonResponse.success(systemResultList);
     }
 
