@@ -49,9 +49,6 @@ public class UserController {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-
-
-
     /**
      * cas client 默认的session key
      */
@@ -59,7 +56,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
 
     @Autowired
     private UserMapper userMapper;
@@ -75,13 +71,6 @@ public class UserController {
         String token = userService.wxLogin(code);
         return SystemJsonResponse.success(token);
     }
-
-
-
-
-
-
-
 
     /**
      * 获取微信端用户个人信息
@@ -118,7 +107,6 @@ public class UserController {
         return userService.getMyLecture(openid,page,pageSize);
     }
 
-
     /**
      * 是否抢到票
      * @param request
@@ -132,7 +120,6 @@ public class UserController {
         String openid = ParseToken.getOpenid(token);
         return userService.isGrabTicket(openid);
     }
-
 
     /**
      * 中央认证
@@ -177,7 +164,6 @@ public class UserController {
         return SystemJsonResponse.success();
     }
 
-
     /***
      * 获取用户id
      * @param request
@@ -195,8 +181,6 @@ public class UserController {
         String uuid = userMapper.selectOne(lambdaQueryWrapper).getUuid();
         return SystemJsonResponse.success(uuid);
     }
-
-
 
     /**
      * 获取个人二维码
@@ -236,8 +220,6 @@ public class UserController {
             throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(),"获取二维码失败");
         }
     }
-
-
 
     /**
      * 签到

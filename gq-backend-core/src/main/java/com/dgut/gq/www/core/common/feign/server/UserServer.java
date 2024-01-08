@@ -20,7 +20,6 @@ public class UserServer {
     @Autowired
     private UserService userService;
 
-
     /**
      * 远程调用根据用户名获取用户信息
      * @return

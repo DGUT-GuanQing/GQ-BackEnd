@@ -74,5 +74,4 @@ public class MyLectureVo {
     )
    private  Integer status;
 
-
 }

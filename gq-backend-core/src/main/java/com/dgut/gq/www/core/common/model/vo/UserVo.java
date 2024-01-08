@@ -19,8 +19,6 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "返回用户信息")
 public class UserVo {
 
-
-
     @ApiModelProperty(value = "姓名")
     private  String name;
 
@@ -29,7 +27,6 @@ public class UserVo {
 
     @ApiModelProperty(value =  "学号")
     private  String studentId;
-
 
     @ApiModelProperty(value = "班级")
     private  String naturalClass;

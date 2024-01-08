@@ -52,18 +52,11 @@ public class LectureDto {
     )
     private String lectureName;
 
-
-
-
-
     @ApiModelProperty(value = "讲座预告图片地址",
             name = "image",
             required = true
     )
     private  String  image;
-
-
-
 
     @ApiModelProperty(value = "嘉宾名称",
             name = "guestName",
@@ -71,16 +64,11 @@ public class LectureDto {
     )
     private  String guestName;
 
-
-
-
     @ApiModelProperty(value = "讲座地点",
             name = "place",
             required = true
     )
     private  String place;
-
-
 
     @ApiModelProperty(value = "票总数",
             name = "ticketNumber",
@@ -95,9 +83,6 @@ public class LectureDto {
     )
     private  LocalDateTime  startTime;
 
-
-
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "讲座结束时间",
             required = true
@@ -111,8 +96,6 @@ public class LectureDto {
     )
     private  LocalDateTime  grabTicketsStart;
 
-
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "抢票结束时间",
             name = "grabTicketsEnd",
@@ -120,15 +103,11 @@ public class LectureDto {
     )
     private  LocalDateTime grabTicketsEnd;
 
-
-
-
     @ApiModelProperty(value = "讲座导语",
             name = "introduction",
             required = true
     )
     private  String introduction;
-
 
     @ApiModelProperty(value = "讲座回顾主题",
             required = false
@@ -139,7 +118,6 @@ public class LectureDto {
             required = false
     )
     private  String reviewUrl ;
-
 
     @ApiModelProperty(value = "讲座回顾微信公众号地址",
             required = false

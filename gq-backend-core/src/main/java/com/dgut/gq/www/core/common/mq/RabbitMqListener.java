@@ -29,14 +29,11 @@ public class RabbitMqListener {
     @Autowired
     private UserLectureInfoMapper infoMapper;
 
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-
     @Autowired
     private LectureMapper lectureMapper;
-
 
     /**
      * rabbitmq监听将抢票信息写入数据库
@@ -47,12 +44,10 @@ public class RabbitMqListener {
         String str ;
         String key = RedisGlobalKey.USER_MESSAGE;
         try {
-            //接受消息
-             str =  new String(message.getBody());
-            //转换成讲座用户信息
+            str =  new String(message.getBody());
             UserLectureInfo userLectureInfo = JSONUtil.toBean(str,UserLectureInfo.class);
-            //将用户讲座表插入数据库
             infoMapper.insert(userLectureInfo);
+
             //删除我的信息
             stringRedisTemplate.delete(key + userLectureInfo.getOpenid());
 
@@ -62,9 +57,9 @@ public class RabbitMqListener {
                     .eq(Lecture::getId, userLectureInfo.getLectureId())
                     .gt(Lecture::getTicketNumber, 0);
             lectureMapper.update(null,updateWrapper);
+
             //消息队列签收信息
             channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
-
         } catch (Exception e) {
             //如果发送异常  消息重新回队列
             channel.basicNack(message.getMessageProperties().getDeliveryTag(),true,true);

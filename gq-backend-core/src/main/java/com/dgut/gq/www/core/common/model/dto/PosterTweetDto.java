@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PosterTweetDto {
+
     /**
      * 主键
      */
     @TableId
     private String id;
-
 
     @ApiModelProperty(value = "标题")
     private String title;

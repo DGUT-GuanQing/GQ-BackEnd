@@ -27,12 +27,12 @@ import java.time.format.DateTimeFormatter;
  */
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
+
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
-
 
     /**
      * 跨域处理
@@ -92,6 +92,7 @@ public class MvcConfig implements WebMvcConfigurer {
         converter.setObjectMapper(objectMapper);
         return converter;
     }
+
     //@Bean
     ObjectMapper objectMapper(){
         ObjectMapper om =new ObjectMapper();
@@ -116,7 +117,6 @@ public class MvcConfig implements WebMvcConfigurer {
          registry.addResourceHandler("/webjars/**")
                  .addResourceLocations("classpath:/META-INF/resources/webjars/");
      }
-
 
     @Override
     public void addFormatters(FormatterRegistry registry) {

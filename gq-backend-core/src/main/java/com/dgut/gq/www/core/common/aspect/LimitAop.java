@@ -20,13 +20,12 @@ import java.util.Map;
 @Aspect
 @Component
 public class LimitAop {
+
     /**
      * 不同的接口，不同的流量控制
      * map的key为 Limiter.key
      */
     private final Map<String, RateLimiter> limitMap = Maps.newConcurrentMap();
-
-
 
     @Around("@annotation(com.dgut.gq.www.core.common.annotation.Limit)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable{

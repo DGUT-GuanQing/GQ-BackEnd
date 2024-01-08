@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @ApiModel(description = "返回的推文信息")
 public class PosterTweetVo {
+
     /**
      * 主键
      */
@@ -20,7 +21,6 @@ public class PosterTweetVo {
 
     @ApiModelProperty(value = "标题")
     private String title;
-
 
     /**
      * 图片链接

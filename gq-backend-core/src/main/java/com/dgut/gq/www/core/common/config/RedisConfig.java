@@ -42,8 +42,8 @@ public class RedisConfig {
         // Hash的key也采用StringRedisSerializer的序列化方式
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(serializer);
-
         template.afterPropertiesSet();
+
         return template;
     }
 
@@ -53,12 +53,10 @@ public class RedisConfig {
      */
     @Bean
     public RedissonClient redissonClient() {
-        //配置
         Config config = new Config();
         config.useSingleServer().setAddress("redis://"+redisAddress + ":6379")
                 .setPassword(redisPassword);
 
-        //创建对象
         return Redisson.create(config);
     }
 }

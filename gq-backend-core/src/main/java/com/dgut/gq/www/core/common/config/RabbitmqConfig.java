@@ -18,36 +18,30 @@ public class RabbitmqConfig {
      */
     public  static  final String GQ_ROB_TICKET_EXCHANGE = "gq-rob-ticket-exchange";
 
-
     /**
      * 抢票的队列
      */
     public  static  final String GQ_ROB_TICKET_QUEUE = "gq-rob-ticket-queue";
-
 
     /**
      * 扫码签到交换机
      */
     public  static  final String GQ_SCAN_CHECKIN_EXCHANGE = "gq-scan-checkin-exchange";
 
-
     /**
      * 扫码签到队列
      */
     public  static  final String GQ_SCAN_CHECKIN_QUEUE = "gq-scan-checkin-queue";
-
 
     /**
      * 扫码签退交换机
      */
     public  static  final String GQ_SCAN_CHECKOUT_EXCHANGE = "gq-scan-checkout-exchange";
 
-
     /**
      * 扫码签退队列
      */
     public  static  final String GQ_SCAN_CHECKOUT_QUEUE = "gq-scan-checkout-queue";
-
 
     /**
      * 抢票交换机
@@ -58,7 +52,6 @@ public class RabbitmqConfig {
         return ExchangeBuilder.topicExchange(GQ_ROB_TICKET_EXCHANGE).durable(true).build();
     }
 
-
     /**
      * 抢票队列
      */
@@ -67,7 +60,6 @@ public class RabbitmqConfig {
       return QueueBuilder.durable(GQ_ROB_TICKET_QUEUE).build();
     }
 
-
     /**
      * 绑定队列和交换机
      */
@@ -75,7 +67,5 @@ public class RabbitmqConfig {
     public Binding bindQueueExchange1(@Qualifier("gq-rob-ticket-queue") Queue queue , @Qualifier("gq-rob-ticket-exchange") Exchange exchange){
        return BindingBuilder.bind(queue).to(exchange).with("gqyyds").noargs();
     }
-
-
 
 }
