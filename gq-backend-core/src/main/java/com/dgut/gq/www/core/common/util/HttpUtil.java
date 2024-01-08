@@ -22,6 +22,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class HttpUtil {
+
     /**
      * 通过code获取信息
      * @param code
@@ -46,7 +47,6 @@ public class HttpUtil {
     @Autowired
     private RestTemplate restTemplate;
 
-
     /**
      * 获取openid
      * @param code
@@ -56,11 +56,13 @@ public class HttpUtil {
         String url = WX_LOGIN_URL + "?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
         JSONObject jsonObject = restTemplate.getForObject(url, JSONObject.class);
         Optional<JSONObject> optionalJSONObject = Optional.ofNullable(jsonObject);
+
         if(!optionalJSONObject.isPresent()){
             //获取openid失败
            throw  new GlobalSystemException(GlobalResponseCode.FAIL_GET_OPENID.getCode(),
                    GlobalResponseCode.FAIL_GET_OPENID.getMessage());
         }
+
         var data = jsonObject.getInnerMap();
        /// assert data.get("openid") != null;
        /// return (String) data.get("openid");
@@ -69,6 +71,7 @@ public class HttpUtil {
        if(openid == null)
         throw  new GlobalSystemException(GlobalResponseCode.FAIL_GET_OPENID.getCode(),
                GlobalResponseCode.FAIL_GET_OPENID.getMessage());
+
       return openid;
     }
 }

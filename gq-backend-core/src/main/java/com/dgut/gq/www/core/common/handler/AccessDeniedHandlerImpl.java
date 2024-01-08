@@ -25,7 +25,6 @@ public class AccessDeniedHandlerImpl implements AccessDeniedHandler{
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         SystemJsonResponse systemJsonResponse = SystemJsonResponse.fail(GlobalResponseCode.USER_NOT_PERMISSIONS.getCode(),
                 GlobalResponseCode.USER_NOT_PERMISSIONS.getMessage());
-        //处理异常
         String s = JSON.toJSONString(systemJsonResponse);
         WebUtil.renderString(response, s);
     }

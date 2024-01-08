@@ -20,6 +20,7 @@ import java.util.Optional;
 
 @Service
 public class PosterTweetServiceImpl implements PosterTweetService {
+
     @Autowired
     private PosterTweetMapper posterTweetMapper;
 
@@ -58,7 +59,6 @@ public class PosterTweetServiceImpl implements PosterTweetService {
         return SystemJsonResponse.success(posterTweetVo);
     }
 
-
     /**
      * 更新或者新增推文
      * @param posterTweetDto
@@ -85,6 +85,5 @@ public class PosterTweetServiceImpl implements PosterTweetService {
         stringRedisTemplate.delete(key + posterTweetDto.getType());
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),state);
     }
-
 
 }

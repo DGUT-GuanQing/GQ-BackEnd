@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private HttpUtil httpUtil;
 
-
     /**
      * 微信登录
      * @param code
@@ -117,7 +116,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-
     /**
      * 获取小程序端个人信息
      *
@@ -145,7 +143,6 @@ public class UserServiceImpl implements UserService {
 
         return SystemJsonResponse.success(userVo);
     }
-
 
     /**
      * 获取自己参加过的讲座信息
@@ -193,7 +190,6 @@ public class UserServiceImpl implements UserService {
         return SystemJsonResponse.success(systemResultList);
     }
 
-
     /**
      * 是否抢到票
      * @param openid
@@ -209,7 +205,6 @@ public class UserServiceImpl implements UserService {
         }
         return SystemJsonResponse.success(flag);
     }
-
 
     /**
      * 中央认证登陆
@@ -231,7 +226,6 @@ public class UserServiceImpl implements UserService {
         stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid,openid);
         return SystemJsonResponse.success();
     }
-
 
     /**
      * 签到
@@ -263,7 +257,6 @@ public class UserServiceImpl implements UserService {
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"签到成功");
     }
 
-
     /**
      * 是否在黑名单
      * @param openid
@@ -287,13 +280,11 @@ public class UserServiceImpl implements UserService {
         return  SystemJsonResponse.success(flag);
     }
 
-
     @Override
     public User getUserByUsername(String username) {
         LambdaQueryWrapper<User>lq=new LambdaQueryWrapper<>();
         lq.eq(User::getUserName,username);
         return userMapper.selectOne(lq);
     }
-
 
 }

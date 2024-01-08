@@ -39,7 +39,6 @@ public class LectureServer {
         return lectureService.updateSaveLecture(lectureDto);
     }
 
-
     /**
      * 远程调用获取讲座
      * @param page
@@ -54,7 +53,6 @@ public class LectureServer {
         return lectureService.getLecture(page,pageSize,name);
     }
 
-
     /**
      * 导出参加讲座的用户
      * @param
@@ -65,8 +63,6 @@ public class LectureServer {
     SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status){
         return lectureService.exportAttendLectureUser(id,status);
     }
-
-
 
     /**
      * 远程调用删除讲座

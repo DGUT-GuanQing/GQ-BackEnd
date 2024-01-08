@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class LectureServiceImpl  implements LectureService {
+
     @Autowired
     private LectureMapper lectureMapper;
 
@@ -64,7 +65,6 @@ public class LectureServiceImpl  implements LectureService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-
     /**
      * 加载lua脚本代码
      * @param voucherId
@@ -76,7 +76,6 @@ public class LectureServiceImpl  implements LectureService {
         SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill.lua"));
         SECKILL_SCRIPT.setResultType(Long.class);
     }
-
 
     /**
      * 获取还没开始的讲座信息
@@ -120,7 +119,6 @@ public class LectureServiceImpl  implements LectureService {
 
         return SystemJsonResponse.success(lectureVo);
     }
-
 
     /**
      * 抢票
@@ -172,7 +170,6 @@ public class LectureServiceImpl  implements LectureService {
 
     }
 
-
     /**
      * 获取讲座回顾
      * @param page
@@ -212,7 +209,6 @@ public class LectureServiceImpl  implements LectureService {
         return SystemJsonResponse.success(systemResultList);
     }
 
-
     /**
      * 讲座预告
      * @param page
@@ -250,7 +246,6 @@ public class LectureServiceImpl  implements LectureService {
 
         return SystemJsonResponse.success(systemResultList);
     }
-
 
     /**
      * 获取参加讲座的用户信息
@@ -294,7 +289,6 @@ public class LectureServiceImpl  implements LectureService {
         return SystemJsonResponse.success(systemResultList);
     }
 
-
     /**
      * 新增或者更新讲座
      * @param lectureDto
@@ -336,7 +330,6 @@ public class LectureServiceImpl  implements LectureService {
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),state);
     }
 
-
     /**
      * 后台获取讲座信息
      * @param page
@@ -373,7 +366,6 @@ public class LectureServiceImpl  implements LectureService {
 
         return SystemJsonResponse.success(systemResultList);
     }
-
 
     /**
      * 导出参加讲座的用户信息

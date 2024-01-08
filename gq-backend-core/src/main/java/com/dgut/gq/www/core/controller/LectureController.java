@@ -32,8 +32,6 @@ public class LectureController {
     @Autowired
     private LectureService lectureService;
 
-
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
@@ -59,7 +57,6 @@ public class LectureController {
         return lectureService.getLectureReview(page,pageSize,name);
     }
 
-
     /**
      * 获取讲座预告信息
      * @param page
@@ -82,9 +79,6 @@ public class LectureController {
         return lectureService.getLectureTrailer(page,pageSize,name);
     }
 
-
-
-
     /**
      * 获取正在进行的讲座信息
      * @return
@@ -99,9 +93,6 @@ public class LectureController {
     public  SystemJsonResponse unstart(){
         return  lectureService.findUnStartLecture();
     }
-
-
-
 
     /**
      * 抢票
@@ -119,9 +110,6 @@ public class LectureController {
         String openid = ParseToken.getOpenid(token);
         return lectureService.robTicket(openid,id);
     }
-
-
-
 
     /**
      * 判断是否还有票
