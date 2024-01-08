@@ -1,7 +1,6 @@
 package com.dgut.gq.www.core.service.impl;
 
 
-import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,17 +10,17 @@ import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.User;
-import com.dgut.gq.www.core.config.RabbitmqConfig;
+import com.dgut.gq.www.core.common.config.RabbitmqConfig;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.core.mapper.UserMapper;
-import com.dgut.gq.www.core.model.dto.LectureDto;
-import com.dgut.gq.www.core.model.entity.Lecture;
-import com.dgut.gq.www.core.model.entity.UserLectureInfo;
-import com.dgut.gq.www.core.model.vo.LectureReviewVo;
-import com.dgut.gq.www.core.model.vo.LectureTrailerVo;
-import com.dgut.gq.www.core.model.vo.LectureVo;
-import com.dgut.gq.www.core.model.vo.UserVo;
+import com.dgut.gq.www.core.common.model.dto.LectureDto;
+import com.dgut.gq.www.core.common.model.entity.Lecture;
+import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
+import com.dgut.gq.www.core.common.model.vo.LectureReviewVo;
+import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
+import com.dgut.gq.www.core.common.model.vo.LectureVo;
+import com.dgut.gq.www.core.common.model.vo.UserVo;
 import com.dgut.gq.www.core.service.LectureService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -34,11 +33,9 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**

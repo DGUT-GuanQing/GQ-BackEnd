@@ -2,10 +2,10 @@ package com.dgut.gq.www.recruit.controller;
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.util.ParseToken;
-import com.dgut.gq.www.recruit.model.dto.CurriculumVitaeDto;
-import com.dgut.gq.www.recruit.model.vo.CurriculumVitaeVo;
-import com.dgut.gq.www.recruit.model.vo.DepartmentVo;
-import com.dgut.gq.www.recruit.model.vo.PositionVo;
+import com.dgut.gq.www.recruit.common.model.dto.CurriculumVitaeDto;
+import com.dgut.gq.www.recruit.common.model.vo.CurriculumVitaeVo;
+import com.dgut.gq.www.recruit.common.model.vo.DepartmentVo;
+import com.dgut.gq.www.recruit.common.model.vo.PositionVo;
 import com.dgut.gq.www.recruit.service.RecruitmentService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,12 +1,12 @@
 package com.dgut.gq.www.admin.controller;
 
-import com.dgut.gq.www.admin.model.dto.DepartmentDto;
-import com.dgut.gq.www.admin.model.dto.LectureDto;
-import com.dgut.gq.www.admin.model.dto.PositionDto;
-import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
-import com.dgut.gq.www.admin.model.vo.CurriculumVitaeVo;
-import com.dgut.gq.www.admin.model.vo.LectureVo;
-import com.dgut.gq.www.admin.model.vo.UserVo;
+import com.dgut.gq.www.admin.common.model.dto.DepartmentDto;
+import com.dgut.gq.www.admin.common.model.dto.LectureDto;
+import com.dgut.gq.www.admin.common.model.dto.PositionDto;
+import com.dgut.gq.www.admin.common.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.common.model.vo.CurriculumVitaeVo;
+import com.dgut.gq.www.admin.common.model.vo.LectureVo;
+import com.dgut.gq.www.admin.common.model.vo.UserVo;
 import com.dgut.gq.www.admin.service.BackendService;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import io.swagger.annotations.*;

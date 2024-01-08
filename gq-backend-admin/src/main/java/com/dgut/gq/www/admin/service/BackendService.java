@@ -1,10 +1,10 @@
 package com.dgut.gq.www.admin.service;
 
 
-import com.dgut.gq.www.admin.model.dto.DepartmentDto;
-import com.dgut.gq.www.admin.model.dto.LectureDto;
-import com.dgut.gq.www.admin.model.dto.PositionDto;
-import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.common.model.dto.DepartmentDto;
+import com.dgut.gq.www.admin.common.model.dto.LectureDto;
+import com.dgut.gq.www.admin.common.model.dto.PositionDto;
+import com.dgut.gq.www.admin.common.model.dto.PosterTweetDto;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 
 /**

@@ -1,15 +1,14 @@
 package com.dgut.gq.www.admin.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.dgut.gq.www.admin.feign.client.LectureClient;
-import com.dgut.gq.www.admin.feign.client.PosterClient;
-import com.dgut.gq.www.admin.feign.client.RecruitClient;
-import com.dgut.gq.www.admin.feign.client.UserClient;
-import com.dgut.gq.www.admin.model.dto.DepartmentDto;
-import com.dgut.gq.www.admin.model.dto.LectureDto;
-import com.dgut.gq.www.admin.model.dto.PositionDto;
-import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.common.feign.client.LectureClient;
+import com.dgut.gq.www.admin.common.feign.client.PosterClient;
+import com.dgut.gq.www.admin.common.feign.client.RecruitClient;
+import com.dgut.gq.www.admin.common.feign.client.UserClient;
+import com.dgut.gq.www.admin.common.model.dto.DepartmentDto;
+import com.dgut.gq.www.admin.common.model.dto.LectureDto;
+import com.dgut.gq.www.admin.common.model.dto.PositionDto;
+import com.dgut.gq.www.admin.common.model.dto.PosterTweetDto;
 import com.dgut.gq.www.admin.service.BackendService;
 
 
