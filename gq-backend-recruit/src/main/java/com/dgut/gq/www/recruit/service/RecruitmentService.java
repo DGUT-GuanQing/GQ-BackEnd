@@ -2,9 +2,9 @@ package com.dgut.gq.www.recruit.service;
 
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.recruit.model.dto.CurriculumVitaeDto;
-import com.dgut.gq.www.recruit.model.dto.DepartmentDto;
-import com.dgut.gq.www.recruit.model.dto.PositionDto;
+import com.dgut.gq.www.recruit.common.model.dto.CurriculumVitaeDto;
+import com.dgut.gq.www.recruit.common.model.dto.DepartmentDto;
+import com.dgut.gq.www.recruit.common.model.dto.PositionDto;
 
 
 /**

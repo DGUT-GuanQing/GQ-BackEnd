@@ -8,7 +8,7 @@ import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.common.util.ParseToken;
 import com.dgut.gq.www.core.mapper.UserMapper;
-import com.dgut.gq.www.core.model.vo.MyLectureVo;
+import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
 import com.dgut.gq.www.core.service.UserService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
