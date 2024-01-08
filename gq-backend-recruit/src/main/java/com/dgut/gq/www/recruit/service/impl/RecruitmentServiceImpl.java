@@ -32,6 +32,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 简历模块
@@ -66,35 +68,59 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse updateOrSave(String openid, CurriculumVitaeDto curriculumVitaeDto) {
-        //先查询用户是否上传过简历
-        LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CurriculumVitae::getOpenid,openid);
-        Integer count = curriculumVitaeMapper.selectCount(lambdaQueryWrapper);
-        CurriculumVitae curriculumVitae = new CurriculumVitae();
-        BeanUtils.copyProperties(curriculumVitaeDto,curriculumVitae);
-        curriculumVitae.setUpdateTime(LocalDateTime.now());
-        curriculumVitae.setOpenid(openid);
+        // 否上传过简历
+        boolean isResumeExists = checkResumeExists(openid);
+        CurriculumVitae curriculumVitae = createCurriculumVitae(curriculumVitaeDto, openid);
         String msg;
-        if(count == null || count == 0){
-            curriculumVitae.setCreateTime(LocalDateTime.now());
-            //获取年份，计算第几期
-            LocalDate currentDate = LocalDate.now();
-            int year = currentDate.getYear();
-            curriculumVitae.setTerm(year - 2010);
+        if (!isResumeExists) {
+            initializeNewCurriculumVitae(curriculumVitae);
             curriculumVitaeMapper.insert(curriculumVitae);
             msg = "上传成功";
-        }else {
-            curriculumVitaeMapper.update(curriculumVitae,lambdaQueryWrapper);
+        } else {
+            updateExistingCurriculumVitae(curriculumVitae, openid);
             msg = "修改成功";
         }
-        //把班级存入数据库
-        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+        // 更新用户班级信息，中央认证拿不到班级，这里是通过用户上传间接拿到他填的班级
+        updateUserClassInfo(openid, curriculumVitaeDto.getNaturalClass());
+
+        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), msg);
+    }
+
+    private void updateUserClassInfo(String openid, String naturalClass) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getOpenid, openid);
         User user = new User();
-        user.setNaturalClass(curriculumVitaeDto.getNaturalClass());
-        userLambdaQueryWrapper.eq(User::getOpenid,openid);
-        userMapper.update(user,userLambdaQueryWrapper);
+        user.setNaturalClass(naturalClass);
+        userMapper.update(user, queryWrapper);
         stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
-        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),msg);
+    }
+
+    private void updateExistingCurriculumVitae(CurriculumVitae curriculumVitae, String openid) {
+        LambdaQueryWrapper<CurriculumVitae> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CurriculumVitae::getOpenid, openid);
+        curriculumVitaeMapper.update(curriculumVitae, queryWrapper);
+    }
+
+    private void initializeNewCurriculumVitae(CurriculumVitae curriculumVitae) {
+        curriculumVitae.setCreateTime(LocalDateTime.now());
+        int year = LocalDate.now().getYear();
+        curriculumVitae.setTerm(year - 2010);
+    }
+
+    private CurriculumVitae createCurriculumVitae(CurriculumVitaeDto curriculumVitaeDto, String openid) {
+        CurriculumVitae curriculumVitae = new CurriculumVitae();
+        BeanUtils.copyProperties(curriculumVitaeDto, curriculumVitae);
+        curriculumVitae.setUpdateTime(LocalDateTime.now());
+        curriculumVitae.setOpenid(openid);
+        return curriculumVitae;
+    }
+
+    private boolean checkResumeExists(String openid) {
+        LambdaQueryWrapper<CurriculumVitae> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CurriculumVitae::getOpenid, openid);
+        Integer count = curriculumVitaeMapper.selectCount(queryWrapper);
+        return count != null && count > 0;
     }
 
     /**
@@ -104,36 +130,53 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse getMyCurriculumVitae(String openid) {
-        LambdaQueryWrapper<CurriculumVitae> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CurriculumVitae::getOpenid,openid);
-        CurriculumVitae curriculumVitae = curriculumVitaeMapper.selectOne(lambdaQueryWrapper);
-        CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
-        if(curriculumVitae == null || curriculumVitae.getOpenid() == null){
-            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"没有简历");
-        }else {
-            //查询用户信息
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.eq(User::getOpenid,openid);
-            User user = userMapper.selectOne(userLambdaQueryWrapper);
-            //查询部门信息
-            LambdaQueryWrapper<Department>departmentLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            departmentLambdaQueryWrapper.eq(Department::getId,curriculumVitae.getDepartmentId());
-            Department department = departmentMapper.selectOne(departmentLambdaQueryWrapper);
-            //查询职位信息
-            LambdaQueryWrapper<Position>positionLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            positionLambdaQueryWrapper.eq(Position::getId,curriculumVitae.getPositionId());
-            Position position = positionMapper.selectOne(positionLambdaQueryWrapper);
-            //对象转换
-            BeanUtils.copyProperties(curriculumVitae,curriculumVitaeVo);
-            //将学生信息添加到返回对象集合
-            curriculumVitaeVo.setCollege(user.getCollege());
-            curriculumVitaeVo.setName(user.getName());
-            curriculumVitaeVo.setStudentId(user.getStudentId());
-            curriculumVitaeVo.setNaturalClass(user.getNaturalClass());
-            curriculumVitaeVo.setDepartmentName(department.getDepartmentName());
-            curriculumVitaeVo.setPositionName(position.getPositionName());
+        CurriculumVitae curriculumVitae = queryCurriculumVitae(openid);
+        if (!Optional.ofNullable(curriculumVitae).isPresent()) {
+            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "没有简历");
         }
+
+        User user = queryUser(openid);
+        Department department = queryDepartment(curriculumVitae.getDepartmentId());
+        Position position = queryPosition(curriculumVitae.getPositionId());
+        CurriculumVitaeVo curriculumVitaeVo = buildCurriculumVitaeVo(curriculumVitae, user, department, position);
+
         return SystemJsonResponse.success(curriculumVitaeVo);
+    }
+
+    private CurriculumVitae queryCurriculumVitae(String openid) {
+        LambdaQueryWrapper<CurriculumVitae> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CurriculumVitae::getOpenid, openid);
+        return curriculumVitaeMapper.selectOne(lambdaQueryWrapper);
+    }
+
+    private User queryUser(String openid) {
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.eq(User::getOpenid, openid);
+        return userMapper.selectOne(userLambdaQueryWrapper);
+    }
+
+    private Department queryDepartment(String departmentId) {
+        LambdaQueryWrapper<Department> departmentLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        departmentLambdaQueryWrapper.eq(Department::getId, departmentId);
+        return departmentMapper.selectOne(departmentLambdaQueryWrapper);
+    }
+
+    private Position queryPosition(String positionId) {
+        LambdaQueryWrapper<Position> positionLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        positionLambdaQueryWrapper.eq(Position::getId, positionId);
+        return positionMapper.selectOne(positionLambdaQueryWrapper);
+    }
+
+    private CurriculumVitaeVo buildCurriculumVitaeVo(CurriculumVitae curriculumVitae, User user, Department department, Position position) {
+        CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
+        BeanUtils.copyProperties(curriculumVitae, curriculumVitaeVo);
+        curriculumVitaeVo.setCollege(user.getCollege());
+        curriculumVitaeVo.setName(user.getName());
+        curriculumVitaeVo.setStudentId(user.getStudentId());
+        curriculumVitaeVo.setNaturalClass(user.getNaturalClass());
+        curriculumVitaeVo.setDepartmentName(department.getDepartmentName());
+        curriculumVitaeVo.setPositionName(position.getPositionName());
+        return curriculumVitaeVo;
     }
 
     /**
@@ -144,44 +187,21 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     public SystemJsonResponse getAllCurriculumVitae(int page, int pageSize,String departmentId,Integer term) {
         Page<CurriculumVitae>pageInfo = new Page<>(page,pageSize);
         LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        //未被删除
-        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0);
-        //按更新时间降序
-        lambdaQueryWrapper.orderByDesc(CurriculumVitae::getUpdateTime);
-        //部门
-        lambdaQueryWrapper.eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId);
-        //第几期
-        lambdaQueryWrapper.eq(term != null,CurriculumVitae::getTerm,term);
+        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0)
+                          .orderByDesc(CurriculumVitae::getUpdateTime)
+                          .eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId)
+                          .eq(term != null,CurriculumVitae::getTerm,term);
         curriculumVitaeMapper.selectPage(pageInfo,lambdaQueryWrapper);
         List<CurriculumVitae> records = pageInfo.getRecords();
-        List<CurriculumVitaeVo>curriculumVitaeVoList = new ArrayList<>();
         Integer count = curriculumVitaeMapper.selectCount(lambdaQueryWrapper);
-        for (CurriculumVitae record : records) {
-            String openid = record.getOpenid();
-            //查询用户信息
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.eq(User::getOpenid,openid);
-            User user = userMapper.selectOne(userLambdaQueryWrapper);
-            //查询部门信息
-            LambdaQueryWrapper<Department>departmentLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            departmentLambdaQueryWrapper.eq(Department::getId,record.getDepartmentId());
-            Department department = departmentMapper.selectOne(departmentLambdaQueryWrapper);
-            //查询职位信息
-            LambdaQueryWrapper<Position>positionLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            positionLambdaQueryWrapper.eq(Position::getId,record.getPositionId());
-            Position position = positionMapper.selectOne(positionLambdaQueryWrapper);
-            CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
-            //对象转换
-            BeanUtils.copyProperties(record,curriculumVitaeVo);
-            //将学生信息添加到返回对象集合
-            curriculumVitaeVo.setCollege(user.getCollege());
-            curriculumVitaeVo.setName(user.getName());
-            curriculumVitaeVo.setStudentId(user.getStudentId());
-            curriculumVitaeVo.setNaturalClass(user.getNaturalClass());
-            curriculumVitaeVo.setDepartmentName(department.getDepartmentName());
-            curriculumVitaeVo.setPositionName(position.getPositionName());
-            curriculumVitaeVoList.add(curriculumVitaeVo);
-        }
+
+        List<CurriculumVitaeVo> curriculumVitaeVoList = records.stream().map(record -> {
+            User user = queryUser(record.getOpenid());
+            Department department = queryDepartment(departmentId);
+            Position position = queryPosition(record.getPositionId());
+            return buildCurriculumVitaeVo(record, user, department, position);
+        }).collect(Collectors.toList());
+
         SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
         return SystemJsonResponse.success(systemResultList);
     }
@@ -237,44 +257,21 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
         LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        //未被删除
-        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0);
-        //按更新时间降序
-        lambdaQueryWrapper.orderByDesc(CurriculumVitae::getUpdateTime);
-        //部门
-        lambdaQueryWrapper.eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId);
-        //第几期
-        lambdaQueryWrapper.eq(term != null,CurriculumVitae::getTerm,term);
-        List<CurriculumVitaeVo>curriculumVitaeVoList = new ArrayList<>();
+        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0)
+                .orderByDesc(CurriculumVitae::getUpdateTime)
+                .eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId)
+                .eq(term != null,CurriculumVitae::getTerm,term);
         Integer count = curriculumVitaeMapper.selectCount(lambdaQueryWrapper);
         List<CurriculumVitae> curriculumVitaes = curriculumVitaeMapper.selectList(lambdaQueryWrapper);
-        for (CurriculumVitae record : curriculumVitaes) {
-            String openid = record.getOpenid();
-            //查询用户信息
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.eq(User::getOpenid,openid);
-            User user = userMapper.selectOne(userLambdaQueryWrapper);
-            //查询部门信息
-            LambdaQueryWrapper<Department>departmentLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            departmentLambdaQueryWrapper.eq(Department::getId,record.getDepartmentId());
-            Department department = departmentMapper.selectOne(departmentLambdaQueryWrapper);
-            //查询职位信息
-            LambdaQueryWrapper<Position>positionLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            positionLambdaQueryWrapper.eq(Position::getId,record.getPositionId());
-            Position position = positionMapper.selectOne(positionLambdaQueryWrapper);
-            CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
-            //对象转换
-            BeanUtils.copyProperties(record,curriculumVitaeVo);
-            //将学生信息添加到返回对象集合
-            curriculumVitaeVo.setCollege(user.getCollege());
-            curriculumVitaeVo.setName(user.getName());
-            curriculumVitaeVo.setStudentId(user.getStudentId());
-            curriculumVitaeVo.setNaturalClass(user.getNaturalClass());
-            curriculumVitaeVo.setDepartmentName(department.getDepartmentName());
-            curriculumVitaeVo.setPositionName(position.getPositionName());
-            curriculumVitaeVoList.add(curriculumVitaeVo);
-        }
+
+        List<CurriculumVitaeVo> curriculumVitaeVoList = curriculumVitaes.stream().map(record -> {
+            User user = queryUser(record.getOpenid());
+            Department department = queryDepartment(departmentId);
+            Position position = queryPosition(record.getPositionId());
+            return buildCurriculumVitaeVo(record, user, department, position);
+        }).collect(Collectors.toList());
         SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
+
         return SystemJsonResponse.success(systemResultList);
     }
 

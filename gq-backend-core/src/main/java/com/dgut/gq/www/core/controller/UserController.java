@@ -237,10 +237,6 @@ public class UserController {
           return  userService.signIn(lectureId,openid);
     }
 
-
-
-
-
     /**
      * 是否在黑名单里面
      * @param
