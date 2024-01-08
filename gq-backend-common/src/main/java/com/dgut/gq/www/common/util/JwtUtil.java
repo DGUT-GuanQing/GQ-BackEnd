@@ -31,7 +31,6 @@ public class JwtUtil {
      */
     public static String JWT_KEY;
 
-
     @Value("${jwt.secret}")
     public void setJwtKey(String secret){
         JwtUtil.JWT_KEY = secret;
@@ -39,7 +38,6 @@ public class JwtUtil {
 
     //有效期
     public static final Long JWT_TTL = 60* 60 *1000L;// 60 * 60 *1000  一个小时
-
 
     public static String getUUID(){
         String token = UUID.randomUUID().toString().replaceAll("-", "");
@@ -128,7 +126,6 @@ public class JwtUtil {
                 .parseClaimsJws(jwt)
                 .getBody();
     }
-
 
 }
 

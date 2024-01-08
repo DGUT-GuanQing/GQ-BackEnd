@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SystemResultList<T> {
+
     private List<T> list;
 
     private  Integer count;

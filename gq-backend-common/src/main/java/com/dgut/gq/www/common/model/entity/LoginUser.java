@@ -82,7 +82,6 @@ public class LoginUser implements UserDetails {
         return true;
     }
 
-
     /**
      *
      * @return是否可用

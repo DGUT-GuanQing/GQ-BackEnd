@@ -31,31 +31,18 @@ public class User {
     @TableId
     private String uuid ;
 
-
     /**
      * 微信的openid
      */
     private String openid;
 
-
-
     private LocalDateTime createTime = null;
-
-
-
 
     private  LocalDateTime updateTime = null;
 
-
-
-
     private  LocalDateTime deleteTime = null;
 
-
-
-
     private Integer isDeleted;
-
 
     /**
      * 版本号乐观锁
@@ -63,72 +50,55 @@ public class User {
     @Version
     private  Integer version;
 
-
     /**
      * 用户名
      */
     private  String userName;
-
 
     /**
      * 密码
      */
     private  String password;
 
-
-
-
-
     /**
      * 名字
      */
     private  String name;
-
 
     /**
      * 性别
      */
     private  Integer sex;
 
-
     /**
      * 学院
      */
     private  String college;
-
 
     /**
      * 学号
      */
     private  String studentId;
 
-
-
     /**
      * 班级
      */
     private  String naturalClass;
-
 
     /**
      * 老师或者学生标号
      */
     private  Integer userIdentity;
 
-
     /**
      * 是否是vip
      */
     private  Integer  vip;
 
-
     /**
      * 参加讲座次数
      */
     private  Integer raceNumber;
-
-
-
 
     /**
      * 权限
