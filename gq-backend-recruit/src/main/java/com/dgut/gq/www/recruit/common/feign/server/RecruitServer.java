@@ -18,7 +18,6 @@ public class RecruitServer {
     @Autowired
     private RecruitmentService recruitmentService;
 
-
     /**
      * 远程调用导出简历
      * @param
@@ -28,7 +27,6 @@ public class RecruitServer {
     SystemJsonResponse exportCurriculumVitae(@RequestParam String departmentId, @RequestParam Integer term){
         return recruitmentService.exportCurriculumVitae(departmentId,term);
     }
-
 
     /**
      * 删除部门远程调用
@@ -40,8 +38,6 @@ public class RecruitServer {
         return recruitmentService.deleteDepartment(id);
     }
 
-
-
     /**
      * 删除职位远程调用
      * @param id
@@ -52,7 +48,6 @@ public class RecruitServer {
         return recruitmentService.deletePosition(id);
     }
 
-
     /**
      * 新增或者修改部门远程调用
      * @param departmentDto
@@ -62,8 +57,6 @@ public class RecruitServer {
     SystemJsonResponse saveAndUpdateDep(@RequestBody DepartmentDto departmentDto){
         return recruitmentService.saveAndUpdateDep(departmentDto);
     }
-
-
 
     /**
      * 新增或者修改职位远程调用

@@ -23,7 +23,6 @@ public class PositionDto {
     )
     private String id;
 
-
     /**
      * 职位名
      */
@@ -33,7 +32,6 @@ public class PositionDto {
             required = true
     )
     private String positionName;
-
 
     /**
      * 部门id

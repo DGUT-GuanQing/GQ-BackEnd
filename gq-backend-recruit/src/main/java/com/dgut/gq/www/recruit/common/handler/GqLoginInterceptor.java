@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class GqLoginInterceptor implements HandlerInterceptor {
 
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
@@ -39,7 +38,6 @@ public class GqLoginInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("sss");
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.DGUT_LOGIN + openid);

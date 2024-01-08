@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 @Api(tags = "招新模块")
 public class RecruitmentController {
 
-
     @Autowired
     RecruitmentService recruitmentService;
 
@@ -65,9 +64,6 @@ public class RecruitmentController {
         return recruitmentService.getMyCurriculumVitae(openid);
     }
 
-
-
-
     /**
      * 获取全部简历
      * @param
@@ -89,7 +85,6 @@ public class RecruitmentController {
         return recruitmentService.getAllCurriculumVitae(page,pageSize, departmentId,term);
     }
 
-
     /**
      * 获取部门
      * @param
@@ -105,10 +100,6 @@ public class RecruitmentController {
     public SystemJsonResponse getDepartment(){
         return recruitmentService.getDepartment();
     }
-
-
-
-
 
     /**
      * 获取职位

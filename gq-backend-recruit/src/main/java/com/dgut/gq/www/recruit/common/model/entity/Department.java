@@ -25,15 +25,11 @@ public class Department {
 
         private LocalDateTime createTime;
 
-
         private LocalDateTime updateTime;
-
 
         private LocalDateTime deleteTime;
 
-
         private Integer isDeleted;
-
 
         private int version;
 

@@ -58,7 +58,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Autowired
     private  StringRedisTemplate stringRedisTemplate;
 
-
     /**
      * 上传或者修改简历
      * @param openid
@@ -67,7 +66,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse updateOrSave(String openid, CurriculumVitaeDto curriculumVitaeDto) {
-        if(2 <1)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"系统已经关闭");
         //先查询用户是否上传过简历
         LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CurriculumVitae::getOpenid,openid);
@@ -98,7 +96,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),msg);
     }
-
 
     /**
      * 获取我的简历
@@ -138,7 +135,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
         return SystemJsonResponse.success(curriculumVitaeVo);
     }
-
 
     /**
      * 获取简历
@@ -190,7 +186,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return SystemJsonResponse.success(systemResultList);
     }
 
-
     /**
      * 获取全部部门
      * @return
@@ -210,7 +205,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
         return SystemJsonResponse.success(departmentVoList);
     }
-
 
     /**
      * 获取职位
@@ -233,7 +227,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
         return SystemJsonResponse.success(positionVos);
     }
-
 
     /**
      * 导出简历
@@ -285,7 +278,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return SystemJsonResponse.success(systemResultList);
     }
 
-
     /**
      * 删除部门
      * @param id
@@ -300,7 +292,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         return SystemJsonResponse.success();
     }
 
-
     /**
      * 删除职位
      * @param id
@@ -314,7 +305,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         positionMapper.updateById(position);
         return SystemJsonResponse.success();
     }
-
 
     /**
      * 新增或者修稿部门
@@ -339,7 +329,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
         return SystemJsonResponse.success(status);
     }
-
 
     /**
      * 新增或者修改职位

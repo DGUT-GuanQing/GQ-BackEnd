@@ -19,16 +19,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDto {
 
-
     @ApiModelProperty(value = "用户姓名",
             name = "name",
             allowEmptyValue = false,
             required = true
     )
     private  String name;
-
-
-
 
     @ApiModelProperty(value = "学院",
             name = "department",
@@ -37,15 +33,12 @@ public class UserDto {
     )
     private  String college;
 
-
     @ApiModelProperty(value = "学号",
             name = "studentId",
             allowEmptyValue = false,
             required = true
     )
     private  String studentId;
-
-
 
     @ApiModelProperty(value = "班级",
             name = "naturalClass",

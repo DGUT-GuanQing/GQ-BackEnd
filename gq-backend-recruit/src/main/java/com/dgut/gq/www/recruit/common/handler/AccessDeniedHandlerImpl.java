@@ -21,6 +21,7 @@ import java.io.IOException;
  */
 @Component
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler{
+
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         SystemJsonResponse systemJsonResponse = SystemJsonResponse.fail(GlobalResponseCode.USER_NOT_PERMISSIONS.getCode(),

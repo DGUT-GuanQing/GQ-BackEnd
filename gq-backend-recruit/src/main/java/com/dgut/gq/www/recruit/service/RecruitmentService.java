@@ -21,7 +21,6 @@ public interface RecruitmentService {
      */
     SystemJsonResponse updateOrSave(String openid, CurriculumVitaeDto curriculumVitaeDto);
 
-
     /**
      * 获取我的简历
      * @param openid
@@ -29,16 +28,11 @@ public interface RecruitmentService {
      */
     SystemJsonResponse getMyCurriculumVitae(String openid);
 
-
     /**
      * 获取全部简历
      * @return
      */
     SystemJsonResponse getAllCurriculumVitae(int page, int pageSize,String departmentId,Integer term);
-
-
-
-
 
     /**
      * 获取部门
@@ -46,14 +40,12 @@ public interface RecruitmentService {
      */
     SystemJsonResponse getDepartment();
 
-
     /**
      * 获取职位
      * @param departmentId
      * @return
      */
     SystemJsonResponse getPosition(String departmentId);
-
 
     /**
      * 导出简历
@@ -76,14 +68,12 @@ public interface RecruitmentService {
      */
     SystemJsonResponse deletePosition(String id);
 
-
     /**
      * 新增或者更新部门
      * @param departmentDto
      * @return
      */
     SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto);
-
 
     /**
      * 新增或者更新职位

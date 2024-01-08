@@ -24,7 +24,6 @@ public class CurriculumVitaeDto {
     )
     private  String naturalClass;
 
-
     @TableId
     @ApiModelProperty(
             value = "部门id",
@@ -49,7 +48,6 @@ public class CurriculumVitaeDto {
             required = true
     )
     private Integer isAdjust ;
-
 
     //校区
     @TableId
@@ -77,7 +75,6 @@ public class CurriculumVitaeDto {
             required = true
     )
     private  String wechat ;
-
 
     //简历的路径
     @TableId
