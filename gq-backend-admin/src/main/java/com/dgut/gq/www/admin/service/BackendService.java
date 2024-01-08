@@ -13,7 +13,6 @@ import com.dgut.gq.www.common.common.SystemJsonResponse;
  * @since  2022-10-8
  * @version  1.0
  */
-
 public interface BackendService {
 
     /**
