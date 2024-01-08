@@ -19,6 +19,8 @@
         <module>gq-backend-core</module>
         <module>gq-backend-gateway</module>
         <module>gq-backend-recruit</module>
+        <module>gq-backend-admin</module>
+        <module>gq-backend-common</module>
     </modules>
 
     <properties>

@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.dgut</groupId>
+    <groupId>com.dgut.gq.www.admin</groupId>
     <artifactId>gq-backend-admin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>gq-backend-admin</name>
