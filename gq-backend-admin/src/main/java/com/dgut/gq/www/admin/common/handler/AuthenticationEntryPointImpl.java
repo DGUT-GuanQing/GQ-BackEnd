@@ -21,7 +21,6 @@ import java.io.IOException;
  */
 @Component
 public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
-
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         SystemJsonResponse systemJsonResponse=SystemJsonResponse.fail

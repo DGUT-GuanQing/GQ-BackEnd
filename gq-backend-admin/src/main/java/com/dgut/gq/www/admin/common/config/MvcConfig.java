@@ -34,7 +34,6 @@ public class MvcConfig implements WebMvcConfigurer {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     /**
      * 跨域处理
      * @param registry
@@ -105,7 +104,6 @@ public class MvcConfig implements WebMvcConfigurer {
          registry.addResourceHandler("/webjars/**")
                  .addResourceLocations("classpath:/META-INF/resources/webjars/");
      }
-
 
     @Override
     public void addFormatters(FormatterRegistry registry) {

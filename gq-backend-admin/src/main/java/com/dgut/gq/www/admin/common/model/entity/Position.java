@@ -23,15 +23,11 @@ public class Position {
 
     private LocalDateTime createTime;
 
-
     private LocalDateTime updateTime;
-
 
     private LocalDateTime deleteTime;
 
-
     private Integer isDeleted;
-
 
     private int version;
 
@@ -39,7 +35,6 @@ public class Position {
      * 职位名
      */
     private String positionName;
-
 
     /**
      * 部门id

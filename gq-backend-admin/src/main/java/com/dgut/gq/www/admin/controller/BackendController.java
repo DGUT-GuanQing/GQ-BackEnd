@@ -29,8 +29,6 @@ public class BackendController {
     private BackendService backendService;
 
 
-
-
     /**
      * 后台的登录
      * @param
@@ -44,8 +42,6 @@ public class BackendController {
     public SystemJsonResponse backendLogin(String userName, String password){
         return backendService.login(userName,password);
     }
-
-
 
     /**
      * 后台登出
@@ -83,9 +79,6 @@ public class BackendController {
       return   backendService.getAttendLectureUser(page,pageSize,id,status);
     }
 
-
-
-
     /**
      * 新增或者更新讲座
      * @param lectureDto
@@ -98,9 +91,6 @@ public class BackendController {
         return backendService.updateOrSaveLecture(lectureDto);
     }
 
-
-
-
     /**
      * 新增或者更新推文信息
      * @param
@@ -112,9 +102,6 @@ public class BackendController {
     public  SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto){
        return  backendService.saveUpdatePosterTweet(posterTweetDto);
     }
-
-
-
 
     /**
      * 获取讲座

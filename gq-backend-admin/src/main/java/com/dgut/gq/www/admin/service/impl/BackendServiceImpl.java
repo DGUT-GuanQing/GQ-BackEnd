@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class BackendServiceImpl implements BackendService, UserDetailsService {
 
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -56,20 +55,14 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Autowired
     private UserClient userClient;
 
-
     @Autowired
     private LectureClient lectureClient;
-
 
     @Autowired
     private PosterClient posterClient;
 
-
     @Autowired
     private RecruitClient recruitClient;
-
-
-
 
     @Override
     public SystemJsonResponse login(String userName, String password) {

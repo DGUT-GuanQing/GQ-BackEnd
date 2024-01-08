@@ -25,24 +25,17 @@ public class LectureVo {
     @ApiModelProperty(value = "讲座预告微信公众号地址")
     private  String officialAccountUrl ;
 
-
-
     @ApiModelProperty(value = "第几期讲座")
     private  Integer term;
-
 
     @ApiModelProperty(value = "讲座名称")
     private String lectureName;
 
-
     @ApiModelProperty(value = "讲座预告图片地址")
     private  String  image;
 
-
-
     @ApiModelProperty(value = "嘉宾名称")
     private  String guestName;
-
 
     @ApiModelProperty(value = "讲座地点",
             name = "place",
@@ -50,10 +43,8 @@ public class LectureVo {
     )
     private  String place;
 
-
     @ApiModelProperty(value = "票数量")
     private  Integer ticketNumber;
-
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "讲座开始时间",
@@ -77,27 +68,19 @@ public class LectureVo {
     @ApiModelProperty(value = "抢票结束时间")
     private  LocalDateTime grabTicketsEnd;
 
-
-
     @ApiModelProperty(value = "讲座导语",
             name = "introduction",
             required = true
     )
     private  String introduction;
 
-
     @ApiModelProperty(value = "讲座回顾主题")
     private  String reviewName ;
-
-
 
     @ApiModelProperty(value = "讲座回顾图片路径")
     private  String reviewUrl ;
 
-
-
     @ApiModelProperty(value = "讲座回顾微信公众号地址")
     private  String reviewOfficialAccountUrl ;
-
 
 }

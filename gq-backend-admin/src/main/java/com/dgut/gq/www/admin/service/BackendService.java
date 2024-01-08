@@ -29,7 +29,6 @@ public interface BackendService {
      */
     void logout();
 
-
     /**
      * 获取参加讲座的用户
      * @param page
@@ -40,7 +39,6 @@ public interface BackendService {
      */
     SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status);
 
-
     /**
      * 更新或者新增讲座
      * @param lectureDto
@@ -48,14 +46,12 @@ public interface BackendService {
      */
     SystemJsonResponse updateOrSaveLecture(LectureDto lectureDto);
 
-
     /**
      * 更新或者新增推文
      * @param posterTweetDto
      * @return
      */
     SystemJsonResponse saveUpdatePosterTweet(PosterTweetDto posterTweetDto);
-
 
     /**
      * 后台获取讲座
@@ -66,7 +62,6 @@ public interface BackendService {
      */
     SystemJsonResponse getLecture(int page, int pageSize, String name);
 
-
     /**
      * 导出参加讲座的用户
      * @param id
@@ -75,7 +70,6 @@ public interface BackendService {
      */
     SystemJsonResponse exportUser(String id, Integer status);
 
-
     /**
      * 导出简历
      * @param departmentId
@@ -83,7 +77,6 @@ public interface BackendService {
      * @return
      */
     SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term);
-
 
     /**
      * 删除讲座
@@ -105,7 +98,6 @@ public interface BackendService {
      * @return
      */
     SystemJsonResponse deletePosition(String id);
-
 
     /**
      * 新增或者更新部门

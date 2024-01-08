@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class GqLoginInterceptor implements HandlerInterceptor {
 
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 

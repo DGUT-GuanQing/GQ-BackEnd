@@ -39,7 +39,6 @@ public class SwaggerConfig implements WebMvcConfigurer{
 
         }
 
-
         private ApiInfo apiInfo() {
             return new ApiInfoBuilder()
                     .title("莞青小程序")

@@ -27,18 +27,11 @@ public class Lecture {
     @TableId
     private String id;
 
-
     private LocalDateTime createTime;
-
-
 
     private LocalDateTime updateTime;
 
-
-
     private LocalDateTime deleteTime;
-
-
 
     private Integer isDeleted;
 

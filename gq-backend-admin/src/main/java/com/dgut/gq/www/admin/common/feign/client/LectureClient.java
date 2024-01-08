@@ -31,7 +31,6 @@ public interface LectureClient {
     @PostMapping("/feign-lecture/updateSaveLecture")
     SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto);
 
-
     /**
      * 远程调用获取讲座
      * @param page
@@ -44,8 +43,6 @@ public interface LectureClient {
                                   @RequestParam int pageSize,
                                   @RequestParam String name);
 
-
-
     /**
      * 远程调用导出参加讲座的用户
      * @param
@@ -55,9 +52,6 @@ public interface LectureClient {
     @GetMapping("/feign-lecture/exportAttendLectureUser")
     SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status);
 
-
-
-
     /**
      * 远程调用删除讲座
      * @param id
@@ -65,6 +59,5 @@ public interface LectureClient {
      */
     @DeleteMapping("/feign-lecture/deleteLecture/{id}")
     SystemJsonResponse deleteLecture(@PathVariable String id);
-
 
 }

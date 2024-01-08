@@ -32,7 +32,6 @@ public class CurriculumVitaeVo {
     )
     private String departmentName ;
 
-
     @ApiModelProperty(
             value = "职位名",
             name = "positionName",
@@ -47,7 +46,6 @@ public class CurriculumVitaeVo {
             required = true
     )
     private Integer isAdjust ;
-
 
     //校区
     @ApiModelProperty(
@@ -73,7 +71,6 @@ public class CurriculumVitaeVo {
     )
     private  String wechat ;
 
-
     //简历的路径
     @ApiModelProperty(
             value = "简历地址",
@@ -81,8 +78,6 @@ public class CurriculumVitaeVo {
             required = true
     )
     private String fileUrl ;
-
-
 
     //第几期新人
     @ApiModelProperty(
