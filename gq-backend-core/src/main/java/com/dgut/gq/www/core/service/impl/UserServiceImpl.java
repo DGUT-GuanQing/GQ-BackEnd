@@ -264,10 +264,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse isBlack(String openid) {
-        Boolean flag = false;
+        boolean flag = false;
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION +openid);
         LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
         String permission;
+
         if(Objects.isNull(loginUser)||Objects.isNull(loginUser.getUser())){
              LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
              lambdaQueryWrapper.eq(User::getOpenid,openid);
@@ -277,6 +278,7 @@ public class UserServiceImpl implements UserService {
             permission = loginUser.getPermission().get(0);
         }
         if(permission.equals("black"))flag = true;
+
         return  SystemJsonResponse.success(flag);
     }
 

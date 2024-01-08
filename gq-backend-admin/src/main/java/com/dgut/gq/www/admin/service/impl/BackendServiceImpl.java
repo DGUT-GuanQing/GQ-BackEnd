@@ -66,13 +66,12 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse login(String userName, String password) {
-        //后台管理密码,
+        //后台管理密码
         UsernamePasswordAuthenticationToken authenticationToken=
                 new UsernamePasswordAuthenticationToken(userName,password);
 
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
-        //认证失败
         if(Objects.isNull(authenticate)) {
             throw new GlobalSystemException(
                     GlobalResponseCode.ACCOUNT_NOT_EXIST.getCode(),
@@ -83,15 +82,11 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         String key = RedisGlobalKey.PERMISSION+userName;
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
-
-        //设置超时时间
         stringRedisTemplate.expire(key,10, TimeUnit.DAYS);
+
         String jwt = JwtUtil.createJWT(userName);
         return  SystemJsonResponse.success(jwt);
     }
-
-
-
 
     @Override
     public void logout() {
@@ -122,63 +117,45 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         return posterClient.saveUpdatePosterTweet(posterTweetDto);
     }
 
-
-
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
         return lectureClient.getLecture(page,pageSize,name);
     }
-
-
 
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
         return lectureClient.exportAttendLectureUser(id,status);
     }
 
-
-
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
         return recruitClient.exportCurriculumVitae(departmentId,term);
     }
-
-
 
     @Override
     public SystemJsonResponse deleteLecture(String id) {
         return lectureClient.deleteLecture(id);
     }
 
-
-
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
        return  recruitClient.deleteDepartment(id);
     }
-
-
 
     @Override
     public SystemJsonResponse deletePosition(String id) {
         return recruitClient.deletePosition(id);
     }
 
-
-
     @Override
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
         return recruitClient.saveAndUpdateDep(departmentDto);
     }
 
-
-
     @Override
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
         return recruitClient.saveAndUpdatePos(positionDto);
     }
-
-
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
