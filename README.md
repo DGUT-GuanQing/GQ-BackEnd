@@ -78,7 +78,7 @@ SpringSecurity
 ```
 
 安装以下服务
-+ Naco
++ Nacos
 + Mysql
 + RabbitMQ
 + Minio
