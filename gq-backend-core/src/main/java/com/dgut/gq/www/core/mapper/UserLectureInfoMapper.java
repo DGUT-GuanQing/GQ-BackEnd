@@ -2,7 +2,7 @@ package com.dgut.gq.www.core.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dgut.gq.www.core.model.entity.UserLectureInfo;
+import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

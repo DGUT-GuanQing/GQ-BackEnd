@@ -8,7 +8,7 @@ import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.common.util.ParseToken;
 import com.dgut.gq.www.core.mapper.UserMapper;
-import com.dgut.gq.www.core.model.vo.MyLectureVo;
+import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
 import com.dgut.gq.www.core.service.UserService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -49,9 +49,6 @@ public class UserController {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-
-
-
     /**
      * cas client 默认的session key
      */
@@ -59,7 +56,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
 
     @Autowired
     private UserMapper userMapper;
@@ -75,13 +71,6 @@ public class UserController {
         String token = userService.wxLogin(code);
         return SystemJsonResponse.success(token);
     }
-
-
-
-
-
-
-
 
     /**
      * 获取微信端用户个人信息
@@ -118,7 +107,6 @@ public class UserController {
         return userService.getMyLecture(openid,page,pageSize);
     }
 
-
     /**
      * 是否抢到票
      * @param request
@@ -132,7 +120,6 @@ public class UserController {
         String openid = ParseToken.getOpenid(token);
         return userService.isGrabTicket(openid);
     }
-
 
     /**
      * 中央认证
@@ -177,7 +164,6 @@ public class UserController {
         return SystemJsonResponse.success();
     }
 
-
     /***
      * 获取用户id
      * @param request
@@ -195,8 +181,6 @@ public class UserController {
         String uuid = userMapper.selectOne(lambdaQueryWrapper).getUuid();
         return SystemJsonResponse.success(uuid);
     }
-
-
 
     /**
      * 获取个人二维码
@@ -237,8 +221,6 @@ public class UserController {
         }
     }
 
-
-
     /**
      * 签到
      * @param lectureId
@@ -254,10 +236,6 @@ public class UserController {
     public  SystemJsonResponse signIn(String lectureId,String openid){
           return  userService.signIn(lectureId,openid);
     }
-
-
-
-
 
     /**
      * 是否在黑名单里面

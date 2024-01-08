@@ -6,10 +6,9 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.core.mapper.PosterTweetMapper;
-import com.dgut.gq.www.core.model.dto.LectureDto;
-import com.dgut.gq.www.core.model.dto.PosterTweetDto;
-import com.dgut.gq.www.core.model.entity.PosterTweet;
-import com.dgut.gq.www.core.model.vo.PosterTweetVo;
+import com.dgut.gq.www.core.common.model.dto.PosterTweetDto;
+import com.dgut.gq.www.core.common.model.entity.PosterTweet;
+import com.dgut.gq.www.core.common.model.vo.PosterTweetVo;
 import com.dgut.gq.www.core.service.PosterTweetService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import java.util.Optional;
 
 @Service
 public class PosterTweetServiceImpl implements PosterTweetService {
+
     @Autowired
     private PosterTweetMapper posterTweetMapper;
 
@@ -59,7 +59,6 @@ public class PosterTweetServiceImpl implements PosterTweetService {
         return SystemJsonResponse.success(posterTweetVo);
     }
 
-
     /**
      * 更新或者新增推文
      * @param posterTweetDto
@@ -86,6 +85,5 @@ public class PosterTweetServiceImpl implements PosterTweetService {
         stringRedisTemplate.delete(key + posterTweetDto.getType());
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),state);
     }
-
 
 }

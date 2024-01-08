@@ -1,12 +1,12 @@
 package com.dgut.gq.www.admin.controller;
 
-import com.dgut.gq.www.admin.model.dto.DepartmentDto;
-import com.dgut.gq.www.admin.model.dto.LectureDto;
-import com.dgut.gq.www.admin.model.dto.PositionDto;
-import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
-import com.dgut.gq.www.admin.model.vo.CurriculumVitaeVo;
-import com.dgut.gq.www.admin.model.vo.LectureVo;
-import com.dgut.gq.www.admin.model.vo.UserVo;
+import com.dgut.gq.www.admin.common.model.dto.DepartmentDto;
+import com.dgut.gq.www.admin.common.model.dto.LectureDto;
+import com.dgut.gq.www.admin.common.model.dto.PositionDto;
+import com.dgut.gq.www.admin.common.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.common.model.vo.CurriculumVitaeVo;
+import com.dgut.gq.www.admin.common.model.vo.LectureVo;
+import com.dgut.gq.www.admin.common.model.vo.UserVo;
 import com.dgut.gq.www.admin.service.BackendService;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import io.swagger.annotations.*;
@@ -29,8 +29,6 @@ public class BackendController {
     private BackendService backendService;
 
 
-
-
     /**
      * 后台的登录
      * @param
@@ -44,8 +42,6 @@ public class BackendController {
     public SystemJsonResponse backendLogin(String userName, String password){
         return backendService.login(userName,password);
     }
-
-
 
     /**
      * 后台登出
@@ -83,9 +79,6 @@ public class BackendController {
       return   backendService.getAttendLectureUser(page,pageSize,id,status);
     }
 
-
-
-
     /**
      * 新增或者更新讲座
      * @param lectureDto
@@ -98,9 +91,6 @@ public class BackendController {
         return backendService.updateOrSaveLecture(lectureDto);
     }
 
-
-
-
     /**
      * 新增或者更新推文信息
      * @param
@@ -112,9 +102,6 @@ public class BackendController {
     public  SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto){
        return  backendService.saveUpdatePosterTweet(posterTweetDto);
     }
-
-
-
 
     /**
      * 获取讲座

@@ -34,25 +34,21 @@ import java.util.Objects;
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-
    @Autowired
    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws RuntimeException,ServletException, IOException {
-        //获取token,从请求头中
         String token = request.getHeader("token");
-        //字符串为空
         if (!StringUtils.hasText(token)) {
-            //放行
             filterChain.doFilter(request, response);
             return;
         }
+
         //解析token
         String openid;
         Claims claims = null;
         try {
-            //将token解密
             claims = JwtUtil.parseJWT(token);
         } catch (Exception e) {
             throw  new RuntimeException("token错误");
@@ -72,7 +68,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
         //将信息存入 SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        //放行
+
         filterChain.doFilter(request, response);
     }
 

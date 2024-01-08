@@ -2,8 +2,7 @@ package com.dgut.gq.www.core.service;
 
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.common.common.SystemResultList;
-import com.dgut.gq.www.core.model.dto.LectureDto;
+import com.dgut.gq.www.core.common.model.dto.LectureDto;
 
 /**
  * 讲座

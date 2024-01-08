@@ -17,13 +17,13 @@ import com.dgut.gq.www.common.util.JwtUtil;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.core.mapper.UserMapper;
-import com.dgut.gq.www.core.model.dto.UserDto;
-import com.dgut.gq.www.core.model.entity.Lecture;
-import com.dgut.gq.www.core.model.entity.UserLectureInfo;
-import com.dgut.gq.www.core.model.vo.MyLectureVo;
-import com.dgut.gq.www.core.model.vo.UserVo;
+import com.dgut.gq.www.core.common.model.dto.UserDto;
+import com.dgut.gq.www.core.common.model.entity.Lecture;
+import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
+import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
+import com.dgut.gq.www.core.common.model.vo.UserVo;
 import com.dgut.gq.www.core.service.UserService;
-import com.dgut.gq.www.core.util.HttpUtil;
+import com.dgut.gq.www.core.common.util.HttpUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -58,7 +58,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private HttpUtil httpUtil;
-
 
     /**
      * 微信登录
@@ -117,7 +116,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-
     /**
      * 获取小程序端个人信息
      *
@@ -145,7 +143,6 @@ public class UserServiceImpl implements UserService {
 
         return SystemJsonResponse.success(userVo);
     }
-
 
     /**
      * 获取自己参加过的讲座信息
@@ -193,7 +190,6 @@ public class UserServiceImpl implements UserService {
         return SystemJsonResponse.success(systemResultList);
     }
 
-
     /**
      * 是否抢到票
      * @param openid
@@ -209,7 +205,6 @@ public class UserServiceImpl implements UserService {
         }
         return SystemJsonResponse.success(flag);
     }
-
 
     /**
      * 中央认证登陆
@@ -231,7 +226,6 @@ public class UserServiceImpl implements UserService {
         stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid,openid);
         return SystemJsonResponse.success();
     }
-
 
     /**
      * 签到
@@ -263,7 +257,6 @@ public class UserServiceImpl implements UserService {
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"签到成功");
     }
 
-
     /**
      * 是否在黑名单
      * @param openid
@@ -271,10 +264,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse isBlack(String openid) {
-        Boolean flag = false;
+        boolean flag = false;
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION +openid);
         LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
         String permission;
+
         if(Objects.isNull(loginUser)||Objects.isNull(loginUser.getUser())){
              LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
              lambdaQueryWrapper.eq(User::getOpenid,openid);
@@ -284,9 +278,9 @@ public class UserServiceImpl implements UserService {
             permission = loginUser.getPermission().get(0);
         }
         if(permission.equals("black"))flag = true;
+
         return  SystemJsonResponse.success(flag);
     }
-
 
     @Override
     public User getUserByUsername(String username) {
@@ -294,6 +288,5 @@ public class UserServiceImpl implements UserService {
         lq.eq(User::getUserName,username);
         return userMapper.selectOne(lq);
     }
-
 
 }

@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@EnableFeignClients(basePackages = {"com.dgut.gq.www.admin.feign"})
+@EnableFeignClients(basePackages = {"com.dgut.gq.www.admin.common.feign"})
 @SpringBootApplication(scanBasePackages = {"com.dgut.gq.www"})
 public class GqBackendAdminApplication {
 

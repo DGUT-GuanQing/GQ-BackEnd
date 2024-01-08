@@ -12,6 +12,7 @@ import io.jsonwebtoken.Claims;
  * @version  1.0
  */
 public class ParseToken {
+
     /**
      * 解析传过来的token
      * @param token

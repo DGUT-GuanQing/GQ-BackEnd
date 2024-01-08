@@ -1,15 +1,14 @@
 package com.dgut.gq.www.admin.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.dgut.gq.www.admin.feign.client.LectureClient;
-import com.dgut.gq.www.admin.feign.client.PosterClient;
-import com.dgut.gq.www.admin.feign.client.RecruitClient;
-import com.dgut.gq.www.admin.feign.client.UserClient;
-import com.dgut.gq.www.admin.model.dto.DepartmentDto;
-import com.dgut.gq.www.admin.model.dto.LectureDto;
-import com.dgut.gq.www.admin.model.dto.PositionDto;
-import com.dgut.gq.www.admin.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.common.feign.client.LectureClient;
+import com.dgut.gq.www.admin.common.feign.client.PosterClient;
+import com.dgut.gq.www.admin.common.feign.client.RecruitClient;
+import com.dgut.gq.www.admin.common.feign.client.UserClient;
+import com.dgut.gq.www.admin.common.model.dto.DepartmentDto;
+import com.dgut.gq.www.admin.common.model.dto.LectureDto;
+import com.dgut.gq.www.admin.common.model.dto.PositionDto;
+import com.dgut.gq.www.admin.common.model.dto.PosterTweetDto;
 import com.dgut.gq.www.admin.service.BackendService;
 
 
@@ -47,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class BackendServiceImpl implements BackendService, UserDetailsService {
 
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -57,30 +55,23 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Autowired
     private UserClient userClient;
 
-
     @Autowired
     private LectureClient lectureClient;
-
 
     @Autowired
     private PosterClient posterClient;
 
-
     @Autowired
     private RecruitClient recruitClient;
 
-
-
-
     @Override
     public SystemJsonResponse login(String userName, String password) {
-        //后台管理密码,
+        //后台管理密码
         UsernamePasswordAuthenticationToken authenticationToken=
                 new UsernamePasswordAuthenticationToken(userName,password);
 
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
-        //认证失败
         if(Objects.isNull(authenticate)) {
             throw new GlobalSystemException(
                     GlobalResponseCode.ACCOUNT_NOT_EXIST.getCode(),
@@ -91,15 +82,11 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         String key = RedisGlobalKey.PERMISSION+userName;
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
-
-        //设置超时时间
         stringRedisTemplate.expire(key,10, TimeUnit.DAYS);
+
         String jwt = JwtUtil.createJWT(userName);
         return  SystemJsonResponse.success(jwt);
     }
-
-
-
 
     @Override
     public void logout() {
@@ -130,63 +117,45 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         return posterClient.saveUpdatePosterTweet(posterTweetDto);
     }
 
-
-
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
         return lectureClient.getLecture(page,pageSize,name);
     }
-
-
 
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
         return lectureClient.exportAttendLectureUser(id,status);
     }
 
-
-
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
         return recruitClient.exportCurriculumVitae(departmentId,term);
     }
-
-
 
     @Override
     public SystemJsonResponse deleteLecture(String id) {
         return lectureClient.deleteLecture(id);
     }
 
-
-
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
        return  recruitClient.deleteDepartment(id);
     }
-
-
 
     @Override
     public SystemJsonResponse deletePosition(String id) {
         return recruitClient.deletePosition(id);
     }
 
-
-
     @Override
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
         return recruitClient.saveAndUpdateDep(departmentDto);
     }
 
-
-
     @Override
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
         return recruitClient.saveAndUpdatePos(positionDto);
     }
-
-
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {

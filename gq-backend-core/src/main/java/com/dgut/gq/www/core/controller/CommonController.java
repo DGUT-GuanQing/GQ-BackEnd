@@ -4,7 +4,7 @@ package com.dgut.gq.www.core.controller;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
-import com.dgut.gq.www.core.model.vo.PosterTweetVo;
+import com.dgut.gq.www.core.common.model.vo.PosterTweetVo;
 import com.dgut.gq.www.core.service.PosterTweetService;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;

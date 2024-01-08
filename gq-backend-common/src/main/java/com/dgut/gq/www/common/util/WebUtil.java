@@ -10,8 +10,8 @@ import java.io.IOException;
  * @version  1.0
  *
  */
-public class WebUtil
-{
+public class WebUtil {
+
     /**
      * 将字符串渲染到客户端
      *

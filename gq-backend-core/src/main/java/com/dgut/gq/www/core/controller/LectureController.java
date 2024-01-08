@@ -4,10 +4,10 @@ package com.dgut.gq.www.core.controller;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.util.ParseToken;
-import com.dgut.gq.www.core.annotation.Limit;
-import com.dgut.gq.www.core.model.vo.LectureReviewVo;
-import com.dgut.gq.www.core.model.vo.LectureTrailerVo;
-import com.dgut.gq.www.core.model.vo.LectureVo;
+import com.dgut.gq.www.core.common.annotation.Limit;
+import com.dgut.gq.www.core.common.model.vo.LectureReviewVo;
+import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
+import com.dgut.gq.www.core.common.model.vo.LectureVo;
 import com.dgut.gq.www.core.service.LectureService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,6 @@ public class LectureController {
 
     @Autowired
     private LectureService lectureService;
-
-
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -59,7 +57,6 @@ public class LectureController {
         return lectureService.getLectureReview(page,pageSize,name);
     }
 
-
     /**
      * 获取讲座预告信息
      * @param page
@@ -82,9 +79,6 @@ public class LectureController {
         return lectureService.getLectureTrailer(page,pageSize,name);
     }
 
-
-
-
     /**
      * 获取正在进行的讲座信息
      * @return
@@ -99,9 +93,6 @@ public class LectureController {
     public  SystemJsonResponse unstart(){
         return  lectureService.findUnStartLecture();
     }
-
-
-
 
     /**
      * 抢票
@@ -119,9 +110,6 @@ public class LectureController {
         String openid = ParseToken.getOpenid(token);
         return lectureService.robTicket(openid,id);
     }
-
-
-
 
     /**
      * 判断是否还有票

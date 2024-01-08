@@ -28,12 +28,10 @@ public class RedisGlobalKey {
      */
     public  static  String UNSTART_LECTURE = "gq:lecture:unstart:";
 
-
     /**
      * 锁
      */
     public  static  String LOCK_USER = "gq:user:lock:";
-
 
     /**
      * 票的数量
@@ -49,7 +47,6 @@ public class RedisGlobalKey {
      * 海报类型
      */
     public  static  String POSTER_TWEET =   "gq:common:poster_tweet:";
-
 
     /**
      * 是否抢到票
