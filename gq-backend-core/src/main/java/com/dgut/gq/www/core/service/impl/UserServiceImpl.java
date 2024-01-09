@@ -245,8 +245,6 @@ public class UserServiceImpl implements UserService {
 
         UserLectureInfo lectureInfo = userLectureInfoMapper.selectOne(lambdaQueryWrapper);
         lectureInfo.setStatus(lectureInfo.getStatus() + 1);
-        LambdaQueryWrapper<User> userLambdaQueryWrapper =new LambdaQueryWrapper<>();
-        userLambdaQueryWrapper.eq(User::getOpenid,openid);
         //更新个人观看讲座记录
         LambdaUpdateWrapper<User> updateWrapper = new UpdateWrapper<User>().lambda()
                 .setSql("race_number = race_number + 1")
