@@ -1,0 +1,45 @@
+version: '3'
+services:
+  gq-backend-gateway:
+    container_name: gq-backend-gateway
+    build: # 服务的 Docker 构建文件位置
+      context: ./gq-backend-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    networks:
+      - gqnetwork
+
+  gq-backend-core:
+    container_name: gq-backend-core
+    build:
+      context: ./gq-backend-core
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+    networks:
+      - gqnetwork
+
+  gq-backend-recruit:
+    container_name: gq-backend-recruit
+    build:
+      context: ./gq-backend-recruit
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+    networks:
+      - gqnetwork
+
+  gq-backend-admin:
+    container_name:  gq-backend-admin
+    build:
+      context: ./gq-backend-admin
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    networks:
+      - gqnetwork
+
+# 网络，不定义的话就是默认网络
+networks:
+  gqnetwork:
