@@ -74,7 +74,7 @@ SpringSecurity
 ## 项目开发
 
 ``` shell
-执行git clone https://github.com/DGUT-GuanQing/GQ-BackEnd.git
+git clone https://github.com/DGUT-GuanQing/GQ-BackEnd.git
 ```
 
 安装以下服务
@@ -85,13 +85,20 @@ SpringSecurity
 + Redis
 
 ``` text
-创建对应的配置文件，填写application.yml对应的参数
+创建application-test.properties配置文件，填写对应的参数
 git branch 分支名  
 git checkout 分支  
 连接校园网或者vpn启动项目  
 开发  
-git push 远程名 本地分支名:远程分支名   
+git push  
 提pr
+```
+
+## 部署
+```text
+cd /opt/gq-backend
+将代码上传到此处  
+执行  ./deploy.sh
 ```
 
 ## 分支命名规范
@@ -161,7 +168,8 @@ test:     增加或者修改测试用例
 - [x] 招新模块开发
 - [x] 用户模块开发
 - [x] 文件上传开发
-- [ ] 通过公众号推送消息
+- [ ] 公众号推送消息
+- [ ] 小程序推送消息
 - [ ] 优化后台界面和相关功能
 - [ ] 小程序首页视频功能
 - [ ] 小程序整体ui优化
