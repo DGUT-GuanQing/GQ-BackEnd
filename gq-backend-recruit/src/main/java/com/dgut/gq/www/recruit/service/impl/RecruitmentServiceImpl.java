@@ -197,7 +197,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         List<CurriculumVitaeVo> curriculumVitaeVoList = records.stream().map(record -> {
             User user = queryUser(record.getOpenid());
-            Department department = queryDepartment(departmentId);
+            Department department = queryDepartment(record.getDepartmentId());
             Position position = queryPosition(record.getPositionId());
             return buildCurriculumVitaeVo(record, user, department, position);
         }).collect(Collectors.toList());
@@ -266,7 +266,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         List<CurriculumVitaeVo> curriculumVitaeVoList = curriculumVitaes.stream().map(record -> {
             User user = queryUser(record.getOpenid());
-            Department department = queryDepartment(departmentId);
+            Department department = queryDepartment(record.getDepartmentId());
             Position position = queryPosition(record.getPositionId());
             return buildCurriculumVitaeVo(record, user, department, position);
         }).collect(Collectors.toList());

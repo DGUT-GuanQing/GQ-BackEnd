@@ -125,9 +125,6 @@ public class BackendController {
         return backendService.getLecture(page,pageSize,name);
     }
 
-
-
-
     /**
      * 导出参加讲座的用户
      * @param
@@ -148,8 +145,6 @@ public class BackendController {
     public  SystemJsonResponse exportUser(String id,Integer status){
         return   backendService.exportUser(id,status);
     }
-
-
 
     /**
      * 导出简历
@@ -173,9 +168,6 @@ public class BackendController {
         return backendService.exportCurriculumVitae(departmentId,term);
     }
 
-
-
-
     /**
      * 删除讲座
      * @param id
@@ -188,9 +180,6 @@ public class BackendController {
     public SystemJsonResponse deleteLecture(@PathVariable String id){
         return backendService.deleteLecture(id);
     }
-
-
-
 
     /**
      * 删除部门
@@ -205,8 +194,6 @@ public class BackendController {
         return backendService.deleteDepartment(id);
     }
 
-
-
     /**
      * 删除职位
      * @param id
@@ -220,7 +207,6 @@ public class BackendController {
         return backendService.deletePosition(id);
     }
 
-
     /**
      * 新增或者修改部门
      * @param departmentDto
@@ -232,8 +218,6 @@ public class BackendController {
     public SystemJsonResponse saveAndUpdateDep(@RequestBody DepartmentDto departmentDto){
         return backendService.saveAndUpdateDep(departmentDto);
     }
-
-
 
     /**
      * 新增或者修改职位
