@@ -26,10 +26,14 @@ import org.springframework.core.Ordered;
 @Configuration
 public class CasFilterConfig {
 
+
     /**
      * 需要走cas拦截的地址（/* 所有地址都拦截）
      */
     private  final static String URL_PATTERN="/user/getUserInfo" ;
+
+
+
 
     /**
      * 默认的cas地址，防止通过 配置信息获取不到
