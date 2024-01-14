@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
 
                     //存入redis
                     stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newUserVo));
-                    stringRedisTemplate.expire(key, 360, TimeUnit.DAYS);
+                    stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
 
                     return newUserVo;
                 });

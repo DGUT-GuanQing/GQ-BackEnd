@@ -25,7 +25,7 @@ public interface LectureService {
      * @param openid
      * @return
      */
-    SystemJsonResponse robTicket(String openid,String id);
+    SystemJsonResponse robTicket(String openid,String id) throws InterruptedException;
 
 
     /**

@@ -22,6 +22,7 @@ import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
 import com.dgut.gq.www.core.common.model.vo.LectureVo;
 import com.dgut.gq.www.core.common.model.vo.UserVo;
 import com.dgut.gq.www.core.service.LectureService;
+import net.sf.jsqlparser.statement.select.KSQLWindow;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -32,10 +33,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -113,8 +116,11 @@ public class LectureServiceImpl  implements LectureService {
                 });
 
         // 获取票的数量
-        String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue().get(RedisGlobalKey.TICKET_NUMBER))
-                .orElse("0");
+        String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue()
+                        .get(RedisGlobalKey.TICKET_NUMBER))
+                        .orElse(
+                         String.valueOf(lectureVo.getTicketNumber())
+                        );
         lectureVo.setTicketNumber(Integer.parseInt(ticketNumberStr));
 
         return SystemJsonResponse.success(lectureVo);
@@ -127,7 +133,7 @@ public class LectureServiceImpl  implements LectureService {
      * @return
      */
     @Override
-    public SystemJsonResponse robTicket(String openid,String id) {
+    public SystemJsonResponse robTicket(String openid,String id) throws InterruptedException {
         LectureVo lectureVo;
         //在redis查询
         String key = RedisGlobalKey.UNSTART_LECTURE;
@@ -140,7 +146,7 @@ public class LectureServiceImpl  implements LectureService {
         key = RedisGlobalKey.LOCK_USER + openid;
         //获取锁
         RLock lock = redissonClient.getLock(key);
-        boolean b = lock.tryLock();
+        boolean b = lock.tryLock(5,10, TimeUnit.SECONDS);
         if(!b)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票失败");
         try{
             //执行lua脚本
