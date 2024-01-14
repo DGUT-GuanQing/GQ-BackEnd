@@ -4,7 +4,7 @@ spring:
   application:
     name: ${gq.cloud.application.name}
   profiles:
-    active: test  #dev(开发)   #pro(生产)
+    active: dev
   banner:
     image:
       location: banner.jpg

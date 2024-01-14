@@ -2,4 +2,4 @@ server:
   port: ${gq.server.port}
 spring:
   profiles:
-    active: test
+    active: pro
