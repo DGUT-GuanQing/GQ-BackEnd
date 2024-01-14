@@ -11,9 +11,7 @@ import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.core.common.config.RabbitmqConfig;
-import com.dgut.gq.www.core.common.model.entity.RecordRobTicketError;
 import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
-import com.dgut.gq.www.core.common.util.RecordRobTicketErrorUtil;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
@@ -26,11 +24,9 @@ import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
 import com.dgut.gq.www.core.common.model.vo.LectureVo;
 import com.dgut.gq.www.core.common.model.vo.UserVo;
 import com.dgut.gq.www.core.service.LectureService;
-import net.sf.jsqlparser.statement.select.KSQLWindow;
+import io.minio.messages.JsonOutputSerialization;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +35,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -143,14 +138,15 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse robTicket(String openid,String lectureId) {
-        String key = RedisGlobalKey.UNSTART_LECTURE + openid;
+        if(!openid.equals("oHMec4jGlks68fViyx3pF4disjZ8"))return SystemJsonResponse.fail();
+        String key = RedisGlobalKey.UNSTART_LECTURE ;
         String str = stringRedisTemplate.opsForValue().get(key);
         LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
         if(grabTicketsStart.isAfter(LocalDateTime.now())){
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票时间未到");
         }
 
-        RLock lock = redissonClient.getLock(key);
+        RLock lock = redissonClient.getLock(key + openid);
         boolean b;
         try {
             b = lock.tryLock(5,10, TimeUnit.SECONDS);
@@ -164,11 +160,11 @@ public class LectureServiceImpl  implements LectureService {
             Long execute = stringRedisTemplate.execute(
                     SECKILL_SCRIPT, Collections.emptyList(), lectureId, openid);
 
+            assert execute != null;
             int  re = execute.intValue();
             if(re != 0){
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),re == 1?"票已经抢光":"不能重复抢票");
             }
-
             SendMsg(openid,lectureId);
         }finally {
             lock.unlock();

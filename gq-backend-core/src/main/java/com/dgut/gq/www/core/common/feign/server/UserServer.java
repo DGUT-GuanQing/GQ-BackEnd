@@ -1,8 +1,6 @@
 package com.dgut.gq.www.core.common.feign.server;
 
-import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.model.entity.User;
-import com.dgut.gq.www.core.service.LectureService;
 import com.dgut.gq.www.core.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

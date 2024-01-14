@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -47,13 +49,12 @@ public class RabbitMqListener {
      */
     @RabbitListener(queues = "gq-rob-ticket-queue")
     @Transactional
-    public  void robTicket(Message message, Channel channel) throws Exception {
+    public  void robTicket(Message message, Channel channel)  throws IOException {
         String str =  new String(message.getBody());
         UserLectureInfo userLectureInfo = JSONUtil.toBean(str,UserLectureInfo.class);
         String lectureId = userLectureInfo.getLectureId();
         String openid = userLectureInfo.getOpenid();
         String key = RedisGlobalKey.USER_MESSAGE + openid;
-
         try {
             boolean flag = robMsgIsInDb(userLectureInfo);
             if(!flag) {
@@ -66,24 +67,23 @@ public class RabbitMqListener {
                 lectureMapper.update(null, updateWrapper);
                 stringRedisTemplate.delete(key);
             }
-
             channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
         } catch (Exception e) {
-            //如果异常尝试重新消费,两次过后记录报错
-            String errorKey = RedisGlobalKey.CONSUME_FAIL + openid;
-            str = stringRedisTemplate.opsForValue().get(key);
-            int value = 1;
-            if(str != null) {
-                value = Integer.parseInt(str) + 1;
-            }
-            if(value >= 3){
-                channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
-                RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 2);
-            }else {
-                stringRedisTemplate.opsForValue().set(errorKey, String.valueOf(value));
-                stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), true, true);
-            }
+                //如果异常尝试重新消费,两次过后记录报错
+                String errorKey = RedisGlobalKey.CONSUME_FAIL + openid;
+                str = stringRedisTemplate.opsForValue().get(errorKey);
+                int value = 1;
+                if(str != null) {
+                    value = Integer.parseInt(str) + 1;
+                }
+                if(value >= 3){
+                    RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 2);
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
+                }else {
+                    stringRedisTemplate.opsForValue().set(errorKey, String.valueOf(value));
+                    stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
+                    channel.basicNack(message.getMessageProperties().getDeliveryTag(), true, true);
+                }
         }
     }
 

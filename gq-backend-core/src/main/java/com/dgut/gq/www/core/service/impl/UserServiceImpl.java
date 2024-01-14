@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -67,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String wxLogin(String code) {
         //获取用户的openid
-         String openid = httpUtil.getOpenid(code);
+        String openid = httpUtil.getOpenid(code);
         //String openid = code;
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenid, openid));
         Optional<User> optionalUser=Optional.ofNullable(user);
@@ -156,7 +157,6 @@ public class UserServiceImpl implements UserService {
         //条件
         lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getOpenid,openid)
                                      .orderByDesc(UserLectureInfo::getCreateTime)
-                                     .eq(UserLectureInfo::getIsDeleted,0)
                                      .eq(UserLectureInfo::getIsDeleted,0);
         Integer count = userLectureInfoMapper.selectCount(lectureInfoLambdaQueryWrapper);
         userLectureInfoMapper.selectPage(pageInfo,lectureInfoLambdaQueryWrapper);
