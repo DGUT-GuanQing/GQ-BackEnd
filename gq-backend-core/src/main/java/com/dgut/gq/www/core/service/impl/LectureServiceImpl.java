@@ -138,7 +138,6 @@ public class LectureServiceImpl  implements LectureService {
      */
     @Override
     public SystemJsonResponse robTicket(String openid,String lectureId) {
-        if(!openid.equals("oHMec4jGlks68fViyx3pF4disjZ8"))return SystemJsonResponse.fail();
         String key = RedisGlobalKey.UNSTART_LECTURE ;
         String str = stringRedisTemplate.opsForValue().get(key);
         LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
