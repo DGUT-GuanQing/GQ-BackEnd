@@ -1,12 +1,26 @@
 package com.dgut.gq.www.core.common.config;
 
+import cn.hutool.json.JSONUtil;
+import com.dgut.gq.www.common.common.RedisGlobalKey;
+import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
+import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
+import com.dgut.gq.www.core.common.util.RecordRobTicketErrorUtil;
+import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 /**
- * rabbit的配置类  绑定队列和交换机
+ * rabbit的配置类
  * @author hyj
  * @since  2022-12-15
  */
@@ -23,25 +37,11 @@ public class RabbitmqConfig {
      */
     public  static  final String GQ_ROB_TICKET_QUEUE = "gq-rob-ticket-queue";
 
-    /**
-     * 扫码签到交换机
-     */
-    public  static  final String GQ_SCAN_CHECKIN_EXCHANGE = "gq-scan-checkin-exchange";
+    @Autowired
+    private RecordRobTicketErrorMapper recordRobTicketErrorMapper;
 
-    /**
-     * 扫码签到队列
-     */
-    public  static  final String GQ_SCAN_CHECKIN_QUEUE = "gq-scan-checkin-queue";
-
-    /**
-     * 扫码签退交换机
-     */
-    public  static  final String GQ_SCAN_CHECKOUT_EXCHANGE = "gq-scan-checkout-exchange";
-
-    /**
-     * 扫码签退队列
-     */
-    public  static  final String GQ_SCAN_CHECKOUT_QUEUE = "gq-scan-checkout-queue";
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 抢票交换机
@@ -68,4 +68,62 @@ public class RabbitmqConfig {
        return BindingBuilder.bind(queue).to(exchange).with("gqyyds").noargs();
     }
 
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+
+        // 消息确认回调
+        rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+            /**
+             * MQ确认回调方法
+             * @param correlationData 消息的唯一标识
+             * @param ack 消息是否成功收到
+             * @param cause 失败原因
+             */
+            @Override
+            public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+                if (!ack) {
+                    String openid;
+                    String lectureId;
+                    if (correlationData instanceof CustomCorrelationData) {
+                        CustomCorrelationData customData = (CustomCorrelationData) correlationData;
+                        openid = customData.getOpenid();
+                        lectureId = customData.getLectureId();
+                        String key = RedisGlobalKey.SEND_EXCHANGE_FAIL + openid;
+                        String str = stringRedisTemplate.opsForValue().get(key);
+
+                        //如果异常尝试重新投递消息,两次过后记录报错
+                        int value = 1;
+                        if(str != null) {
+                            value = Integer.parseInt(str) + 1;
+                        }
+                        if(value >= 3){
+                            RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper,openid,lectureId,0);
+                        }else {
+                            stringRedisTemplate.opsForValue().set(key, String.valueOf(value));
+                            stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
+                            RetrySendMsg(rabbitTemplate, openid, lectureId);
+                        }
+                    }
+                }
+            }
+        });
+
+        return rabbitTemplate;
+    }
+
+    private void RetrySendMsg(RabbitTemplate rabbitTemplate, String openid, String lectureId) {
+        UserLectureInfo userLectureInfo = buildUserLectureInfo(openid,lectureId);
+        CustomCorrelationData correlationData = new CustomCorrelationData(openid, lectureId);
+
+        rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE,"gqyyds", JSONUtil.toJsonStr(userLectureInfo),correlationData);
+    }
+    private UserLectureInfo buildUserLectureInfo(String openid, String lectureId) {
+        UserLectureInfo userLectureInfo = new UserLectureInfo();
+        userLectureInfo.setUpdateTime(LocalDateTime.now());
+        userLectureInfo.setCreateTime(LocalDateTime.now());
+        userLectureInfo.setLectureId(lectureId);
+        userLectureInfo.setOpenid(openid);
+        return  userLectureInfo;
+    }
 }

@@ -6,22 +6,19 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
-import com.dgut.gq.www.core.common.model.entity.RecordRobTicketError;
+import com.dgut.gq.www.core.common.util.RecordRobTicketErrorUtil;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.core.common.model.entity.Lecture;
 import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
 import com.rabbitmq.client.Channel;
-import org.bouncycastle.cms.PasswordRecipient;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 
@@ -81,32 +78,13 @@ public class RabbitMqListener {
             }
             if(value >= 3){
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
-                RecordErrorMsg(lectureId,openid);
+                RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 2);
             }else {
                 stringRedisTemplate.opsForValue().set(errorKey, String.valueOf(value));
                 stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
                 channel.basicNack(message.getMessageProperties().getDeliveryTag(), true, true);
             }
         }
-    }
-
-    //报错消费错误记录
-    private void RecordErrorMsg(String lectureId, String openid) {
-        //已经保存了就不要重复记录了
-        LambdaQueryWrapper<RecordRobTicketError> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper
-                .eq(RecordRobTicketError::getOpenid,openid)
-                .eq(RecordRobTicketError::getLectureId,lectureId);
-        Integer count = recordRobTicketErrorMapper.selectCount(lambdaQueryWrapper);
-        if(count > 0)return;
-
-        RecordRobTicketError recordRobTicketError = new RecordRobTicketError();
-        recordRobTicketError.setCreateTime(LocalDateTime.now());
-        recordRobTicketError.setUpdateTime(LocalDateTime.now());
-        recordRobTicketError.setOpenid(openid);
-        recordRobTicketError.setLectureId(lectureId);
-        recordRobTicketError.setType(2);
-        recordRobTicketErrorMapper.insert(recordRobTicketError);
     }
 
     private boolean robMsgIsInDb(UserLectureInfo userLectureInfo) {

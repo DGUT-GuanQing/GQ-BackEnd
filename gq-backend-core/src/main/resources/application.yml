@@ -49,6 +49,10 @@ spring:
 
   #消息队列配置
   rabbitmq:
+    publisher-confirm-type: correlated  # 开启发送方确认机制
+    publisher-returns: true   # 开启消息返回
+    template:
+      mandatory: true
     host: ${gq.rabbitmq.host}
     port: ${gq.rabbitmq.port}
     username: ${gq.rabbitmq.username}
