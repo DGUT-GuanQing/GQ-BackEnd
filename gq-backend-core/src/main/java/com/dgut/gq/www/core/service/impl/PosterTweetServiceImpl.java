@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PosterTweetServiceImpl implements PosterTweetService {
@@ -52,6 +53,7 @@ public class PosterTweetServiceImpl implements PosterTweetService {
                     //存入redis
                     BeanUtils.copyProperties(posterTweet, newPosterTweetVo);
                     stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newPosterTweetVo));
+                    stringRedisTemplate.expire(key,1, TimeUnit.DAYS);
 
                     return newPosterTweetVo;
                 });

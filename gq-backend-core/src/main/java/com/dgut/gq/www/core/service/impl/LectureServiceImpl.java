@@ -11,7 +11,9 @@ import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.core.common.config.RabbitmqConfig;
+import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
 import com.dgut.gq.www.core.mapper.LectureMapper;
+import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.common.model.dto.LectureDto;
@@ -22,6 +24,7 @@ import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
 import com.dgut.gq.www.core.common.model.vo.LectureVo;
 import com.dgut.gq.www.core.common.model.vo.UserVo;
 import com.dgut.gq.www.core.service.LectureService;
+import io.minio.messages.JsonOutputSerialization;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -36,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +68,9 @@ public class LectureServiceImpl  implements LectureService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private RecordRobTicketErrorMapper recordRobTicketErrorMapper;
 
     /**
      * 加载lua脚本代码
@@ -113,8 +120,11 @@ public class LectureServiceImpl  implements LectureService {
                 });
 
         // 获取票的数量
-        String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue().get(RedisGlobalKey.TICKET_NUMBER))
-                .orElse("0");
+        String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue()
+                        .get(RedisGlobalKey.TICKET_NUMBER))
+                        .orElse(
+                         String.valueOf(lectureVo.getTicketNumber())
+                        );
         lectureVo.setTicketNumber(Integer.parseInt(ticketNumberStr));
 
         return SystemJsonResponse.success(lectureVo);
@@ -127,47 +137,55 @@ public class LectureServiceImpl  implements LectureService {
      * @return
      */
     @Override
-    public SystemJsonResponse robTicket(String openid,String id) {
-        LectureVo lectureVo;
-        //在redis查询
-        String key = RedisGlobalKey.UNSTART_LECTURE;
+    public SystemJsonResponse robTicket(String openid,String lectureId) {
+        String key = RedisGlobalKey.UNSTART_LECTURE ;
         String str = stringRedisTemplate.opsForValue().get(key);
-        lectureVo = JSONUtil.toBean(str,LectureVo.class);
-        if(lectureVo.getGrabTicketsStart().isAfter(LocalDateTime.now())){
-            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票时间未到，已经被拉入黑名单");
+        LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
+        if(grabTicketsStart.isAfter(LocalDateTime.now())){
+            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票时间未到");
         }
 
-        key = RedisGlobalKey.LOCK_USER + openid;
-        //获取锁
-        RLock lock = redissonClient.getLock(key);
-        boolean b = lock.tryLock();
-        if(!b)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票失败");
+        RLock lock = redissonClient.getLock(key + openid);
+        boolean b;
+        try {
+            b = lock.tryLock(5,10, TimeUnit.SECONDS);
+            if(!b)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票失败");
+        } catch (InterruptedException e) {
+            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"抢票失败");
+        }
+
         try{
             //执行lua脚本
             Long execute = stringRedisTemplate.execute(
-                    SECKILL_SCRIPT, Collections.emptyList(), id, openid);
+                    SECKILL_SCRIPT, Collections.emptyList(), lectureId, openid);
 
+            assert execute != null;
             int  re = execute.intValue();
-            //判断是否为0
-            //不为0没有抢票资格资格
             if(re != 0){
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),re == 1?"票已经抢光":"不能重复抢票");
             }
-            //生成讲座用户信息
-            UserLectureInfo lectureInfo =new UserLectureInfo();
-            lectureInfo.setUpdateTime(LocalDateTime.now());
-            lectureInfo.setCreateTime(LocalDateTime.now());
-            lectureInfo.setLectureId(id);
-            lectureInfo.setOpenid(openid);
-
-            str = JSONUtil.toJsonStr(lectureInfo);
-            rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE,"gqyyds",str);
+            SendMsg(openid,lectureId);
         }finally {
             lock.unlock();
         }
 
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),"抢票成功");
+    }
 
+    private void SendMsg(String openid, String lectureId) {
+        UserLectureInfo userLectureInfo = buildUserLectureInfo(openid,lectureId);
+        CustomCorrelationData correlationData = new CustomCorrelationData(openid, lectureId);
+
+        rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE,"gqyyds", JSONUtil.toJsonStr(userLectureInfo),correlationData);
+    }
+
+    private UserLectureInfo buildUserLectureInfo(String openid, String lectureId) {
+        UserLectureInfo userLectureInfo = new UserLectureInfo();
+        userLectureInfo.setUpdateTime(LocalDateTime.now());
+        userLectureInfo.setCreateTime(LocalDateTime.now());
+        userLectureInfo.setLectureId(lectureId);
+        userLectureInfo.setOpenid(openid);
+        return  userLectureInfo;
     }
 
     /**

@@ -44,28 +44,28 @@ create table  gq_user_info(
 )comment '用户表';
 
 create  table gq_user_lecture_info(
-                                      id varchar(255) primary key not null  comment '主键id',
-                                      lecture_id varchar(255) not null  comment '对应的讲座的主键',
-                                      openid varchar(100) not null   comment '对应用户的openid',
-                                      status tinyint(1) default  0 comment '是否观看讲座 0-抢到票 1-只签 2-只签退  3-签到和签退' ,
+                                      id varchar(255) primary key not null  comment '主键id',,
                                       create_time datetime not null comment '创建时间',
                                       update_time datetime not null  null comment  '更新用户登录时间',
                                       is_deleted tinyint(1) default 0 comment '删除为1,否则为0',
+                                      lecture_id varchar(255) not null  comment '对应的讲座的主键',
+                                      openid varchar(100) not null   comment '用户的openid',
+                                      status tinyint(1) default  0 comment '是否观看讲座 0-抢到票 大于1签到，暂时没有签退',
                                       index (openid),index (lecture_id),
                                       index (lecture_id,openid)
 )comment '讲座用户信息关联表';
 
 create table gq_poster_tweet_info(
                                      id varchar(256) primary key not null  comment '主键',
+                                     create_time datetime not null comment '创建时间',
+                                     update_time datetime not null comment  '更新时间',
+                                     version  int default  0 comment '乐观锁',
+                                     delete_time datetime default null comment '删除时间',
+                                     is_deleted tinyint(1) default 0 comment '删除为1,否则为0',
                                      title varchar(20) default null comment '标题',
                                      image varchar(100) not null  comment '图片地址',
                                      official_account_url varchar(100) not null comment '微信公众号地址',
-                                     type int not null comment '0-资讯类型 1-招新',
-                                     create_time datetime not null comment '创建时间',
-                                     update_time datetime not null comment  '更新时间',
-                                     delete_time datetime default null comment '删除时间',
-                                     is_deleted tinyint(1) default 0 comment '删除为1,否则为0',
-                                     version  int default  0 comment '乐观锁'
+                                     type int not null comment '0-资讯类型 1-招新'
 )comment '海报推文';
 
 create table  gq_curriculum_vitae_info(
@@ -94,7 +94,7 @@ create  table  gq_department_info(
                                      is_deleted tinyint(1) default 0 comment '删除为1,否则为0',
                                      version int  default  0 comment '版本号',
                                      department_name varchar(30) not null comment '组名'
-)comment '各组表';
+)comment '部门表';
 
 create  table gq_position_info(
                                   id varchar(256) primary key not null comment '主键',
@@ -106,6 +106,20 @@ create  table gq_position_info(
                                   position_name varchar(30) not null comment '职位名',
                                   department_id varchar(256) not null comment '组id'
 )comment '职位表';
+
+create table gq_record_rob_ticket_error_info(
+                                                id varchar(256) primary key not null comment '主键',
+                                                create_time datetime not null comment '创建时间',
+                                                update_time datetime not null comment  '更新时间',
+                                                delete_time datetime default null comment '删除时间',
+                                                is_deleted tinyint(1) default 0 comment '删除为1,否则为0',
+                                                version int default 0 comment '版本号',
+                                                openid varchar(256) not null comment '用户openid',
+                                                lecture_id varchar(256) not null comment '讲座id',
+                                                type tinyint(1) not null comment '失败原因 0-发送失败  1-存储到mq失败  2-消费失败',
+                                                index (lecture_id,type),
+                                                index (type)
+)comment '记录抢票异常信息';
 
 create  table  gq_ticket_user_info(
                                       id varchar(256) primary key  not null  comment '主键',

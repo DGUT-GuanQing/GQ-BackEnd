@@ -1,22 +1,22 @@
-package com.dgut.gq.www.admin.common.model.entity;
+package com.dgut.gq.www.core.common.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 
-/**
- * 职位实体类
- */
 @Data
-@TableName("gq_position_info")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Position {
+@TableName("gq_record_rob_ticket_error_info")
+public class RecordRobTicketError {
+    /**
+     * 主键
+     */
     @TableId
     private String id;
 
@@ -28,15 +28,18 @@ public class Position {
 
     private Integer isDeleted;
 
-    private int version;
+    @Version
+    private Integer version;
+
+    private String openid;
+
+    private String lectureId;
 
     /**
-     * 职位名
+     * 0-发送交换机失败
+     * 1-交换机路由到队列失败
+     * 2-消费消息失败
      */
-    private String positionName;
+    private Integer type;
 
-    /**
-     * 部门id
-     */
-    private  String departmentId;
 }

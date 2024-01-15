@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("gq_lecture_info")
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Lecture {
 
     /**
@@ -27,34 +27,21 @@ public class Lecture {
     @TableId
     private String id;
 
-
     private LocalDateTime createTime;
-
-
 
     private LocalDateTime updateTime;
 
-
-
     private LocalDateTime deleteTime;
-
-
 
     private Integer isDeleted;
 
-
-
     @Version
     private  Integer version;
-
-
 
     /**
      * 第几期
      */
     private Integer term;
-
-
 
     /**
      * 讲座名称
@@ -72,9 +59,6 @@ public class Lecture {
      */
     private  String  image;
 
-
-
-
     /**
      * 嘉宾名称
      */
@@ -84,7 +68,6 @@ public class Lecture {
      * 讲座地点
      */
     private  String place;
-
 
     /**
      * 讲座开始时间
@@ -96,12 +79,10 @@ public class Lecture {
      */
     private LocalDateTime endTime;
 
-
     /**
      * 抢票开始时间
      */
     private  LocalDateTime  grabTicketsStart;
-
 
     /**
      * 抢票结束时间
@@ -128,7 +109,6 @@ public class Lecture {
      * 讲座回顾路径
      */
     private  String reviewUrl ;
-
 
     /**
      * 讲座回顾地址

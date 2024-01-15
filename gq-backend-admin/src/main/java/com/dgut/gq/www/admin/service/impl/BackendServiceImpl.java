@@ -82,7 +82,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         String key = RedisGlobalKey.PERMISSION+userName;
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
-        stringRedisTemplate.expire(key,10, TimeUnit.DAYS);
+        stringRedisTemplate.expire(key,1, TimeUnit.DAYS);
 
         String jwt = JwtUtil.createJWT(userName);
         return  SystemJsonResponse.success(jwt);
