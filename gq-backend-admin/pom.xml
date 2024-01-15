@@ -21,7 +21,6 @@
             <groupId>com.dgut.gq.www.common</groupId>
             <artifactId>gq-backend-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
         </dependency>
         <!--服务发现中心-->
         <dependency>
