@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @TableName("gq_poster_tweet_info")
 public class PosterTweet {
     /**

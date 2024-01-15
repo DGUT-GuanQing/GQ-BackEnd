@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @TableName("gq_record_rob_ticket_error_info")
 public class RecordRobTicketError {
     /**

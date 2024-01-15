@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("gq_lecture_info")
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Lecture {
 
     /**
