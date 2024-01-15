@@ -9,4 +9,4 @@ ADD target/gq-backend-admin-0.0.1-SNAPSHOT.jar .
 # 暴露端口
 EXPOSE 8088
 # 启动命令
-ENTRYPOINT ["java","-jar","/app/gq-backend-admin-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","/app/gq-backen1d-admin-0.0.1-SNAPSHOT.jar"]
