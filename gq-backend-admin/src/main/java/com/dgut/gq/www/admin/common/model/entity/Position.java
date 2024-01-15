@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
  * 职位实体类
  */
 @Data
-@ToString
 @TableName("gq_position_info")
 @NoArgsConstructor
 @AllArgsConstructor
