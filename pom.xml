@@ -21,6 +21,7 @@
         <module>gq-backend-recruit</module>
         <module>gq-backend-admin</module>
         <module>gq-backend-common</module>
+        <module>gq-backend-notification</module>
     </modules>
 
     <properties>
