@@ -3,7 +3,7 @@
 # 停止和删除容器
 docker-compose down
 
-mvn clean package -DskipTests
+mvn clean install package -DskipTests
 
 # 构建并启动容器
 docker-compose build --no-cache
