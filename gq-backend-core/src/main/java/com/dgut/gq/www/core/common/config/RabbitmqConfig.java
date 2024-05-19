@@ -1,23 +1,12 @@
 package com.dgut.gq.www.core.common.config;
 
-import cn.hutool.json.JSONUtil;
-import com.dgut.gq.www.common.common.RedisGlobalKey;
-import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
-import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
-import com.dgut.gq.www.core.common.util.RecordRobTicketErrorUtil;
 import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
-import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 /**
  * rabbit的配置类
@@ -68,18 +57,18 @@ public class RabbitmqConfig {
        return BindingBuilder.bind(queue).to(exchange).with("gqyyds").noargs();
     }
 
-    @Bean
+    /*@Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
 
         // 消息确认回调
         rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
-            /**
+            *//**
              * MQ确认回调方法
              * @param correlationData 消息的唯一标识
              * @param ack 消息是否成功收到
              * @param cause 失败原因
-             */
+             *//*
             @Override
             public void confirm(CorrelationData correlationData, boolean ack, String cause) {
                 if (!ack) {
@@ -111,8 +100,8 @@ public class RabbitmqConfig {
 
         return rabbitTemplate;
     }
-
-    private void RetrySendMsg(RabbitTemplate rabbitTemplate, String openid, String lectureId) {
+*/
+    /*private void RetrySendMsg(RabbitTemplate rabbitTemplate, String openid, String lectureId) {
         UserLectureInfo userLectureInfo = buildUserLectureInfo(openid,lectureId);
         CustomCorrelationData correlationData = new CustomCorrelationData(openid, lectureId);
 
@@ -125,5 +114,5 @@ public class RabbitmqConfig {
         userLectureInfo.setLectureId(lectureId);
         userLectureInfo.setOpenid(openid);
         return  userLectureInfo;
-    }
+    }*/
 }
