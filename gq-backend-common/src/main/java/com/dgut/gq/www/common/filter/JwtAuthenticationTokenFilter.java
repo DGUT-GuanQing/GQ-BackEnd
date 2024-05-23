@@ -51,7 +51,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         try {
             claims = JwtUtil.parseJWT(token);
         } catch (Exception e) {
-            throw  new RuntimeException("token错误");
+            return;
         }
         openid = claims.getSubject();
 
@@ -59,7 +59,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION +openid);
         LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
         if(Objects.isNull(loginUser)||Objects.isNull(loginUser.getUser())){
-            throw  new RuntimeException("token错误");
+            return;
         }
 
         //获取权限信息封装到Authentication中
