@@ -27,11 +27,11 @@ public class SwaggerConfig implements WebMvcConfigurer{
 
         @Bean
         public Docket docket(Environment environment) {
-            Profiles profiles = Profiles.of("pro");
-            boolean flag = environment.acceptsProfiles(profiles);
+            Profiles profiles = Profiles.of("pro" , "test");//设置要显示的swagger环境
+            boolean flag = environment.acceptsProfiles(profiles);   //生产、测试环境返回true
             return new Docket(DocumentationType.SWAGGER_2)
                     .apiInfo(apiInfo())
-                    .enable(!flag)
+                    .enable(flag)
                     .select()
                     .apis(RequestHandlerSelectors.basePackage("com.dgut.gq.www.admin"))
                     .paths(PathSelectors.any())

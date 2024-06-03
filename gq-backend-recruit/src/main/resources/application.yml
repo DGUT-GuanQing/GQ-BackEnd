@@ -5,6 +5,9 @@ spring:
     name: ${gq.cloud.application.name}
   profiles:
     active: pro  #dev(开发)   #pro(生产)
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   banner:
     image:
       location: banner.jpg
