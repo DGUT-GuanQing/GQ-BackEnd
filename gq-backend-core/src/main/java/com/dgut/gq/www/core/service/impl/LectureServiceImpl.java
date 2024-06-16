@@ -11,11 +11,6 @@ import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.core.common.config.RabbitmqConfig;
-import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
-import com.dgut.gq.www.core.mapper.LectureMapper;
-import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
-import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
-import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.common.model.dto.LectureDto;
 import com.dgut.gq.www.core.common.model.entity.Lecture;
 import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
@@ -23,10 +18,17 @@ import com.dgut.gq.www.core.common.model.vo.LectureReviewVo;
 import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
 import com.dgut.gq.www.core.common.model.vo.LectureVo;
 import com.dgut.gq.www.core.common.model.vo.UserVo;
+import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
+import com.dgut.gq.www.core.common.util.RecordRobTicketErrorUtil;
+import com.dgut.gq.www.core.mapper.LectureMapper;
+import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
+import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
+import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.service.LectureService;
-import io.minio.messages.JsonOutputSerialization;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -49,6 +52,7 @@ import java.util.stream.Collectors;
  * @since  2022-9-16
  */
 @Service
+@Slf4j
 public class LectureServiceImpl  implements LectureService {
 
     @Autowired
@@ -173,10 +177,48 @@ public class LectureServiceImpl  implements LectureService {
     }
 
     private void SendMsg(String openid, String lectureId) {
-        UserLectureInfo userLectureInfo = buildUserLectureInfo(openid,lectureId);
+        UserLectureInfo userLectureInfo = buildUserLectureInfo(openid, lectureId);
         CustomCorrelationData correlationData = new CustomCorrelationData(openid, lectureId);
+        correlationData.getFuture().addCallback(new ListenableFutureCallback<CorrelationData.Confirm>() {
+            @Override
+            //springamqp内部处理future的异常（很少出现），不是投递失败
+            public void onFailure(Throwable throwable) {
+                log.error("发送消息失败！！", throwable);
+            }
 
-        rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE,"gqyyds", JSONUtil.toJsonStr(userLectureInfo),correlationData);
+            @Override
+            public void onSuccess(CorrelationData.Confirm result) {
+                //Future接收到回执的处理逻辑，参数中的result就是回执内容
+                if (result.isAck()) {
+                    log.debug("发送消息成功，收到 ack");
+                } else { // result.getReason()，String类型，返回nack时的异常描述
+                    log.error("发送消息失败，收到 nack, reason : {}", result.getReason());
+                    String openid;
+                    String lectureId;
+                    openid = correlationData.getOpenid();
+                    lectureId = correlationData.getLectureId();
+                    String key = RedisGlobalKey.SEND_EXCHANGE_FAIL + openid;
+                    String str = stringRedisTemplate.opsForValue().get(key);
+                    int value = 0;
+                    if(str != null){
+                        value = Integer.parseInt(str);
+                    }
+                    if(value == 1){
+                        //记录错误日志
+                        RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 0);
+                    }else{
+                        stringRedisTemplate.opsForValue().set(key, String.valueOf(value + 1));
+                        stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
+                        //重发消息
+                        rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE, "gqyyds",
+                                JSONUtil.toJsonStr(userLectureInfo), correlationData);
+                    }
+                }
+            }
+        });
+        // 发送消息
+        rabbitTemplate.convertAndSend(RabbitmqConfig.GQ_ROB_TICKET_EXCHANGE, "gqyyds",
+                JSONUtil.toJsonStr(userLectureInfo), correlationData);
     }
 
     private UserLectureInfo buildUserLectureInfo(String openid, String lectureId) {
