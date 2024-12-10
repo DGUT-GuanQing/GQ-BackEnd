@@ -9,23 +9,23 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Feign招新模块客户端
  */
-@FeignClient(name = "gq-backend-recruit",contextId = "recruit")
+@FeignClient(name = "gq-backend-recruit", contextId = "recruit")
 public interface RecruitClient {
-
 
 
     /**
      * 远程调用导出简历
-     * @param
+     *
+     * @param departmentId
      * @return
      */
     @GetMapping("/feign-recruit/exportCurriculumVitae")
     SystemJsonResponse exportCurriculumVitae(@RequestParam String departmentId, @RequestParam Integer term);
 
 
-
     /**
      * 删除部门远程调用
+     *
      * @param id
      * @return
      */
@@ -33,9 +33,9 @@ public interface RecruitClient {
     SystemJsonResponse deleteDepartment(@PathVariable String id);
 
 
-
     /**
      * 删除职位远程调用
+     *
      * @param id
      * @return
      */
@@ -45,6 +45,7 @@ public interface RecruitClient {
 
     /**
      * 新增或者修改部门远程调用
+     *
      * @param departmentDto
      * @return
      */
@@ -52,9 +53,9 @@ public interface RecruitClient {
     SystemJsonResponse saveAndUpdateDep(@RequestBody DepartmentDto departmentDto);
 
 
-
     /**
      * 新增或者修改职位远程调用
+     *
      * @param positionDto
      * @return
      */

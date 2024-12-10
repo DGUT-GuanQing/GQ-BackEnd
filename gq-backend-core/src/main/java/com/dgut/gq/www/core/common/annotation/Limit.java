@@ -20,7 +20,7 @@ public @interface Limit {
     /**
      * 最多的访问限制次数
      */
-    double permitsPerSecond() ;
+    double permitsPerSecond();
 
     /**
      * 获取令牌最大等待时间

@@ -8,21 +8,22 @@ import org.springframework.stereotype.Component;
 
 /**
  * 定义全局异常类
- * @author  hyj
- * @since  2022-10-11
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-11
  */
 @Data
 @NoArgsConstructor
 
-public class GlobalSystemException extends  RuntimeException{
+public class GlobalSystemException extends RuntimeException {
 
-    public int  code;
-    public  String msg;
+    public int code;
+    public String msg;
 
-  public  GlobalSystemException(int  code,String msg){
-      this.code=code;
-      this.msg=msg;
-  }
+    public GlobalSystemException(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
 
 }

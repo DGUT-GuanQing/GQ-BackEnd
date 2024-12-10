@@ -10,12 +10,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/***
+/**
  * UsersDetails实现类
  * 权限校验和登入认证
+ *
+ * @author hyj
  * @version 1.0
- * @author  hyj
- * @since  2022-10-7
+ * @since 2022-10-7
  */
 @Data
 @NoArgsConstructor
@@ -25,9 +26,9 @@ public class LoginUser implements UserDetails {
      */
     private User user;
     /**
-      返回权限集合
+     * 返回权限集合
      */
-    private List<String>permission;
+    private List<String> permission;
 
     public LoginUser(User user, List<String> permission) {
         this.user = user;
@@ -35,19 +36,22 @@ public class LoginUser implements UserDetails {
     }
 
     public LoginUser(User user) {
-        this.user=user;
+        this.user = user;
     }
 
     /**
-     *封装权限信息
+     * 封装权限信息
+     *
      * @return 权限
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         //把permission中的string类型权限封装成SimpleGrantedAuthority
-        List<GrantedAuthority>list=new ArrayList<>();
-        if(permission==null)return list;
-        for(String s:permission){
+        List<GrantedAuthority> list = new ArrayList<>();
+        if (permission == null) {
+            return list;
+        }
+        for (String s : permission) {
             SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(s);
             list.add(simpleGrantedAuthority);
         }
@@ -63,8 +67,8 @@ public class LoginUser implements UserDetails {
     public String getUsername() {
         return user.getUserName();
     }
+
     /**
-     *
      * @return 是否没过期
      */
     @Override
@@ -83,8 +87,7 @@ public class LoginUser implements UserDetails {
     }
 
     /**
-     *
-     * @return是否可用
+     * @return boolean
      */
     @Override
     public boolean isEnabled() {

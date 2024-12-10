@@ -19,9 +19,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * 配置安全框架
  * 包括权限和认证
+ *
+ * @author hyj
+ * @version 1.0
  * @since 2022-9-26
- * @author  hyj
- * @version  1.0
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)//权限注解
@@ -35,13 +36,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * 将BCryptPasswordEncoder注入容器
      */
     @Bean
-    public PasswordEncoder bCryptPasswordEncoder(){
+    @SuppressWarnings("all")
+    public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     /**
-     *传入密码和账户的bean
-     * @return
+     * 传入密码和账户的bean
+     *
+     * @return AuthenticationManager
      * @throws Exception
      */
     @Bean
@@ -77,7 +80,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 对于登录接口 允许匿名访问
                 .antMatchers("/user/wxLogin/{code}").anonymous()
                 .antMatchers("/25fVBQwXXS.txt").permitAll()
-                .antMatchers( "/feign-user/**").permitAll()
+                .antMatchers("/feign-user/**").permitAll()
                 .antMatchers("/feign-lecture/**").permitAll()
                 .antMatchers("/feign-poster/**").permitAll()
                 //讲座全部信息所有人都可以访问
@@ -89,14 +92,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/v2/**", "/swagger-ui.html/**").permitAll()
                 .antMatchers("/common/**").permitAll()
                 //静态资源
-                .antMatchers("/*.svg","/*.png","/*.js","/*.css","/*.html").permitAll()
+                .antMatchers("/*.svg", "/*.png", "/*.js", "/*.css", "/*.html").permitAll()
                 //正在进行的讲座所有人都可以访问
                 //.antMatchers("/lecture/unStartLecture").permitAll()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
 
         //将过滤器配置加入security框架,请求时候验证有没有登录
-        http.addFilterBefore(authenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         //配置异常处理器
         http.exceptionHandling()

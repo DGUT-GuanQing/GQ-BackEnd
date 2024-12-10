@@ -9,12 +9,14 @@ import com.dgut.gq.www.recruit.common.model.dto.PositionDto;
 
 /**
  * 简历
- * @author  hyj
+ *
+ * @author hyj
  */
 public interface RecruitmentService {
 
     /**
      * 上传或者修改简历
+     *
      * @param openid
      * @param curriculumVitaeDto
      * @return
@@ -23,6 +25,7 @@ public interface RecruitmentService {
 
     /**
      * 获取我的简历
+     *
      * @param openid
      * @return
      */
@@ -30,18 +33,21 @@ public interface RecruitmentService {
 
     /**
      * 获取全部简历
+     *
      * @return
      */
-    SystemJsonResponse getAllCurriculumVitae(int page, int pageSize,String departmentId,Integer term);
+    SystemJsonResponse getAllCurriculumVitae(int page, int pageSize, String departmentId, Integer term);
 
     /**
      * 获取部门
+     *
      * @return
      */
     SystemJsonResponse getDepartment();
 
     /**
      * 获取职位
+     *
      * @param departmentId
      * @return
      */
@@ -49,6 +55,7 @@ public interface RecruitmentService {
 
     /**
      * 导出简历
+     *
      * @param departmentId
      * @param term
      */
@@ -56,6 +63,7 @@ public interface RecruitmentService {
 
     /**
      * 删除部门
+     *
      * @param id
      * @return
      */
@@ -63,6 +71,7 @@ public interface RecruitmentService {
 
     /**
      * 删除职位
+     *
      * @param id
      * @return
      */
@@ -70,6 +79,7 @@ public interface RecruitmentService {
 
     /**
      * 新增或者更新部门
+     *
      * @param departmentDto
      * @return
      */
@@ -77,6 +87,7 @@ public interface RecruitmentService {
 
     /**
      * 新增或者更新职位
+     *
      * @param positionDto
      * @return
      */

@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 
 /**
  * 接受前端传来的用户信息
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
  * @since 2022-10-25
- * @author  hyj
  */
 @Data
 @ApiModel(description = "接受用户信息的实现类")
@@ -23,27 +24,27 @@ public class UserDto {
             allowEmptyValue = false,
             required = true
     )
-    private  String name;
+    private String name;
 
     @ApiModelProperty(value = "学院",
             name = "department",
             allowEmptyValue = false,
             required = true
     )
-    private  String college;
+    private String college;
 
     @ApiModelProperty(value = "学号",
             name = "studentId",
             allowEmptyValue = false,
             required = true
     )
-    private  String studentId;
+    private String studentId;
 
     @ApiModelProperty(value = "班级",
             name = "naturalClass",
-            allowEmptyValue =false,
+            allowEmptyValue = false,
             required = true
     )
-    private  String naturalClass;
+    private String naturalClass;
 
 }

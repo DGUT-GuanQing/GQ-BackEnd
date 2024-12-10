@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 /**
  * 用户信息
  * 包括微信端和管理端
- * @author hyj
- * @since 2022-09-02
- * @version 1.0
  *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-09-02
  */
 @Data
 @TableName("gq_user_info")
@@ -29,7 +29,7 @@ public class User {
      * uuid主键
      */
     @TableId
-    private String uuid ;
+    private String uuid;
 
     /**
      * 微信的openid
@@ -38,9 +38,9 @@ public class User {
 
     private LocalDateTime createTime = null;
 
-    private  LocalDateTime updateTime = null;
+    private LocalDateTime updateTime = null;
 
-    private  LocalDateTime deleteTime = null;
+    private LocalDateTime deleteTime = null;
 
     private Integer isDeleted;
 
@@ -48,60 +48,60 @@ public class User {
      * 版本号乐观锁
      */
     @Version
-    private  Integer version;
+    private Integer version;
 
     /**
      * 用户名
      */
-    private  String userName;
+    private String userName;
 
     /**
      * 密码
      */
-    private  String password;
+    private String password;
 
     /**
      * 名字
      */
-    private  String name;
+    private String name;
 
     /**
      * 性别
      */
-    private  Integer sex;
+    private Integer sex;
 
     /**
      * 学院
      */
-    private  String college;
+    private String college;
 
     /**
      * 学号
      */
-    private  String studentId;
+    private String studentId;
 
     /**
      * 班级
      */
-    private  String naturalClass;
+    private String naturalClass;
 
     /**
      * 老师或者学生标号
      */
-    private  Integer userIdentity;
+    private Integer userIdentity;
 
     /**
      * 是否是vip
      */
-    private  Integer  vip;
+    private Integer vip;
 
     /**
      * 参加讲座次数
      */
-    private  Integer raceNumber;
+    private Integer raceNumber;
 
     /**
      * 权限
      */
-    private  String permission;
+    private String permission;
 }

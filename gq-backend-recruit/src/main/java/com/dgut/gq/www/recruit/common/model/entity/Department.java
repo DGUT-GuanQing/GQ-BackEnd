@@ -10,7 +10,7 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 
 /**
- * @author  hyj
+ * @author hyj
  * 部门实体类
  */
 @Data
@@ -20,23 +20,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Department {
 
-        @TableId
-        private String id;
+    @TableId
+    private String id;
 
-        private LocalDateTime createTime;
+    private LocalDateTime createTime;
 
-        private LocalDateTime updateTime;
+    private LocalDateTime updateTime;
 
-        private LocalDateTime deleteTime;
+    private LocalDateTime deleteTime;
 
-        private Integer isDeleted;
+    private Integer isDeleted;
 
-        private int version;
+    private int version;
 
-       /**
-       * 部门名
-       */
-       private String departmentName;
+    /**
+     * 部门名
+     */
+    private String departmentName;
 
 
 }

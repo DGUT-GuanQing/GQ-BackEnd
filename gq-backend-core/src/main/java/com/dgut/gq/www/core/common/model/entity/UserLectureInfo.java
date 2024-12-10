@@ -10,9 +10,10 @@ import java.time.LocalDateTime;
 
 /**
  * 用户讲座关系表
- * @author  hyj
- * @since  2022-10-10
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-10
  */
 @Data
 @NoArgsConstructor
@@ -23,27 +24,27 @@ public class UserLectureInfo {
      * 主键
      */
     @TableId
-    private  String id;
+    private String id;
 
     /**
      * 讲座id
      */
-    private  String lectureId;
+    private String lectureId;
 
 
     /**
      * 用户的openid
      */
-    private  String openid;
+    private String openid;
 
     /**
      * 观看讲座状态
      */
-    private  Integer status;
+    private Integer status;
 
     private LocalDateTime createTime;
 
-    private  LocalDateTime updateTime;
+    private LocalDateTime updateTime;
 
     private Integer isDeleted;
 }

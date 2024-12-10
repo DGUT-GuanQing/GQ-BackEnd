@@ -37,9 +37,10 @@ import java.util.stream.Collectors;
 
 /**
  * 简历模块
+ *
  * @author hyj
  * @version 1.0
- * @since  2023-5-10
+ * @since 2023-5-10
  */
 @Service
 @Slf4j
@@ -58,10 +59,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     private PositionMapper positionMapper;
 
     @Autowired
-    private  StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 上传或者修改简历
+     *
      * @param openid
      * @param curriculumVitaeDto
      * @return
@@ -125,6 +127,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 获取我的简历
+     *
      * @param openid
      * @return
      */
@@ -181,17 +184,18 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 获取简历
+     *
      * @return
      */
     @Override
-    public SystemJsonResponse getAllCurriculumVitae(int page, int pageSize,String departmentId,Integer term) {
-        Page<CurriculumVitae>pageInfo = new Page<>(page,pageSize);
-        LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0)
-                          .orderByDesc(CurriculumVitae::getUpdateTime)
-                          .eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId)
-                          .eq(term != null,CurriculumVitae::getTerm,term);
-        curriculumVitaeMapper.selectPage(pageInfo,lambdaQueryWrapper);
+    public SystemJsonResponse getAllCurriculumVitae(int page, int pageSize, String departmentId, Integer term) {
+        Page<CurriculumVitae> pageInfo = new Page<>(page, pageSize);
+        LambdaQueryWrapper<CurriculumVitae> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted, 0)
+                .orderByDesc(CurriculumVitae::getUpdateTime)
+                .eq(departmentId != null && !departmentId.equals(""), CurriculumVitae::getDepartmentId, departmentId)
+                .eq(term != null, CurriculumVitae::getTerm, term);
+        curriculumVitaeMapper.selectPage(pageInfo, lambdaQueryWrapper);
         List<CurriculumVitae> records = pageInfo.getRecords();
         Integer count = curriculumVitaeMapper.selectCount(lambdaQueryWrapper);
 
@@ -202,12 +206,13 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             return buildCurriculumVitaeVo(record, user, department, position);
         }).collect(Collectors.toList());
 
-        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
+        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, count);
         return SystemJsonResponse.success(systemResultList);
     }
 
     /**
      * 获取全部部门
+     *
      * @return
      */
     @Override
@@ -215,12 +220,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         //条件构造器
         LambdaQueryWrapper<Department> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         //没被删除
-        lambdaQueryWrapper.eq(Department::getIsDeleted,0);
+        lambdaQueryWrapper.eq(Department::getIsDeleted, 0);
         List<Department> departments = departmentMapper.selectList(lambdaQueryWrapper);
         List<DepartmentVo> departmentVoList = new ArrayList<>();
         for (Department department : departments) {
             DepartmentVo departmentVo = new DepartmentVo();
-            BeanUtils.copyProperties(department,departmentVo);
+            BeanUtils.copyProperties(department, departmentVo);
             departmentVoList.add(departmentVo);
         }
         return SystemJsonResponse.success(departmentVoList);
@@ -228,6 +233,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 获取职位
+     *
      * @param departmentId
      * @return
      */
@@ -236,13 +242,13 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         //条件构造器
         LambdaQueryWrapper<Position> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         //没被删除
-        lambdaQueryWrapper.eq(Position::getIsDeleted,0);
-        lambdaQueryWrapper.eq(Position::getDepartmentId,departmentId);
+        lambdaQueryWrapper.eq(Position::getIsDeleted, 0);
+        lambdaQueryWrapper.eq(Position::getDepartmentId, departmentId);
         List<Position> positions = positionMapper.selectList(lambdaQueryWrapper);
         List<PositionVo> positionVos = new ArrayList<>();
         for (Position position : positions) {
             PositionVo positionVo = new PositionVo();
-            BeanUtils.copyProperties(position,positionVo);
+            BeanUtils.copyProperties(position, positionVo);
             positionVos.add(positionVo);
         }
         return SystemJsonResponse.success(positionVos);
@@ -250,17 +256,18 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 导出简历
+     *
      * @param departmentId
      * @param term
      * @return
      */
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
-        LambdaQueryWrapper<CurriculumVitae>lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted,0)
+        LambdaQueryWrapper<CurriculumVitae> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted, 0)
                 .orderByDesc(CurriculumVitae::getUpdateTime)
-                .eq(departmentId != null && !departmentId.equals(""),CurriculumVitae::getDepartmentId,departmentId)
-                .eq(term != null,CurriculumVitae::getTerm,term);
+                .eq(departmentId != null && !departmentId.equals(""), CurriculumVitae::getDepartmentId, departmentId)
+                .eq(term != null, CurriculumVitae::getTerm, term);
         Integer count = curriculumVitaeMapper.selectCount(lambdaQueryWrapper);
         List<CurriculumVitae> curriculumVitaes = curriculumVitaeMapper.selectList(lambdaQueryWrapper);
 
@@ -270,13 +277,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             Position position = queryPosition(record.getPositionId());
             return buildCurriculumVitaeVo(record, user, department, position);
         }).collect(Collectors.toList());
-        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList,count);
+        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, count);
 
         return SystemJsonResponse.success(systemResultList);
     }
 
     /**
      * 删除部门
+     *
      * @param id
      * @return
      */
@@ -291,6 +299,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 删除职位
+     *
      * @param id
      * @return
      */
@@ -305,6 +314,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 新增或者修稿部门
+     *
      * @param departmentDto
      * @return
      */
@@ -312,15 +322,15 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
         String id = departmentDto.getId();
         Department department = new Department();
-        BeanUtils.copyProperties(departmentDto,department);
+        BeanUtils.copyProperties(departmentDto, department);
         department.setUpdateTime(LocalDateTime.now());
         String status;
         //新增
-        if(id == null || id.equals("")){
+        if (id == null || id.equals("")) {
             department.setCreateTime(LocalDateTime.now());
             departmentMapper.insert(department);
             status = "新增成功";
-        }else {
+        } else {
             departmentMapper.updateById(department);
             status = "修改成功";
         }
@@ -329,6 +339,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     /**
      * 新增或者修改职位
+     *
      * @param positionDto
      * @return
      */
@@ -336,14 +347,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
         String id = positionDto.getId();
         Position position = new Position();
-        BeanUtils.copyProperties(positionDto,position);
+        BeanUtils.copyProperties(positionDto, position);
         position.setUpdateTime(LocalDateTime.now());
         String status;
-        if(id == null || id.equals("")){
+        if (id == null || id.equals("")) {
             position.setCreateTime(LocalDateTime.now());
             positionMapper.insert(position);
             status = "新增成功";
-        }else {
+        } else {
             positionMapper.updateById(position);
             status = "修改成功";
         }

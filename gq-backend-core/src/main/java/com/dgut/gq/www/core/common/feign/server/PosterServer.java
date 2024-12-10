@@ -21,11 +21,12 @@ public class PosterServer {
 
     /**
      * 远程调用新增或者更新推文
+     *
      * @param posterTweetDto
      * @return
      */
     @PostMapping("/updatePosterTweet")
-    public  SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto){
+    public SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto) {
         return posterTweetService.updatePosterTweet(posterTweetDto);
     }
 }

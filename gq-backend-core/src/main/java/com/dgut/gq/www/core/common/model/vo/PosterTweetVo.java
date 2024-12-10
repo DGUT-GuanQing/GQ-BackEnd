@@ -26,14 +26,14 @@ public class PosterTweetVo {
      * 图片链接
      */
     @ApiModelProperty(value = "图片地址")
-    private  String image;
+    private String image;
 
     /**
      * 微信公众号地址
      */
     @ApiModelProperty(value = "微信公众号地址")
-    private  String officialAccountUrl;
+    private String officialAccountUrl;
 
-    @ApiModelProperty(value =  "类型")
+    @ApiModelProperty(value = "类型")
     private Integer type;
 }

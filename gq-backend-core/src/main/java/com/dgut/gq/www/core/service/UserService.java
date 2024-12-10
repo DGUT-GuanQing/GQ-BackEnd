@@ -8,16 +8,16 @@ import com.dgut.gq.www.core.common.model.dto.UserDto;
 public interface UserService {
     /**
      * 微信登录
+     *
      * @param code
      * @return
      */
     String wxLogin(String code);
 
 
-
-
     /**
      * 获取小程序d端个人信息
+     *
      * @param openid
      * @return
      */
@@ -25,16 +25,16 @@ public interface UserService {
 
     /**
      * 获取自己参加过的讲座信息
+     *
      * @param openid
      * @return
      */
-    SystemJsonResponse getMyLecture(String openid,Integer page,Integer pageSize);
-
-
+    SystemJsonResponse getMyLecture(String openid, Integer page, Integer pageSize);
 
 
     /**
      * 是否抢到票
+     *
      * @param openid
      * @return
      */
@@ -43,6 +43,7 @@ public interface UserService {
 
     /**
      * 中央认证
+     *
      * @param userDto
      * @return
      */
@@ -51,6 +52,7 @@ public interface UserService {
 
     /**
      * 签到
+     *
      * @param lectureId
      * @param openid
      * @return
@@ -60,6 +62,7 @@ public interface UserService {
 
     /**
      * 是否在黑名单
+     *
      * @param openid
      * @return
      */
@@ -67,6 +70,7 @@ public interface UserService {
 
     /**
      * 根据用户名获取用户信息
+     *
      * @param username
      * @return
      */

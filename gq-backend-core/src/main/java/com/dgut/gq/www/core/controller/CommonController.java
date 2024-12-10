@@ -24,9 +24,10 @@ import java.util.UUID;
 
 /**
  * 通用模块
- * @since  2023-3-14
- * @author  hyj
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2023-3-14
  */
 @RestController
 @RequestMapping("/common")
@@ -45,28 +46,27 @@ public class CommonController {
 
     /**
      * 获取推文
+     *
      * @param type
      * @return
      */
     @GetMapping("/posterTweet/{type}")
     @ApiOperation(value = "获取招新和活动推文")
-    @ApiImplicitParam(value = "推文类型 0-活动，1-招新 ",name = "type")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功", response = PosterTweetVo.class)
-    }
-    )
-    public SystemJsonResponse tweet(@PathVariable Integer type){
+    @ApiImplicitParam(value = "推文类型 0-活动，1-招新 ", name = "type")
+    @ApiResponses({@ApiResponse(code = 200, message = "查询成功", response = PosterTweetVo.class)})
+    public SystemJsonResponse tweet(@PathVariable Integer type) {
         return posterTweetService.getByType(type);
     }
 
     /**
      * 文件
+     *
      * @return
      */
     @PostMapping("/upload")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
     @ApiOperation(value = "文件上传")
-    public SystemJsonResponse upload(MultipartFile file){
+    public SystemJsonResponse upload(MultipartFile file) {
         //原始文件名
         String filename = file.getOriginalFilename();
         //UUID随机生成名字，防止重复
@@ -80,16 +80,11 @@ public class CommonController {
         try {
             // 上传文件到Minio
             ByteArrayInputStream bais = new ByteArrayInputStream(file.getBytes());
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket("gqfile")
-                            .object(subfolder + "/" + s)
-                            .stream(bais, bais.available(), -1)
-                            .contentType(file.getContentType())
-                            .build()
-            );
+            minioClient.putObject(PutObjectArgs.builder().bucket("gqfile")
+                    .object(subfolder + "/" + s).stream(bais, bais.available(), -1)
+                    .contentType(file.getContentType()).build());
         } catch (Exception e) {
-            throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(),"上传文文件失败");
+            throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(), "上传文文件失败");
         }
         return SystemJsonResponse.success(s);
     }
@@ -100,17 +95,16 @@ public class CommonController {
     @GetMapping("/download")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
     @ApiOperation(value = "文件下载")
-    @ApiImplicitParams({@ApiImplicitParam(value = "文件类型 0-图片 1-文件",name = "type",required = true),
-            @ApiImplicitParam(value = "文件名",name = "name",required = true)
-    })
-    public void download( HttpServletResponse response,
-                         @RequestParam("type") Integer type,
-                         @RequestParam("name") String name) throws IOException {
+    @ApiImplicitParams({@ApiImplicitParam(value = "文件类型 0-图片 1-文件", name = "type", required = true), @ApiImplicitParam(value = "文件名", name = "name", required = true)})
+    public void download(HttpServletResponse response, @RequestParam("type") Integer type, @RequestParam("name") String name) throws IOException {
 
         // 判断是文件还是图片
         String str = "";
-        if(type == 0)str = "image";
-        else if(type == 1)str = "file";
+        if (type == 0) {
+            str = "image";
+        } else if (type == 1) {
+            str = "file";
+        }
         if ("file".equals(str)) {
             response.setContentType("application/octet-stream");
         } else if ("image".equals(str)) {
@@ -130,12 +124,7 @@ public class CommonController {
         }
 
         try {
-            InputStream stream = minioClient.getObject(
-                    GetObjectArgs.builder()
-                            .bucket("gqfile")
-                            .object(subfolder + "/" + name)
-                            .build()
-            );
+            InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket("gqfile").object(subfolder + "/" + name).build());
 
             // Set the content type and attachment header.
             response.addHeader("Content-disposition", "attachment;filename=" + name);
@@ -145,7 +134,7 @@ public class CommonController {
             response.flushBuffer();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(),"下载文文件失败");
+            throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(), "下载文文件失败");
         }
     }
 

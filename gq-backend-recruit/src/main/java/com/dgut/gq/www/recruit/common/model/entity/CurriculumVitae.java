@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * 简历实体类
+ *
  * @author hyj
  */
 @Data
@@ -19,7 +20,7 @@ public class CurriculumVitae {
      * 主键
      */
     @TableId
-    private String id ;
+    private String id;
 
     /**
      * 微信的openid
@@ -28,33 +29,33 @@ public class CurriculumVitae {
 
     private LocalDateTime createTime;
 
-    private  LocalDateTime updateTime;
+    private LocalDateTime updateTime;
 
-    private  LocalDateTime deleteTime ;
+    private LocalDateTime deleteTime;
 
     private Integer isDeleted;
 
     //部门id，比如技术组
-    private String departmentId ;
+    private String departmentId;
 
     //职位id
-    private  String positionId;
+    private String positionId;
 
     //是否调剂 0-否 1-是
-    private Integer isAdjust ;
+    private Integer isAdjust;
 
     //校区
-    private Integer campus ;
+    private Integer campus;
 
     //电话号码
-    private  String  phone ;
+    private String phone;
 
     //微信号
-    private  String wechat ;
+    private String wechat;
 
     //简历的路径
-    private String fileUrl ;
+    private String fileUrl;
 
     //第几期新人
-    private  Integer term;
+    private Integer term;
 }

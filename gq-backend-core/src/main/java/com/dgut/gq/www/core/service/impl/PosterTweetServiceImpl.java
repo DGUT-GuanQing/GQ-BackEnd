@@ -28,6 +28,7 @@ public class PosterTweetServiceImpl implements PosterTweetService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
     /**
      * 获取推文
      *
@@ -53,7 +54,7 @@ public class PosterTweetServiceImpl implements PosterTweetService {
                     //存入redis
                     BeanUtils.copyProperties(posterTweet, newPosterTweetVo);
                     stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newPosterTweetVo));
-                    stringRedisTemplate.expire(key,1, TimeUnit.DAYS);
+                    stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
 
                     return newPosterTweetVo;
                 });
@@ -63,29 +64,29 @@ public class PosterTweetServiceImpl implements PosterTweetService {
 
     /**
      * 更新或者新增推文
+     *
      * @param posterTweetDto
      * @return
      */
     @Override
     public SystemJsonResponse updatePosterTweet(PosterTweetDto posterTweetDto) {
-        String key = RedisGlobalKey.POSTER_TWEET;
         String id = posterTweetDto.getId();
         PosterTweet posterTweet = new PosterTweet();
-        BeanUtils.copyProperties(posterTweetDto,posterTweet);
+        BeanUtils.copyProperties(posterTweetDto, posterTweet);
         posterTweet.setUpdateTime(LocalDateTime.now());
         String state;
         //新增
-        if(id == null || id.equals("")){
+        if (id == null || id.equals("")) {
             //新增数据
             posterTweet.setCreateTime(LocalDateTime.now());
             posterTweetMapper.insert(posterTweet);
             state = "新增成功";
-        }else {
+        } else {
             posterTweetMapper.updateById(posterTweet);
             state = "更新成功";
         }
-        stringRedisTemplate.delete(key + posterTweetDto.getType());
-        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(),state);
+        stringRedisTemplate.delete(RedisGlobalKey.POSTER_TWEET + posterTweetDto.getType());
+        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), state);
     }
 
 }

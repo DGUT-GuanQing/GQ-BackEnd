@@ -15,8 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * 中央认证的拦截器
- * @since  2022-10-7
- * @author  hyj
+ *
+ * @author hyj
+ * @since 2022-10-7
  */
 @Component
 public class GqLoginInterceptor implements HandlerInterceptor {
@@ -30,10 +31,11 @@ public class GqLoginInterceptor implements HandlerInterceptor {
 
     /**
      * 拦截请求 判断中央认证是否登录或者过期
+     *
      * @param request
      * @param response
      * @param handler
-     * @return
+     * @return boolean
      * @throws Exception
      */
     @Override
@@ -41,7 +43,7 @@ public class GqLoginInterceptor implements HandlerInterceptor {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.DGUT_LOGIN + openid);
-        if(s == null || s.equals("") || !s.equals(openid)){
+        if (s == null || s.equals("") || !s.equals(openid)) {
             throw new GlobalSystemException(GlobalResponseCode.GQ_USER_ACCOUNT_OVERDUE.getCode(), GlobalResponseCode.GQ_USER_ACCOUNT_OVERDUE.getMessage());
         }
         return true;

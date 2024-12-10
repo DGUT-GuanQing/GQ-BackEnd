@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@ApiModel(value = "LectureVo",description = "返回讲座信息")
+@ApiModel(value = "LectureVo", description = "返回讲座信息")
 public class LectureVo {
     /**
      * 主键
@@ -23,64 +23,64 @@ public class LectureVo {
     private String id;
 
     @ApiModelProperty(value = "讲座预告微信公众号地址")
-    private  String officialAccountUrl ;
+    private String officialAccountUrl;
 
     @ApiModelProperty(value = "第几期讲座")
-    private  Integer term;
+    private Integer term;
 
     @ApiModelProperty(value = "讲座名称")
     private String lectureName;
 
     @ApiModelProperty(value = "讲座预告图片地址")
-    private  String  image;
+    private String image;
 
     @ApiModelProperty(value = "嘉宾名称")
-    private  String guestName;
+    private String guestName;
 
     @ApiModelProperty(value = "讲座地点",
             name = "place",
             required = true
     )
-    private  String place;
+    private String place;
 
     @ApiModelProperty(value = "票数量")
-    private  Integer ticketNumber;
+    private Integer ticketNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "讲座开始时间",
             name = "startTime",
             required = true
     )
-    private  LocalDateTime  startTime;
+    private LocalDateTime startTime;
 
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "讲座结束时间",
             required = true
     )
-    private  LocalDateTime endTime;
+    private LocalDateTime endTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "抢票开始时间")
-    private  LocalDateTime  grabTicketsStart;
+    private LocalDateTime grabTicketsStart;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "抢票结束时间")
-    private  LocalDateTime grabTicketsEnd;
+    private LocalDateTime grabTicketsEnd;
 
     @ApiModelProperty(value = "讲座导语",
             name = "introduction",
             required = true
     )
-    private  String introduction;
+    private String introduction;
 
     @ApiModelProperty(value = "讲座回顾主题")
-    private  String reviewName ;
+    private String reviewName;
 
     @ApiModelProperty(value = "讲座回顾图片路径")
-    private  String reviewUrl ;
+    private String reviewUrl;
 
     @ApiModelProperty(value = "讲座回顾微信公众号地址")
-    private  String reviewOfficialAccountUrl ;
+    private String reviewOfficialAccountUrl;
 
 }

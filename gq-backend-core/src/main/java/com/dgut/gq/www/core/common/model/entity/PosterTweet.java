@@ -28,35 +28,31 @@ public class PosterTweet {
     /**
      * 图片链接
      */
-    private  String image;
+    private String image;
 
     /**
      * 微信公众号地址
      */
-    private  String officialAccountUrl;
+    private String officialAccountUrl;
 
 
     /**
      * 类型
      */
-    private  Integer type;
+    private Integer type;
 
     private LocalDateTime createTime;
-
 
 
     private LocalDateTime updateTime;
 
 
-
     private LocalDateTime deleteTime;
-
 
 
     private Integer isDeleted;
 
 
-
     @Version
-    private  Integer version;
+    private Integer version;
 }

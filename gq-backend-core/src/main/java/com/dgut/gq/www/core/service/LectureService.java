@@ -6,14 +6,16 @@ import com.dgut.gq.www.core.common.model.dto.LectureDto;
 
 /**
  * 讲座
- * @author  hyj
- * @since  2022-10-8
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-8
  */
 public interface LectureService {
 
     /**
      * 获取正在进行的讲座
+     *
      * @return
      */
     SystemJsonResponse findUnStartLecture();
@@ -21,15 +23,17 @@ public interface LectureService {
 
     /**
      * 抢票
+     *
      * @param id
      * @param openid
      * @return
      */
-    SystemJsonResponse robTicket(String openid,String id);
+    SystemJsonResponse robTicket(String openid, String id);
 
 
     /**
      * 获取讲座回顾
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -40,6 +44,7 @@ public interface LectureService {
 
     /**
      * 获取讲座预告
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -50,6 +55,7 @@ public interface LectureService {
 
     /**
      * 获取参加讲座的人员信息
+     *
      * @param page
      * @param pageSize
      * @param id
@@ -60,6 +66,7 @@ public interface LectureService {
 
     /**
      * 更新或者新增讲座
+     *
      * @param lectureDto
      */
     SystemJsonResponse updateSaveLecture(LectureDto lectureDto);
@@ -67,6 +74,7 @@ public interface LectureService {
 
     /**
      * 后台获取讲座信息
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -77,6 +85,7 @@ public interface LectureService {
 
     /**
      * 导出参加讲座的用户信息
+     *
      * @param id
      * @param status
      * @return
@@ -86,6 +95,7 @@ public interface LectureService {
 
     /**
      * 删除讲座
+     *
      * @param id
      * @return
      */

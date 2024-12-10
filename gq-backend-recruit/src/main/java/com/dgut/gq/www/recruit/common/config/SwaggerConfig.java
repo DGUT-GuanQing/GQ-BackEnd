@@ -16,36 +16,37 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * swagger提供接口
+ *
  * @author hyj
- * @since 2022-9-3
  * @version 1.0
+ * @since 2022-9-3
  */
 @Configuration
 @EnableSwagger2
 //@EnableWebMvc
-public class SwaggerConfig implements WebMvcConfigurer{
+public class SwaggerConfig implements WebMvcConfigurer {
 
-        @Bean
-        public Docket docket(Environment environment) {
-            Profiles profiles = Profiles.of("pro" , "test");    //设置要显示的swagger环境
-            boolean flag = environment.acceptsProfiles(profiles);   //生产、测试环境返回true
-            return new Docket(DocumentationType.SWAGGER_2)
-                    .apiInfo(apiInfo())
-                    .enable(flag)
-                    .select()
-                    .apis(RequestHandlerSelectors.basePackage("com.dgut.gq.www.recruit"))
-                    .paths(PathSelectors.any())
-                    .build();
+    @Bean
+    public Docket docket(Environment environment) {
+        Profiles profiles = Profiles.of("pro", "test");    //设置要显示的swagger环境
+        boolean flag = environment.acceptsProfiles(profiles);   //生产、测试环境返回true
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enable(flag)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.dgut.gq.www.recruit"))
+                .paths(PathSelectors.any())
+                .build();
 
-        }
+    }
 
-        private ApiInfo apiInfo() {
-            return new ApiInfoBuilder()
-                    .title("莞青小程序")
-                    .description("简历模块接口")
-                    .version("1.0.0")
-                    // 作者信息
-                    .contact(new Contact("莞青技术组", "", ""))
-                    .build();
-        }
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("莞青小程序")
+                .description("简历模块接口")
+                .version("1.0.0")
+                // 作者信息
+                .contact(new Contact("莞青技术组", "", ""))
+                .build();
+    }
 }

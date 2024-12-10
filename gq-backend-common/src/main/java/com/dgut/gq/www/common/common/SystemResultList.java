@@ -16,5 +16,5 @@ public class SystemResultList<T> {
 
     private List<T> list;
 
-    private  Integer count;
+    private Integer count;
 }

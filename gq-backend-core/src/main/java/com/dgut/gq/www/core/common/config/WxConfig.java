@@ -8,9 +8,10 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * 微信配置
- * @author  hyj
- * @since  2022-10-20
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-20
  */
 @Configuration
 public class WxConfig {

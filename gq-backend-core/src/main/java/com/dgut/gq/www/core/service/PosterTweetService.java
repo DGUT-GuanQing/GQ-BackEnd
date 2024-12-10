@@ -4,11 +4,12 @@ package com.dgut.gq.www.core.service;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.core.common.model.dto.PosterTweetDto;
 
-public interface PosterTweetService  {
+public interface PosterTweetService {
 
 
     /**
      * 获取推文
+     *
      * @param type
      * @return
      */
@@ -17,6 +18,7 @@ public interface PosterTweetService  {
 
     /**
      * 新增或者更新推文
+     *
      * @param posterTweetDto
      * @return
      */

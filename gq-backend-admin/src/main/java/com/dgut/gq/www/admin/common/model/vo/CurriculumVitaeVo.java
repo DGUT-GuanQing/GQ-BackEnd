@@ -9,35 +9,35 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "CurriculumVitaeVo",description = "返回的简历信息")
+@ApiModel(value = "CurriculumVitaeVo", description = "返回的简历信息")
 public class CurriculumVitaeVo {
 
     @ApiModelProperty(value = "姓名")
-    private  String name;
+    private String name;
 
     @ApiModelProperty(value = "学院")
-    private  String college;
+    private String college;
 
-    @ApiModelProperty(value =  "学号")
-    private  String studentId;
+    @ApiModelProperty(value = "学号")
+    private String studentId;
 
 
     @ApiModelProperty(value = "班级")
-    private  String naturalClass;
+    private String naturalClass;
 
     @ApiModelProperty(
             value = "部门名",
             name = "departmentName",
             required = true
     )
-    private String departmentName ;
+    private String departmentName;
 
     @ApiModelProperty(
             value = "职位名",
             name = "positionName",
             required = true
     )
-    private  String positionName;
+    private String positionName;
 
     //是否调剂 0-否 1-是
     @ApiModelProperty(
@@ -45,7 +45,7 @@ public class CurriculumVitaeVo {
             name = "isAdjust",
             required = true
     )
-    private Integer isAdjust ;
+    private Integer isAdjust;
 
     //校区
     @ApiModelProperty(
@@ -53,7 +53,7 @@ public class CurriculumVitaeVo {
             name = "campus",
             required = true
     )
-    private Integer campus ;
+    private Integer campus;
 
     //电话号码
     @ApiModelProperty(
@@ -61,7 +61,7 @@ public class CurriculumVitaeVo {
             name = "phone",
             required = true
     )
-    private  String  phone ;
+    private String phone;
 
     //微信号
     @ApiModelProperty(
@@ -69,7 +69,7 @@ public class CurriculumVitaeVo {
             name = "wechat",
             required = true
     )
-    private  String wechat ;
+    private String wechat;
 
     //简历的路径
     @ApiModelProperty(
@@ -77,7 +77,7 @@ public class CurriculumVitaeVo {
             name = "fileUrl",
             required = true
     )
-    private String fileUrl ;
+    private String fileUrl;
 
     //第几期新人
     @ApiModelProperty(
@@ -85,6 +85,6 @@ public class CurriculumVitaeVo {
             name = "term",
             required = true
     )
-    private  Integer term;
+    private Integer term;
 
 }

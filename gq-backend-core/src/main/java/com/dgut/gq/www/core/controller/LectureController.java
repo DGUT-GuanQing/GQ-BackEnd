@@ -20,9 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 讲座接口
- * @author  hyj
- * @since  2022-10-10
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-10
  */
 @RequestMapping("/lecture")
 @RestController
@@ -37,6 +38,7 @@ public class LectureController {
 
     /**
      * 获取讲座回顾信息
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -45,20 +47,15 @@ public class LectureController {
     @GetMapping("/allLectureReview")
     @ApiOperation(value = "获取讲座回顾")
     //@PreAuthorize("hasAnyAuthority('user', 'admin')")
-    @ApiImplicitParams({@ApiImplicitParam(value = "页数",name = "page",required = true),
-            @ApiImplicitParam(value = "每页数量",name = "pageSize",required = true),
-            @ApiImplicitParam(value = "模糊查询字段",name = "name",required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功", response = LectureReviewVo.class)
-        }
-    )
-    public SystemJsonResponse getLectureReview(int page , int pageSize, String name){
-        return lectureService.getLectureReview(page,pageSize,name);
+    @ApiImplicitParams({@ApiImplicitParam(value = "页数", name = "page", required = true), @ApiImplicitParam(value = "每页数量", name = "pageSize", required = true), @ApiImplicitParam(value = "模糊查询字段", name = "name", required = true)})
+    @ApiResponses({@ApiResponse(code = 200, message = "查询成功", response = LectureReviewVo.class)})
+    public SystemJsonResponse getLectureReview(int page, int pageSize, String name) {
+        return lectureService.getLectureReview(page, pageSize, name);
     }
 
     /**
      * 获取讲座预告信息
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -66,66 +63,63 @@ public class LectureController {
      */
     @GetMapping("/allLectureTrailer")
     @ApiOperation(value = "获取讲座预告")
-   // @PreAuthorize("hasAnyAuthority('user', 'admin')")
-    @ApiImplicitParams({@ApiImplicitParam(value = "页数",name = "page",required = true),
-            @ApiImplicitParam(value = "每页数量",name = "pageSize",required = true),
-            @ApiImplicitParam(value = "模糊查询字段",name = "name",required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功", response = LectureTrailerVo.class)
-    }
-    )
-    public SystemJsonResponse getLectureTrailer(int page ,int pageSize,String name){
-        return lectureService.getLectureTrailer(page,pageSize,name);
+    // @PreAuthorize("hasAnyAuthority('user', 'admin')")
+    @ApiImplicitParams({@ApiImplicitParam(value = "页数", name = "page", required = true), @ApiImplicitParam(value = "每页数量", name = "pageSize", required = true), @ApiImplicitParam(value = "模糊查询字段", name = "name", required = true)})
+    @ApiResponses({@ApiResponse(code = 200, message = "查询成功", response = LectureTrailerVo.class)})
+    public SystemJsonResponse getLectureTrailer(int page, int pageSize, String name) {
+        return lectureService.getLectureTrailer(page, pageSize, name);
     }
 
     /**
      * 获取正在进行的讲座信息
+     *
      * @return
      */
     @GetMapping("/unStartLecture")
     @ApiOperation(value = "获取正在进行的讲座信息")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功", response = LectureVo.class)
-    }
+    @ApiResponses({@ApiResponse(code = 200, message = "查询成功", response = LectureVo.class)}
 
     )
-    public  SystemJsonResponse unstart(){
-        return  lectureService.findUnStartLecture();
+    public SystemJsonResponse unstart() {
+        return lectureService.findUnStartLecture();
     }
 
     /**
      * 抢票
-     * @param
-     * @param
-     * @return
+     *
+     * @param id
+     * @return SystemJsonResponse
      */
     @PostMapping("/robTicket/{id}")
     @ApiOperation(value = "抢票")
-    @ApiImplicitParam(value = "讲座id",required = true)
+    @ApiImplicitParam(value = "讲座id", required = true)
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
     @Limit(key = "robTicketLimit", permitsPerSecond = 200, timeout = 500, timeunit = TimeUnit.MILLISECONDS)
-    public  SystemJsonResponse robTicket(HttpServletRequest request,@PathVariable String id){
+    public SystemJsonResponse robTicket(HttpServletRequest request, @PathVariable String id) {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
-        return lectureService.robTicket(openid,id);
+        return lectureService.robTicket(openid, id);
     }
 
     /**
      * 判断是否还有票
+     *
      * @return
      */
     @GetMapping("/isTicketAvailable")
     @ApiOperation(value = "判断当前讲座是否有票")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
-    public  SystemJsonResponse isTicketAvailable(){
+    public SystemJsonResponse isTicketAvailable() {
         boolean flag = true;
         //获取票的数量
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.TICKET_NUMBER);
-        if(s == null || s.equals(""))flag = false;
-        else {
-            int count  = Integer.parseInt(s);
-            if(count <= 0)flag = false;
+        if (s == null || s.equals("")) {
+            flag = false;
+        } else {
+            int count = Integer.parseInt(s);
+            if (count <= 0) {
+                flag = false;
+            }
         }
         return SystemJsonResponse.success(flag);
     }
