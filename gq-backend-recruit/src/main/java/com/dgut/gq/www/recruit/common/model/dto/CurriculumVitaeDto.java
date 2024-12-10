@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * 接受前端传来简历信息
- * @author  hyj
+ *
+ * @author hyj
  */
 @Data
 @ApiModel(description = "接受报名信息的实现类")
@@ -19,10 +20,10 @@ public class CurriculumVitaeDto {
 
     @ApiModelProperty(value = "班级",
             name = "naturalClass",
-            allowEmptyValue =false,
+            allowEmptyValue = false,
             required = true
     )
-    private  String naturalClass;
+    private String naturalClass;
 
     @TableId
     @ApiModelProperty(
@@ -30,7 +31,7 @@ public class CurriculumVitaeDto {
             name = "departmentId",
             required = true
     )
-    private String departmentId ;
+    private String departmentId;
 
     //职位
     @ApiModelProperty(
@@ -38,7 +39,7 @@ public class CurriculumVitaeDto {
             name = "positionId",
             required = true
     )
-    private  String positionId;
+    private String positionId;
 
     //是否调剂 0-否 1-是
     @TableId
@@ -47,7 +48,7 @@ public class CurriculumVitaeDto {
             name = "isAdjust",
             required = true
     )
-    private Integer isAdjust ;
+    private Integer isAdjust;
 
     //校区
     @TableId
@@ -56,7 +57,7 @@ public class CurriculumVitaeDto {
             name = "campus",
             required = true
     )
-    private Integer campus ;
+    private Integer campus;
 
     //电话号码
     @TableId
@@ -65,7 +66,7 @@ public class CurriculumVitaeDto {
             name = "phone",
             required = true
     )
-    private  String  phone ;
+    private String phone;
 
     //微信号
     @TableId
@@ -74,7 +75,7 @@ public class CurriculumVitaeDto {
             name = "wechat",
             required = true
     )
-    private  String wechat ;
+    private String wechat;
 
     //简历的路径
     @TableId
@@ -83,5 +84,5 @@ public class CurriculumVitaeDto {
             name = "fileUrl",
             required = true
     )
-    private String fileUrl ;
+    private String fileUrl;
 }

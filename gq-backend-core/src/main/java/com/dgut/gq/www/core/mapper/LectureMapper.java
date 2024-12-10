@@ -7,9 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 讲座mapper
- * @author  hyj
- * @version  1.0
- * @since  2022-10-1
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-1
  */
 @Mapper
 public interface LectureMapper extends BaseMapper<Lecture> {

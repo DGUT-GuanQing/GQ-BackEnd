@@ -36,9 +36,10 @@ import java.util.Optional;
 
 /**
  * 微信端用户接口
+ *
+ * @author hyj
  * @version 1.0
- * @author  hyj
- * @since  2022-9-16
+ * @since 2022-9-16
  */
 @RestController
 @RequestMapping("/user")
@@ -52,7 +53,7 @@ public class UserController {
     /**
      * cas client 默认的session key
      */
-    public final static String CAS = "_const_cas_assertion_";
+    public static final String CAS = "_const_cas_assertion_";
 
     @Autowired
     private UserService userService;
@@ -66,56 +67,53 @@ public class UserController {
      */
     @PostMapping("/wxLogin/{code}")
     @ApiOperation(value = "微信登录")
-    @ApiImplicitParam(value = "微信code",name = "code",required = true)
-    public SystemJsonResponse wxlogin(@PathVariable String code){
+    @ApiImplicitParam(value = "微信code", name = "code", required = true)
+    public SystemJsonResponse wxlogin(@PathVariable String code) {
         String token = userService.wxLogin(code);
         return SystemJsonResponse.success(token);
     }
 
     /**
      * 获取微信端用户个人信息
+     *
      * @param request
      * @return
      */
     @GetMapping("/me")
     @ApiOperation(value = "微信端获取个人信息")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
-    public  SystemJsonResponse getMyMessage(HttpServletRequest request){
-        String token =  request.getHeader("token");
+    public SystemJsonResponse getMyMessage(HttpServletRequest request) {
+        String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
-        return  userService.getMe(openid);
+        return userService.getMe(openid);
     }
 
     /**
      * 获取自己参加过哪些讲座
+     *
      * @return
      */
     @GetMapping("/myLecture")
-    @ApiOperation(value ="获取自己参加过的讲座")
+    @ApiOperation(value = "获取自己参加过的讲座")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "页数",name = "page",required = true),
-            @ApiImplicitParam(value = "每页数量",name = "pageSize",required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功", response = MyLectureVo.class)
-    }
-    )
-    public  SystemJsonResponse getMyLecture(HttpServletRequest request,Integer page,Integer pageSize){
+    @ApiImplicitParams({@ApiImplicitParam(value = "页数", name = "page", required = true), @ApiImplicitParam(value = "每页数量", name = "pageSize", required = true)})
+    @ApiResponses({@ApiResponse(code = 200, message = "查询成功", response = MyLectureVo.class)})
+    public SystemJsonResponse getMyLecture(HttpServletRequest request, Integer page, Integer pageSize) {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
-        return userService.getMyLecture(openid,page,pageSize);
+        return userService.getMyLecture(openid, page, pageSize);
     }
 
     /**
      * 是否抢到票
+     *
      * @param request
      * @return
      */
     @GetMapping("/isGrabTicket")
     @ApiOperation(value = "是否抢到票")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
-    public  SystemJsonResponse isGrabTicket(HttpServletRequest request){
+    public SystemJsonResponse isGrabTicket(HttpServletRequest request) {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         return userService.isGrabTicket(openid);
@@ -123,15 +121,14 @@ public class UserController {
 
     /**
      * 中央认证
+     *
      * @param request
      * @return
      */
     @ApiOperation(value = "回调接口")
-    @RequestMapping(value = "/getUserInfo",
-            produces = { "application/json" },
-            method = RequestMethod.GET)
+    @RequestMapping(value = "/getUserInfo", produces = {"application/json"}, method = RequestMethod.GET)
 
-    public SystemJsonResponse getLoginUserInfo(HttpServletRequest request,String id){
+    public SystemJsonResponse getLoginUserInfo(HttpServletRequest request, String id) {
         Optional<User> optionalUser = Optional.ofNullable(userMapper.selectById(id));
         if (!optionalUser.isPresent() || optionalUser.get().getOpenid() == null) {
             return SystemJsonResponse.fail();
@@ -143,7 +140,7 @@ public class UserController {
         if (!optionalObject.isPresent()) {
             return SystemJsonResponse.fail("中央认证失败");
         }
-        Assertion assertion = ( Assertion ) cas;
+        Assertion assertion = (Assertion) cas;
         String userName = assertion.getPrincipal().getName();
         log.error("cas对接登录用户buildUserInfoByCas：" + userName);
         //获取属性值
@@ -155,46 +152,50 @@ public class UserController {
         user.setCollege((String) attributes.get("eduPersonOrgDN"));
         user.setStudentId((String) attributes.get("bindUserList"));
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(User::getOpenid,openid);
-        if(userMapper.update(user, lambdaQueryWrapper) == 0)return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(),"该中央认证已经绑定过微信号,请联系管理员解绑");
+        lambdaQueryWrapper.eq(User::getOpenid, openid);
+        if (userMapper.update(user, lambdaQueryWrapper) == 0) {
+            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "该中央认证已经绑定过微信号,请联系管理员解绑");
+        }
         //删除redis
         stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
         //设置中央认证缓存
-        stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid,openid);
+        stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid, openid);
         return SystemJsonResponse.success();
     }
 
-    /***
+    /**
      * 获取用户id
+     *
      * @param request
      * @return
      */
     @GetMapping("/getId")
     @ApiOperation("获取用户id")
-    public  SystemJsonResponse getId(HttpServletRequest request){
+    public SystemJsonResponse getId(HttpServletRequest request) {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
-        LambdaQueryWrapper<User>lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         User user = new User();
         user.setOpenid(openid);
-        lambdaQueryWrapper.eq(User::getOpenid,openid);
+        lambdaQueryWrapper.eq(User::getOpenid, openid);
         String uuid = userMapper.selectOne(lambdaQueryWrapper).getUuid();
         return SystemJsonResponse.success(uuid);
     }
 
     /**
      * 获取个人二维码
+     *
      * @param request
      * @param response
      */
     @GetMapping("/myQRCode")
     @ApiOperation(value = "获取个人二维码")
     @PreAuthorize("hasAnyAuthority('user', 'admin')")
-    public  void getMyCode(HttpServletRequest request, HttpServletResponse response){
+    public void getMyCode(HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(User::getOpenid,openid);
+        lambdaQueryWrapper.eq(User::getOpenid, openid);
         try {
             int width = 300; // QR Code的宽度
             int height = 300; // QR Code的高度
@@ -217,12 +218,13 @@ public class UserController {
         } catch (WriterException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(),"获取二维码失败");
+            throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(), "获取二维码失败");
         }
     }
 
     /**
      * 签到
+     *
      * @param lectureId
      * @param openid
      * @return
@@ -230,23 +232,21 @@ public class UserController {
     @PostMapping("/SignIn")
     @ApiOperation("签到")
     @PreAuthorize("hasAuthority('admin')")
-    @ApiImplicitParams({@ApiImplicitParam(value = "讲座id",name = "lectureId",required = true),
-            @ApiImplicitParam(value = "openid",name = "openid",required = true),
-    })
-    public  SystemJsonResponse signIn(String lectureId,String openid){
-          return  userService.signIn(lectureId,openid);
+    @ApiImplicitParams({@ApiImplicitParam(value = "讲座id", name = "lectureId", required = true), @ApiImplicitParam(value = "openid", name = "openid", required = true)})
+    public SystemJsonResponse signIn(String lectureId, String openid) {
+        return userService.signIn(lectureId, openid);
     }
 
     /**
      * 是否在黑名单里面
-     * @param
-     * @param
-     * @return
+     *
+     * @param request
+     * @return SystemJsonResponse
      */
     @GetMapping("/isBlack")
     @ApiOperation("判断是否在黑名单")
-    public  SystemJsonResponse isBlack(HttpServletRequest request){
-        String token =  request.getHeader("token");
+    public SystemJsonResponse isBlack(HttpServletRequest request) {
+        String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         return userService.isBlack(openid);
     }

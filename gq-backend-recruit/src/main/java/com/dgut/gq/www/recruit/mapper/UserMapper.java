@@ -9,5 +9,5 @@ import java.util.HashMap;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
-    public  int robTicket(HashMap<String,String> map);
+    public int robTicket(HashMap<String, String> map);
 }

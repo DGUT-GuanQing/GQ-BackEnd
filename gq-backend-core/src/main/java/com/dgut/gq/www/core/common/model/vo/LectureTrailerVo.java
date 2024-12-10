@@ -22,7 +22,7 @@ public class LectureTrailerVo {
     private String id;
 
     @ApiModelProperty(value = "微信公众号地址")
-    private  String officialAccountUrl ;
+    private  String officialAccountUrl;
 
 
 

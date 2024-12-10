@@ -10,15 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * Feign推文模块客户端
  */
-@FeignClient(name = "gq-backend-core",contextId="poster")
-public interface PosterClient  {
+@FeignClient(name = "gq-backend-core", contextId = "poster")
+public interface PosterClient {
 
     /**
      * 远程调用新增或者更新推文信息
-     * @param
+     *
+     * @param posterTweetDto
      * @return
      */
-     @PostMapping("/feign-poster/updatePosterTweet")
-     SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto);
+    @PostMapping("/feign-poster/updatePosterTweet")
+    SystemJsonResponse saveUpdatePosterTweet(@RequestBody PosterTweetDto posterTweetDto);
 
 }

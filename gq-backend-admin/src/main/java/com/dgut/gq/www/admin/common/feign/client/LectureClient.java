@@ -9,12 +9,16 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Feign讲座模块客户端
  */
-@FeignClient(name = "gq-backend-core",contextId="lecture")
+@FeignClient(name = "gq-backend-core", contextId = "lecture")
 public interface LectureClient {
 
     /**
      * 远程调用获取参加讲座的人员
-     * @param
+     *
+     * @param page
+     * @param pageSize
+     * @param id
+     * @param status
      * @return
      */
     @GetMapping("/feign-lecture/AttendLectureUser")
@@ -25,6 +29,7 @@ public interface LectureClient {
 
     /**
      * 远程调用新增或者更新讲座
+     *
      * @param lectureDto
      * @return
      */
@@ -33,27 +38,30 @@ public interface LectureClient {
 
     /**
      * 远程调用获取讲座
+     *
      * @param page
      * @param pageSize
      * @param name
      * @return
      */
     @GetMapping("/feign-lecture/getLecture")
-    SystemJsonResponse getLecture(@RequestParam int page ,
+    SystemJsonResponse getLecture(@RequestParam int page,
                                   @RequestParam int pageSize,
                                   @RequestParam String name);
 
     /**
      * 远程调用导出参加讲座的用户
-     * @param
-     * @param
+     *
+     * @param id
+     * @param status
      * @return
      */
     @GetMapping("/feign-lecture/exportAttendLectureUser")
-    SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status);
+    SystemJsonResponse exportAttendLectureUser(@RequestParam String id, @RequestParam Integer status);
 
     /**
      * 远程调用删除讲座
+     *
      * @param id
      * @return
      */

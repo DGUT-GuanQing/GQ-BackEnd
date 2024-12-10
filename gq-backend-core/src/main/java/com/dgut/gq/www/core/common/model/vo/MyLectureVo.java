@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 
 /**
  * 我参加的讲座
+ *
  * @since 2023-5-24
  */
 @Data
@@ -26,12 +27,11 @@ public class MyLectureVo {
     private String id;
 
     @ApiModelProperty(value = "讲座预告微信公众号地址")
-    private  String officialAccountUrl ;
-
+    private String officialAccountUrl;
 
 
     @ApiModelProperty(value = "第几期讲座")
-    private  Integer term;
+    private Integer term;
 
 
     @ApiModelProperty(value = "讲座预告名称")
@@ -39,19 +39,18 @@ public class MyLectureVo {
 
 
     @ApiModelProperty(value = "讲座预告图片地址")
-    private  String  image;
-
+    private String image;
 
 
     @ApiModelProperty(value = "嘉宾名称")
-    private  String guestName;
+    private String guestName;
 
 
     @ApiModelProperty(value = "讲座地点",
             name = "place",
             required = true
     )
-    private  String place;
+    private String place;
 
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -66,12 +65,12 @@ public class MyLectureVo {
     @ApiModelProperty(value = "讲座结束时间",
             required = true
     )
-    private  LocalDateTime endTime;
+    private LocalDateTime endTime;
 
 
     @ApiModelProperty(value = "0或者1-表示未观看 2-表示观看",
             required = true
     )
-   private  Integer status;
+    private Integer status;
 
 }

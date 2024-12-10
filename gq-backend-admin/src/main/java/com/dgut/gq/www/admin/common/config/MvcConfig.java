@@ -22,9 +22,10 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * 拦截处理
+ *
+ * @author hyj
+ * @version 1.0
  * @since 2022-10-7
- * @author  hyj
- * @version  1.0
  */
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
@@ -36,6 +37,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
     /**
      * 跨域处理
+     *
      * @param registry
      */
     @Override
@@ -47,7 +49,7 @@ public class MvcConfig implements WebMvcConfigurer {
                 //配置请求来源
                 .allowedOrigins("*")
                 //允许访问的方法
-                .allowedMethods("GET","POST","DELETE","PUT","OPTION")
+                .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTION")
                 //最大效应时间
                 .maxAge(3600)
                 .allowedHeaders("*")
@@ -56,10 +58,11 @@ public class MvcConfig implements WebMvcConfigurer {
     }
 
     /**
-     *   实现拦截
+     * 实现拦截
      *
      * @param registry
      */
+    @SuppressWarnings("all")
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //中央认证登录拦截器配置不用拦截的接口
@@ -67,7 +70,7 @@ public class MvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/backend/**",
                         "/lecture/page",
-                        "/*.svg","/*.png","/*.js","/*.css","/*.html",
+                        "/*.svg", "/*.png", "/*.js", "/*.css", "/*.html",
                         "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**",
                         "/getLoginData",
                         "/25fVBQwXXS.txt"
@@ -75,35 +78,37 @@ public class MvcConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(){
-        MappingJackson2HttpMessageConverter converter =new MappingJackson2HttpMessageConverter();
+    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(objectMapper);
         return converter;
     }
+
     //@Bean
-    ObjectMapper objectMapper(){
-        ObjectMapper om =new ObjectMapper();
+    ObjectMapper objectMapper() {
+        ObjectMapper om = new ObjectMapper();
         om.setSerializationInclusion(JsonInclude.Include.ALWAYS);
-        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS,false);
+        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss"));
-        return  om;
+        return om;
     }
 
     /**
-     *防止@EnableMvc把静态资源覆盖了
+     * 防止@EnableMvc把静态资源覆盖了
+     *
      * @param registry
      */
-     public  void addResourceHandlers(ResourceHandlerRegistry registry){
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //解决静态资源
-         registry.addResourceHandler("/**")
-                 .addResourceLocations("classpath:/static/");
-         //swagger
-         registry.addResourceHandler("/swagger-ui.html")
-                 .addResourceLocations("classpath:/META-INF/resources/");
-         //swagger无法访问js
-         registry.addResourceHandler("/webjars/**")
-                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
-     }
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
+        //swagger
+        registry.addResourceHandler("/swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+        //swagger无法访问js
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
 
     @Override
     public void addFormatters(FormatterRegistry registry) {

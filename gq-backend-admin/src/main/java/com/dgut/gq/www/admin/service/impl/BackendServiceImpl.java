@@ -31,7 +31,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
-;import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,9 +39,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 后台管理
- * @since  2022-10-8
- * @author  hyj
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-8
  */
 @Service
 public class BackendServiceImpl implements BackendService, UserDetailsService {
@@ -67,25 +68,25 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Override
     public SystemJsonResponse login(String userName, String password) {
         //后台管理密码
-        UsernamePasswordAuthenticationToken authenticationToken=
-                new UsernamePasswordAuthenticationToken(userName,password);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userName, password);
 
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
-        if(Objects.isNull(authenticate)) {
+        if (Objects.isNull(authenticate)) {
             throw new GlobalSystemException(
                     GlobalResponseCode.ACCOUNT_NOT_EXIST.getCode(),
                     GlobalResponseCode.ACCOUNT_NOT_EXIST.getMessage());
         }
 
         //认证成功把全部数据封装为LoginUser存入redis  方便后续权限的管理
-        String key = RedisGlobalKey.PERMISSION+userName;
+        String key = RedisGlobalKey.PERMISSION + userName;
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
-        stringRedisTemplate.expire(key,1, TimeUnit.DAYS);
+        stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
 
         String jwt = JwtUtil.createJWT(userName);
-        return  SystemJsonResponse.success(jwt);
+        return SystemJsonResponse.success(jwt);
     }
 
     @Override
@@ -94,17 +95,17 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         UsernamePasswordAuthenticationToken authentication =
                 (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        LoginUser loginUser= (LoginUser) authentication.getPrincipal();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         String userName = loginUser.getUser().getUserName();
 
         //删除redis对应信息
-        String key = RedisGlobalKey.PERMISSION+userName;
+        String key = RedisGlobalKey.PERMISSION + userName;
         stringRedisTemplate.delete(key);
     }
 
     @Override
     public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
-        return lectureClient.getAttendLectureUser(page,pageSize,id,status);
+        return lectureClient.getAttendLectureUser(page, pageSize, id, status);
     }
 
     @Override
@@ -119,17 +120,17 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
-        return lectureClient.getLecture(page,pageSize,name);
+        return lectureClient.getLecture(page, pageSize, name);
     }
 
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
-        return lectureClient.exportAttendLectureUser(id,status);
+        return lectureClient.exportAttendLectureUser(id, status);
     }
 
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
-        return recruitClient.exportCurriculumVitae(departmentId,term);
+        return recruitClient.exportCurriculumVitae(departmentId, term);
     }
 
     @Override
@@ -139,7 +140,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
-       return  recruitClient.deleteDepartment(id);
+        return recruitClient.deleteDepartment(id);
     }
 
     @Override
@@ -162,11 +163,11 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         //远程调用用户模块
         User user = userClient.getUserByUserName(userName);
         //判断用户是否存在数据库中
-        Optional<User> optionalUser=Optional.ofNullable(user);
+        Optional<User> optionalUser = Optional.ofNullable(user);
 
         //不存在就抛出异常
-        if(!optionalUser.isPresent()){
-            throw  new GlobalSystemException(
+        if (!optionalUser.isPresent()) {
+            throw new GlobalSystemException(
                     GlobalResponseCode.OPERATE_FAIL.getCode(),
                     "账户不存在");
         }
@@ -176,7 +177,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         List<String> list = new ArrayList<>();
         list.add(permission);
 
-        return new LoginUser(user,list);
+        return new LoginUser(user, list);
     }
 }
 

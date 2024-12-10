@@ -14,9 +14,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * 配置redis
- * @author  hyj
- * @since  2022-9-21
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-9-21
  */
 @Configuration
 public class RedisConfig {
@@ -28,9 +29,8 @@ public class RedisConfig {
     private String redisPassword;
 
     @Bean
-    @SuppressWarnings(value = { "unchecked", "rawtypes" })
-    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory)
-    {
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
@@ -50,14 +50,14 @@ public class RedisConfig {
 
     /**
      * 配置redissonClient
+     *
      * @return
      */
     @Bean
     public RedissonClient redissonClient() {
         //配置
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://"+redisAddress + ":6379")
-                .setPassword(redisPassword);
+        config.useSingleServer().setAddress("redis://" + redisAddress + ":6379").setPassword(redisPassword);
 
         //创建对象
         return Redisson.create(config);

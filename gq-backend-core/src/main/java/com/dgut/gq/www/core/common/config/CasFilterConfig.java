@@ -21,7 +21,6 @@ import org.springframework.core.Ordered;
  * 修改人：
  * 修改内容：
  * </pre>
- *
  */
 @Configuration
 public class CasFilterConfig {
@@ -29,7 +28,7 @@ public class CasFilterConfig {
     /**
      * 需要走cas拦截的地址（/* 所有地址都拦截）
      */
-    private  final static String URL_PATTERN="/user/getUserInfo" ;
+    private static final String URL_PATTERN = "/user/getUserInfo";
 
     /**
      * 默认的cas地址，防止通过 配置信息获取不到
@@ -73,6 +72,7 @@ public class CasFilterConfig {
      * @return
      */
     @Bean
+    @SuppressWarnings("all")
     public FilterRegistrationBean AuthenticationFilter() {
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new AuthenticationFilter());
@@ -90,6 +90,7 @@ public class CasFilterConfig {
      * @return
      */
     @Bean
+    @SuppressWarnings("all")
     public FilterRegistrationBean Cas30ProxyReceivingTicketValidationFilter() {
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new Cas30ProxyReceivingTicketValidationFilter());

@@ -5,10 +5,10 @@ import java.io.IOException;
 
 /**
  * web工具类
- * @author  hyj
- * @since  2022-10-20
- * @version  1.0
  *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-20
  */
 public class WebUtil {
 
@@ -16,7 +16,7 @@ public class WebUtil {
      * 将字符串渲染到客户端
      *
      * @param response 渲染对象
-     * @param string 待渲染的字符串
+     * @param string   待渲染的字符串
      * @return null
      */
     public static String renderString(HttpServletResponse response, String string) {
@@ -25,8 +25,7 @@ public class WebUtil {
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
             response.getWriter().print(string);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;

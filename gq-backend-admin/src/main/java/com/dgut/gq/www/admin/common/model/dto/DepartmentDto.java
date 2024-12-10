@@ -1,9 +1,5 @@
 package com.dgut.gq.www.admin.common.model.dto;
 
-/**
- * @author  hyj
- * @since 2023-5-30
- */
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
@@ -13,7 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 部门dto
+ * @author hyj
+ * @since 2023-5-30
  */
 @Data
 @ApiModel(description = "接受部门的类")

@@ -9,14 +9,16 @@ import com.dgut.gq.www.common.common.SystemJsonResponse;
 
 /**
  * 后台
- * @author  hyj
- * @since  2022-10-8
- * @version  1.0
+ *
+ * @author hyj
+ * @version 1.0
+ * @since 2022-10-8
  */
 public interface BackendService {
 
     /**
      * 登陆
+     *
      * @param username
      * @param password
      * @return
@@ -30,6 +32,7 @@ public interface BackendService {
 
     /**
      * 获取参加讲座的用户
+     *
      * @param page
      * @param pageSize
      * @param id
@@ -40,6 +43,7 @@ public interface BackendService {
 
     /**
      * 更新或者新增讲座
+     *
      * @param lectureDto
      * @return
      */
@@ -47,6 +51,7 @@ public interface BackendService {
 
     /**
      * 更新或者新增推文
+     *
      * @param posterTweetDto
      * @return
      */
@@ -54,6 +59,7 @@ public interface BackendService {
 
     /**
      * 后台获取讲座
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -63,6 +69,7 @@ public interface BackendService {
 
     /**
      * 导出参加讲座的用户
+     *
      * @param id
      * @param status
      * @return
@@ -71,6 +78,7 @@ public interface BackendService {
 
     /**
      * 导出简历
+     *
      * @param departmentId
      * @param term
      * @return
@@ -79,6 +87,7 @@ public interface BackendService {
 
     /**
      * 删除讲座
+     *
      * @param id
      * @return
      */
@@ -86,6 +95,7 @@ public interface BackendService {
 
     /**
      * 删除部门
+     *
      * @param id
      * @return
      */
@@ -93,6 +103,7 @@ public interface BackendService {
 
     /**
      * 删除职位
+     *
      * @param id
      * @return
      */
@@ -100,6 +111,7 @@ public interface BackendService {
 
     /**
      * 新增或者更新部门
+     *
      * @param departmentDto
      * @return
      */
@@ -107,6 +119,7 @@ public interface BackendService {
 
     /**
      * 新增或者更新职位
+     *
      * @param positionDto
      * @return
      */

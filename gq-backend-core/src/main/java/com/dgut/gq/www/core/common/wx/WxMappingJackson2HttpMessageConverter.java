@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- ** 微信接口返回的Content-Type是text/plain格式, json不能自动解析*
- * @since  2022-10-17
- * @version  1.0
+ * * 微信接口返回的Content-Type是text/plain格式, json不能自动解析*
+ *
+ * @version 1.0
+ * @since 2022-10-17
  */
 public class WxMappingJackson2HttpMessageConverter extends MappingJackson2HttpMessageConverter {
     public WxMappingJackson2HttpMessageConverter() {

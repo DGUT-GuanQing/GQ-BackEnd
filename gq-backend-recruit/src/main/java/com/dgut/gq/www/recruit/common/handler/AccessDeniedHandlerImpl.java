@@ -15,12 +15,13 @@ import java.io.IOException;
 
 /**
  * 授权失败异常拦截
+ *
+ * @author hyj
+ * @version 1.0
  * @since 2022-9-12
- * @author  hyj
- * @version  1.0
  */
 @Component
-public class AccessDeniedHandlerImpl implements AccessDeniedHandler{
+public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {

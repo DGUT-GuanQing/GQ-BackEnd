@@ -18,59 +18,67 @@ public class LectureServer {
 
     /**
      * 远程调用获取参加讲座的人员
-     * @param
+     *
+     * @param page
+     * @param pageSize
+     * @param id
+     * @param status
      * @return
      */
     @GetMapping("/AttendLectureUser")
     SystemJsonResponse getAttendLectureUser(@RequestParam int page,
-                                          @RequestParam int pageSize,
-                                          @RequestParam String id,
-                                          @RequestParam Integer status){
-        return lectureService.getAttendLectureUser(page,pageSize,id,status);
+                                            @RequestParam int pageSize,
+                                            @RequestParam String id,
+                                            @RequestParam Integer status) {
+        return lectureService.getAttendLectureUser(page, pageSize, id, status);
     }
 
     /**
      * 远程调用新增或者更新讲座
+     *
      * @param lectureDto
      * @return
      */
     @PostMapping("/updateSaveLecture")
-    SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto){
+    SystemJsonResponse updateOrSaveLecture(@RequestBody LectureDto lectureDto) {
         return lectureService.updateSaveLecture(lectureDto);
     }
 
     /**
      * 远程调用获取讲座
+     *
      * @param page
      * @param pageSize
      * @param name
      * @return
      */
     @GetMapping("/getLecture")
-    SystemJsonResponse getLecture(@RequestParam int page ,
+    SystemJsonResponse getLecture(@RequestParam int page,
                                   @RequestParam int pageSize,
-                                  @RequestParam String name){
-        return lectureService.getLecture(page,pageSize,name);
+                                  @RequestParam String name) {
+        return lectureService.getLecture(page, pageSize, name);
     }
 
     /**
      * 导出参加讲座的用户
-     * @param
-     * @param
+     *
+     * @param id
+     * @param status
      * @return
      */
     @GetMapping("/exportAttendLectureUser")
-    SystemJsonResponse exportAttendLectureUser(@RequestParam  String id, @RequestParam Integer status){
-        return lectureService.exportAttendLectureUser(id,status);
+    SystemJsonResponse exportAttendLectureUser(@RequestParam String id, @RequestParam Integer status) {
+        return lectureService.exportAttendLectureUser(id, status);
     }
 
     /**
      * 远程调用删除讲座
+     *
      * @param id
      * @return
      */
     @DeleteMapping("/deleteLecture/{id}")
-    SystemJsonResponse deleteLecture(@PathVariable String id){
+    SystemJsonResponse deleteLecture(@PathVariable String id) {
         return lectureService.deleteLecture(id);
     }
 }

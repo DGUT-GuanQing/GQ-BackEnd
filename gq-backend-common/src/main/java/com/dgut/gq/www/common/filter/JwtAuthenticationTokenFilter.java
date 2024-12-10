@@ -26,19 +26,24 @@ import java.util.Objects;
  * 判断小程序token
  * 有没有过期
  * 最后还要配置到security中
+ *
+ * @author hyj
+ * @version 1.0
  * @since 2022-9-9
- * @author  hyj
- * @version  1.0
  */
 
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-   @Autowired
-   private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws RuntimeException,ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws RuntimeException, ServletException, IOException {
         String token = request.getHeader("token");
         if (!StringUtils.hasText(token)) {
             filterChain.doFilter(request, response);
@@ -56,15 +61,15 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         openid = claims.getSubject();
 
         //从redis中获取信息，查看是否登录并且授予权限
-        String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION +openid);
+        String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION + openid);
         LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
-        if(Objects.isNull(loginUser)||Objects.isNull(loginUser.getUser())){
+        if (Objects.isNull(loginUser) || Objects.isNull(loginUser.getUser())) {
             return;
         }
 
         //获取权限信息封装到Authentication中
         UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(loginUser, null, ( loginUser).getAuthorities());
+                new UsernamePasswordAuthenticationToken(loginUser, null, (loginUser).getAuthorities());
 
         //将信息存入 SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

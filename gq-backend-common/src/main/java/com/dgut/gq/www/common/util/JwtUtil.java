@@ -6,11 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -19,8 +15,9 @@ import java.util.UUID;
 
 /**
  * JWT工具类
+ *
  * @author hyj
- * @since  2022-9-26
+ * @since 2022-9-26
  */
 
 @Configuration
@@ -32,36 +29,38 @@ public class JwtUtil {
     public static String JWT_KEY;
 
     @Value("${jwt.secret}")
-    public void setJwtKey(String secret){
+    public void setJwtKey(String secret) {
         JwtUtil.JWT_KEY = secret;
     }
 
     //有效期
-    public static final Long JWT_TTL = 60* 60 *1000L;// 60 * 60 *1000  一个小时
+    public static final Long JWT_TTL = 60 * 60 * 1000L; // 60 * 60 *1000  一个小时
 
-    public static String getUUID(){
+    public static String getUUID() {
         String token = UUID.randomUUID().toString().replaceAll("-", "");
         return token;
     }
 
     /**
      * 生成jtw
+     *
      * @param subject token中要存放的数据（json格式）
      * @return
      */
     public static String createJWT(String subject) {
-        JwtBuilder builder = getJwtBuilder(subject, null, getUUID());// 设置过期时间
+        JwtBuilder builder = getJwtBuilder(subject, null, getUUID()); // 设置过期时间
         return builder.compact();
     }
 
     /**
      * 生成jtw
-     * @param subject token中要存放的数据（json格式）
+     *
+     * @param subject   token中要存放的数据（json格式）
      * @param ttlMillis token超时时间
      * @return
      */
     public static String createJWT(String subject, Long ttlMillis) {
-        JwtBuilder builder = getJwtBuilder(subject, ttlMillis, getUUID());// 设置过期时间
+        JwtBuilder builder = getJwtBuilder(subject, ttlMillis, getUUID()); // 设置过期时间
         return builder.compact();
     }
 
@@ -70,13 +69,12 @@ public class JwtUtil {
         SecretKey secretKey = generalKey();
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        if(ttlMillis==null){
-            ttlMillis=JwtUtil.JWT_TTL;
+        if (ttlMillis == null) {
+            ttlMillis = JwtUtil.JWT_TTL;
         }
         long expMillis = nowMillis + ttlMillis;
         Date expDate = new Date(expMillis);
-        return Jwts.builder()
-                .setId(uuid)              //唯一的ID
+        return Jwts.builder().setId(uuid)              //唯一的ID
                 .setSubject(subject)   // 主题  可以是JSON数据
                 .setIssuer("hyj")     // 签发者
                 .setIssuedAt(now)      // 签发时间
@@ -86,24 +84,23 @@ public class JwtUtil {
 
     /**
      * 创建token
+     *
      * @param id
      * @param subject
      * @param ttlMillis
      * @return
      */
     public static String createJWT(String id, String subject, Long ttlMillis) {
-        JwtBuilder builder = getJwtBuilder(subject, ttlMillis, id);// 设置过期时间
+        JwtBuilder builder = getJwtBuilder(subject, ttlMillis, id); // 设置过期时间
         return builder.compact();
     }
 
     public static void main(String[] args) throws Exception {
-        Claims claims = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwZGVhNzNjNGJjOWQ0MmM2YTZmNzYwNTA4NmE2YTI5YiIsInN1YiI6IjEyMzQ1Njc4OTAiLCJpc3MiOiJzZyIsImlhdCI6MTY2NDIwOTEyNCwiZXhwIjoxNjY0MjEyNzI0fQ.Hqyf-Tzi0Cjh30vXJ5e1__cVT4mwCwUF2CmIPnwUd7E");
-        String subject = claims.getSubject();
-        System.out.println(subject);
     }
 
     /**
      * 生成加密后的秘钥 secretKey
+     *
      * @return
      */
     public static SecretKey generalKey() {
@@ -116,15 +113,12 @@ public class JwtUtil {
      * 解析
      *
      * @param jwt
-     * @return
+     * @return Claims
      * @throws Exception
      */
     public static Claims parseJWT(String jwt) throws Exception {
         SecretKey secretKey = generalKey();
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(jwt)
-                .getBody();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwt).getBody();
     }
 
 }

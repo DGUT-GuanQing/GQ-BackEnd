@@ -20,10 +20,11 @@ public class UserServer {
 
     /**
      * 远程调用根据用户名获取用户信息
+     *
      * @return
      */
     @GetMapping("/getUserByUserName")
-    User getUserByUserName(@RequestParam String userName){
+    User getUserByUserName(@RequestParam String userName) {
         return userService.getUserByUsername(userName);
     }
 

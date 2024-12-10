@@ -26,8 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * rabnbitmq监听类
- * @author  hyj
- * @since  2022-12-15
+ *
+ * @author hyj
+ * @since 2022-12-15
  */
 @Component
 public class RabbitMqListener {
@@ -49,50 +50,50 @@ public class RabbitMqListener {
      */
     @RabbitListener(queues = "gq-rob-ticket-queue")
     @Transactional
-    public  void robTicket(Message message, Channel channel)  throws IOException {
-        String str =  new String(message.getBody());
-        UserLectureInfo userLectureInfo = JSONUtil.toBean(str,UserLectureInfo.class);
+    public void robTicket(Message message, Channel channel) throws IOException {
+        String str = new String(message.getBody());
+        UserLectureInfo userLectureInfo = JSONUtil.toBean(str, UserLectureInfo.class);
         String lectureId = userLectureInfo.getLectureId();
         String openid = userLectureInfo.getOpenid();
         String key = RedisGlobalKey.USER_MESSAGE + openid;
         try {
             boolean flag = robMsgIsInDb(userLectureInfo);
-            if(!flag) {
+            if (!flag) {
                 userLectureInfoMapper.insert(userLectureInfo);
                 LambdaUpdateWrapper<Lecture> updateWrapper = new UpdateWrapper<Lecture>().lambda()
                         .setSql("ticket_number = ticket_number - 1")
                         .eq(Lecture::getId, lectureId)
-                        .eq(Lecture::getIsDeleted,0)
+                        .eq(Lecture::getIsDeleted, 0)
                         .gt(Lecture::getTicketNumber, 0);
                 lectureMapper.update(null, updateWrapper);
                 stringRedisTemplate.delete(key);
             }
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
         } catch (Exception e) {
-                //如果异常尝试重新消费,两次过后记录报错
-                String errorKey = RedisGlobalKey.CONSUME_FAIL + openid;
-                str = stringRedisTemplate.opsForValue().get(errorKey);
-                int value = 1;
-                if(str != null) {
-                    value = Integer.parseInt(str) + 1;
-                }
-                if(value >= 3){
-                    RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 2);
-                    channel.basicAck(message.getMessageProperties().getDeliveryTag(),true);
-                }else {
-                    stringRedisTemplate.opsForValue().set(errorKey, String.valueOf(value));
-                    stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
-                    channel.basicNack(message.getMessageProperties().getDeliveryTag(), true, true);
-                }
+            //如果异常尝试重新消费,两次过后记录报错
+            String errorKey = RedisGlobalKey.CONSUME_FAIL + openid;
+            str = stringRedisTemplate.opsForValue().get(errorKey);
+            int value = 1;
+            if (str != null) {
+                value = Integer.parseInt(str) + 1;
+            }
+            if (value >= 3) {
+                RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 2);
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
+            } else {
+                stringRedisTemplate.opsForValue().set(errorKey, String.valueOf(value));
+                stringRedisTemplate.expire(key, 20, TimeUnit.MINUTES);
+                channel.basicNack(message.getMessageProperties().getDeliveryTag(), true, true);
+            }
         }
     }
 
     private boolean robMsgIsInDb(UserLectureInfo userLectureInfo) {
         LambdaQueryWrapper<UserLectureInfo> userLectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userLectureInfoLambdaQueryWrapper
-                .eq(UserLectureInfo::getLectureId,userLectureInfo.getLectureId())
-                .eq(UserLectureInfo::getOpenid,userLectureInfo.getOpenid())
-                .eq(UserLectureInfo::getIsDeleted,0);
+                .eq(UserLectureInfo::getLectureId, userLectureInfo.getLectureId())
+                .eq(UserLectureInfo::getOpenid, userLectureInfo.getOpenid())
+                .eq(UserLectureInfo::getIsDeleted, 0);
         Integer count = userLectureInfoMapper.selectCount(userLectureInfoLambdaQueryWrapper);
         return count > 0;
     }
