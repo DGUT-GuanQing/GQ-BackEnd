@@ -99,55 +99,13 @@ cd /opt/gq-backend
 执行  ./deploy.sh
 ```
 
-## 分支命名规范
-
-1. 分支名带上类型
-2. 分支名表述解决了什么问题
-
-分支命名必须标准化, 参照该格式进行分支命名
-```bash
-<type>/<description>
-```
-举例:
-- 开发新功能
-```bash
-feature/<feature description>
-e.g.: feature/dev_user_login
-```
-
-- 如果他是为了修复 bug 而开辟的分支:
-```bash
-bugfix/<bug name>
-e.g.: bugfix/login_error
-
-```
-其他分支功能类型如下:
-```
-master: 主分支，主要用来版本发布。
-develop：日常开发分支，该分支正常保存了开发的最新代码。
-feature：具体的功能开发分支，只与 develop 分支交互。
-release：release 分支可以认为是 master 分支的未测试
-版。比如说某一期的功能全部开发完成，那么就将 develop 
-分支合并到 release 分支，测试没有问题并且到了发布日期
-就合并到 master 分支，进行发布。
-hotfix： 线上 bug 修复分支
-```
-
-### 提交信息规范
-
-```bash
-<type>: <subject>
-e.g.: feat: 添加获取讲座接口
-```
+## git提交信息规范
 
 ### type
 
 ```text
-# 主要type
 feat:     增加新功能
 fix:      修复 bug
-
-# 特殊type
 docs:     只改动了文档相关的内容
 style:    不影响代码含义的改动，例如去掉空格、改变缩进、增删分号
 build:    构造工具的或者外部依赖的改动，例如 webpack，npm
