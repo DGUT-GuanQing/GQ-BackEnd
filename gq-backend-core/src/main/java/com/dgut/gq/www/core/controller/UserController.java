@@ -5,7 +5,7 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.common.util.ParseToken;
 import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.common.model.vo.MyLectureVo;

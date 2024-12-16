@@ -11,8 +11,8 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
-import com.dgut.gq.www.common.model.entity.LoginUser;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.LoginUser;
+import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.common.util.JwtUtil;
 import com.dgut.gq.www.core.mapper.LectureMapper;
 import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;

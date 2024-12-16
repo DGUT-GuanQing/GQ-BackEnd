@@ -1,4 +1,4 @@
-package com.dgut.gq.www.common.model.entity;
+package com.dgut.gq.www.common.db.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

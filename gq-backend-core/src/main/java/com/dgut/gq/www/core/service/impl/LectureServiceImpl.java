@@ -9,7 +9,7 @@ import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.core.common.config.RabbitmqConfig;
 import com.dgut.gq.www.core.common.model.dto.LectureDto;
 import com.dgut.gq.www.core.common.model.entity.Lecture;

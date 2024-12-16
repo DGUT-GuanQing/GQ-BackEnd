@@ -2,7 +2,7 @@ package com.dgut.gq.www.recruit.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.HashMap;

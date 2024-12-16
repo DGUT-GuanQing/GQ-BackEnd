@@ -2,7 +2,7 @@ package com.dgut.gq.www.core.service;
 
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.core.common.model.dto.UserDto;
 
 public interface UserService {

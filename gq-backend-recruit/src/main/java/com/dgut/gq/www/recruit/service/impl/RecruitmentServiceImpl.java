@@ -7,7 +7,7 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.recruit.mapper.CurriculumVitaeMapper;
 import com.dgut.gq.www.recruit.mapper.DepartmentMapper;
 import com.dgut.gq.www.recruit.mapper.PositionMapper;

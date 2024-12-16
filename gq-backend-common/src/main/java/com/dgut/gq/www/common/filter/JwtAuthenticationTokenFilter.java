@@ -3,7 +3,7 @@ package com.dgut.gq.www.common.filter;
 
 import cn.hutool.json.JSONUtil;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
-import com.dgut.gq.www.common.model.entity.LoginUser;
+import com.dgut.gq.www.common.db.entity.LoginUser;
 import com.dgut.gq.www.common.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
