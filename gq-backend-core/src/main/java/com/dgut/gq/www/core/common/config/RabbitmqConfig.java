@@ -1,6 +1,7 @@
 package com.dgut.gq.www.core.common.config;
 
-import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
+
+import com.dgut.gq.www.common.db.mapper.RecordRobTicketErrorMapper;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
