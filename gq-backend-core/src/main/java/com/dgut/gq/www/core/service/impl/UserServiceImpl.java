@@ -1,34 +1,40 @@
 package com.dgut.gq.www.core.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
+import com.dgut.gq.www.common.db.entity.Lecture;
 import com.dgut.gq.www.common.db.entity.LoginUser;
 import com.dgut.gq.www.common.db.entity.User;
+import com.dgut.gq.www.common.db.entity.UserLectureInfo;
+import com.dgut.gq.www.common.db.mapper.LectureMapper;
+import com.dgut.gq.www.common.db.mapper.UserLectureInfoMapper;
+import com.dgut.gq.www.common.db.mapper.UserMapper;
+import com.dgut.gq.www.common.db.service.GqLectureService;
+import com.dgut.gq.www.common.db.service.GqUserLectureInfoService;
+import com.dgut.gq.www.common.db.service.GqUserService;
 import com.dgut.gq.www.common.util.JwtUtil;
-import com.dgut.gq.www.core.mapper.LectureMapper;
-import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
-import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.common.model.dto.UserDto;
-import com.dgut.gq.www.core.common.model.entity.Lecture;
-import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
 import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
 import com.dgut.gq.www.core.common.model.vo.UserVo;
-import com.dgut.gq.www.core.service.UserService;
 import com.dgut.gq.www.core.common.util.HttpUtil;
+import com.dgut.gq.www.core.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.jasig.cas.client.validation.Assertion;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +49,7 @@ import java.util.stream.Collectors;
  * @since 2022-9-16
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -60,6 +67,20 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private HttpUtil httpUtil;
 
+    @Autowired
+    private GqUserService gqUserService;
+
+    @Autowired
+    private GqUserLectureInfoService gqUserLectureInfoService;
+
+    @Autowired
+    private GqLectureService gqLectureService;
+
+    /**
+     * cas client 默认的session key
+     */
+    public static final String CAS = "_const_cas_assertion_";
+
     /**
      * 微信登录
      *
@@ -71,20 +92,17 @@ public class UserServiceImpl implements UserService {
         //获取用户的openid
         String openid = httpUtil.getOpenid(code);
         //String openid = code;
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenid, openid));
+        User user = gqUserService.getByOpenid(openid);
         Optional<User> optionalUser = Optional.ofNullable(user);
-
         //第一次登录
         if (!optionalUser.isPresent()) {
             user = createUser(openid);
-            userMapper.insert(user);
+            gqUserService.save(user);
         } else {
             updateUser(user);
         }
-
         // 把全部数据封装为LoginUser存入redis  方便后续权限的管理
         LoginUser loginUser = createLoginUser(user);
-
         //封装权限
         String key = RedisGlobalKey.PERMISSION + openid;
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
@@ -106,7 +124,7 @@ public class UserServiceImpl implements UserService {
     private void updateUser(User user) {
         user.setCreateTime(null);
         user.setUpdateTime(LocalDateTime.now());
-        userMapper.updateById(user);
+        gqUserService.updateById(user);
     }
 
     private User createUser(String openid) {
@@ -130,19 +148,15 @@ public class UserServiceImpl implements UserService {
         UserVo userVo = Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
                 .map(user -> JSONUtil.toBean(user, UserVo.class))
                 .orElseGet(() -> {
+                    User user = gqUserService.getByOpenid(openid);
                     UserVo newUserVo = new UserVo();
-                    LambdaQueryWrapper<User> lq = new LambdaQueryWrapper<>();
-                    lq.eq(User::getOpenid, openid);
-                    User user = userMapper.selectOne(lq);
                     BeanUtils.copyProperties(user, newUserVo);
-
                     //存入redis
                     stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newUserVo));
                     stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
-
                     return newUserVo;
                 });
-
+        log.info("UserServiceImpl getMe = {}", JSONUtil.toJsonStr(userVo));
         return SystemJsonResponse.success(userVo);
     }
 
@@ -154,32 +168,21 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse getMyLecture(String openid, Integer page, Integer pageSize) {
-        Page<UserLectureInfo> pageInfo = new Page<>(page, pageSize);
-        LambdaQueryWrapper<UserLectureInfo> lectureInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        //条件
-        lectureInfoLambdaQueryWrapper.eq(UserLectureInfo::getOpenid, openid)
-                .orderByDesc(UserLectureInfo::getCreateTime)
-                .eq(UserLectureInfo::getIsDeleted, 0);
-        userLectureInfoMapper.selectPage(pageInfo, lectureInfoLambdaQueryWrapper);
+        Page<UserLectureInfo> pageInfo = gqUserLectureInfoService.getByOpenid(openid, page, pageSize);
         List<UserLectureInfo> records = pageInfo.getRecords();
-
-        //记录当前讲座的观看情况
+        log.info("UserServiceImpl getMyLecture UserLectureInfoRecords = {}", JSONUtil.toJsonStr(records));
+        // 记录当前讲座的观看情况
         HashMap<String, Integer> map = new HashMap<>();
         List<String> list = new ArrayList<>();
         for (UserLectureInfo record : records) {
             list.add(record.getLectureId());
             map.put(record.getLectureId(), record.getStatus());
         }
-
-        //拼接字符串,按照给的id顺序返回
-        String s = StrUtil.join(",", list);
+        // 查询讲座信息
+        List<Lecture> lectures = gqLectureService.getByIds(list);
+        log.info("UserServiceImpl getMyLecture lectures = {}", JSONUtil.toJsonStr(lectures));
         List<MyLectureVo> lectureVos = new ArrayList<>();
-        LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        if (list.size() > 0) {
-            lectureLambdaQueryWrapper.in(Lecture::getId, list)
-                    .eq(Lecture::getIsDeleted, 0)
-                    .last("ORDER BY FIELD(id," + s + ")");
-            List<Lecture> lectures = lectureMapper.selectList(lectureLambdaQueryWrapper);
+        if (CollectionUtils.isNotEmpty(lectures)) {
             lectureVos = lectures.stream().map(lecture -> {
                 MyLectureVo lectureVo = new MyLectureVo();
                 BeanUtil.copyProperties(lecture, lectureVo);
@@ -187,8 +190,7 @@ public class UserServiceImpl implements UserService {
                 return lectureVo;
             }).collect(Collectors.toList());
         }
-        Integer count = userLectureInfoMapper.selectCount(lectureInfoLambdaQueryWrapper);
-        SystemResultList systemResultList = new SystemResultList(lectureVos, count);
+        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
         return SystemJsonResponse.success(systemResultList);
     }
 
@@ -202,10 +204,7 @@ public class UserServiceImpl implements UserService {
     public SystemJsonResponse isGrabTicket(String openid) {
         String key = RedisGlobalKey.IS_GRAB_TICKETS;
         Boolean member = stringRedisTemplate.opsForSet().isMember(key, openid);
-        Boolean flag = true;
-        if (member == null || !member) {
-            flag = false;
-        }
+        boolean flag = member != null && member;
         return SystemJsonResponse.success(flag);
     }
 
@@ -245,20 +244,15 @@ public class UserServiceImpl implements UserService {
         lambdaQueryWrapper.eq(UserLectureInfo::getOpenid, openid);
 
         //先查询用户有没有抢到讲座
-        Integer count = userLectureInfoMapper.selectCount(lambdaQueryWrapper);
-        if (count == null || count == 0) {
+        UserLectureInfo userLectureInfo = gqUserLectureInfoService.getByLectureAndOpenid(lectureId, openid);
+        if (userLectureInfo == null) {
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "没有相关讲座记录");
         }
-
-        UserLectureInfo lectureInfo = userLectureInfoMapper.selectOne(lambdaQueryWrapper);
-        lectureInfo.setStatus(lectureInfo.getStatus() + 1);
+        userLectureInfo.setStatus(userLectureInfo.getStatus() + 1);
         //更新个人观看讲座记录
-        LambdaUpdateWrapper<User> updateWrapper = new UpdateWrapper<User>().lambda()
-                .setSql("race_number = race_number + 1")
-                .eq(User::getOpenid, openid);
-        userMapper.update(null, updateWrapper);
-        userLectureInfoMapper.updateById(lectureInfo);
-
+        gqUserService.updateRaceNumber(openid);
+        // 更新签到记录
+        gqUserLectureInfoService.updateById(userLectureInfo);
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), "签到成功");
     }
 
@@ -278,7 +272,7 @@ public class UserServiceImpl implements UserService {
         if (Objects.isNull(loginUser) || Objects.isNull(loginUser.getUser())) {
             LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(User::getOpenid, openid);
-            User user = userMapper.selectOne(lambdaQueryWrapper);
+            User user = gqUserService.getByOpenid(openid);
             permission = user.getPermission();
         } else {
             permission = loginUser.getPermission().get(0);
@@ -294,6 +288,42 @@ public class UserServiceImpl implements UserService {
         LambdaQueryWrapper<User> lq = new LambdaQueryWrapper<>();
         lq.eq(User::getUserName, username);
         return userMapper.selectOne(lq);
+    }
+
+    @Override
+    public SystemJsonResponse getLoginUserInfo(HttpServletRequest request, String id) {
+        Optional<User> optionalUser = Optional.ofNullable(gqUserService.getById(id));
+        if (!optionalUser.isPresent() || optionalUser.get().getOpenid() == null) {
+            return SystemJsonResponse.fail();
+        }
+        String openid = optionalUser.get().getOpenid();
+        Object cas = request.getSession().getAttribute(CAS);
+        Optional<Object> optionalObject = Optional.ofNullable(cas);
+
+        if (!optionalObject.isPresent()) {
+            return SystemJsonResponse.fail("中央认证失败");
+        }
+        Assertion assertion = (Assertion) cas;
+        String userName = assertion.getPrincipal().getName();
+        log.info("cas对接登录用户buildUserInfoByCas = {}", userName);
+        //获取属性值
+        Map<String, Object> attributes = assertion.getPrincipal().getAttributes();
+        //更新用户信息
+        User user = new User();
+        user.setOpenid(openid);
+        user.setName((String) attributes.get("cn"));
+        user.setCollege((String) attributes.get("eduPersonOrgDN"));
+        user.setStudentId((String) attributes.get("bindUserList"));
+        LambdaUpdateWrapper<User> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.eq(User::getOpenid, openid);
+        if (!gqUserService.update(user, lambdaUpdateWrapper)) {
+            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "该中央认证已经绑定过微信号,请联系管理员解绑");
+        }
+        //删除redis
+        stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
+        //设置中央认证缓存
+        stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid, openid);
+        return SystemJsonResponse.success();
     }
 
 }

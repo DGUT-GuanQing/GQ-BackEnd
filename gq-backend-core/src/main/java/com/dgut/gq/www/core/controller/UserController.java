@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.db.entity.User;
+import com.dgut.gq.www.common.db.mapper.UserMapper;
+import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.util.ParseToken;
-import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
 import com.dgut.gq.www.core.service.UserService;
 import com.google.zxing.BarcodeFormat;
@@ -15,7 +15,6 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
-
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jasig.cas.client.validation.Assertion;
@@ -49,11 +48,6 @@ public class UserController {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-
-    /**
-     * cas client 默认的session key
-     */
-    public static final String CAS = "_const_cas_assertion_";
 
     @Autowired
     private UserService userService;
@@ -129,38 +123,7 @@ public class UserController {
     @RequestMapping(value = "/getUserInfo", produces = {"application/json"}, method = RequestMethod.GET)
 
     public SystemJsonResponse getLoginUserInfo(HttpServletRequest request, String id) {
-        Optional<User> optionalUser = Optional.ofNullable(userMapper.selectById(id));
-        if (!optionalUser.isPresent() || optionalUser.get().getOpenid() == null) {
-            return SystemJsonResponse.fail();
-        }
-        String openid = optionalUser.get().getOpenid();
-        Object cas = request.getSession().getAttribute(CAS);
-        Optional<Object> optionalObject = Optional.ofNullable(cas);
-
-        if (!optionalObject.isPresent()) {
-            return SystemJsonResponse.fail("中央认证失败");
-        }
-        Assertion assertion = (Assertion) cas;
-        String userName = assertion.getPrincipal().getName();
-        log.error("cas对接登录用户buildUserInfoByCas：" + userName);
-        //获取属性值
-        Map<String, Object> attributes = assertion.getPrincipal().getAttributes();
-        //更新用户信息
-        User user = new User();
-        user.setOpenid(openid);
-        user.setName((String) attributes.get("cn"));
-        user.setCollege((String) attributes.get("eduPersonOrgDN"));
-        user.setStudentId((String) attributes.get("bindUserList"));
-        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(User::getOpenid, openid);
-        if (userMapper.update(user, lambdaQueryWrapper) == 0) {
-            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "该中央认证已经绑定过微信号,请联系管理员解绑");
-        }
-        //删除redis
-        stringRedisTemplate.delete(RedisGlobalKey.USER_MESSAGE + openid);
-        //设置中央认证缓存
-        stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid, openid);
-        return SystemJsonResponse.success();
+        return userService.getLoginUserInfo(request, id);
     }
 
     /**
