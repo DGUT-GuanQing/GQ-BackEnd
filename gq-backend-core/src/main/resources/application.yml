@@ -96,7 +96,7 @@ minio:
 
 logging:
   level:
-    root: error
+    root: info
 
 wx:
   appid: ${gq.wx.appid}
