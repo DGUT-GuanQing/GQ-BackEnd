@@ -41,4 +41,29 @@ public class GqUserLectureInfoServiceImpl
                 .one();
     }
 
+    @Override
+    public Page<UserLectureInfo> getByLectureId(int page, int pageSize, String id, Integer status) {
+        LambdaQueryChainWrapper<UserLectureInfo> lectureInfoChainWrapper = lambdaQuery();
+        lectureInfoChainWrapper.eq(UserLectureInfo::getIsDeleted, 0);
+        lectureInfoChainWrapper.eq(UserLectureInfo::getLectureId, id);
+        //如果是1查询参加讲座的
+        if (status == 1) {
+            lectureInfoChainWrapper.ge(UserLectureInfo::getStatus, status);
+        }
+        return lambdaQuery().page(new Page<>(page, pageSize));
+    }
+
+    @Override
+    public List<UserLectureInfo> getByLectureId(String id, Integer status) {
+        LambdaQueryChainWrapper<UserLectureInfo> lambdaQueryChainWrapper =  lambdaQuery();
+        //如果是1查询参加讲座的
+        if (status == 1) {
+            lambdaQueryChainWrapper.ge(UserLectureInfo::getStatus, 1);
+        }
+        return lambdaQueryChainWrapper
+               .eq(UserLectureInfo::getLectureId, id)
+               .eq(UserLectureInfo::getIsDeleted, 0)
+               .list();
+    }
+
 }

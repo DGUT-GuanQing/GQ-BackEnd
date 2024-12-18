@@ -77,7 +77,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/25fVBQwXXS.txt").permitAll()
-                .antMatchers("/feign-recruit/**").permitAll()
                 //swagger
                 .antMatchers("/swagger-resources/**", "/webjars/**",
                         "/v2/**", "/swagger-ui.html/**").permitAll()

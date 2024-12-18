@@ -1,24 +1,24 @@
 package com.dgut.gq.www.admin.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.dgut.gq.www.admin.common.feign.client.LectureClient;
-import com.dgut.gq.www.admin.common.feign.client.PosterClient;
-import com.dgut.gq.www.admin.common.feign.client.RecruitClient;
-import com.dgut.gq.www.admin.common.feign.client.UserClient;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dgut.gq.www.admin.common.model.dto.DepartmentDto;
 import com.dgut.gq.www.admin.common.model.dto.LectureDto;
 import com.dgut.gq.www.admin.common.model.dto.PositionDto;
 import com.dgut.gq.www.admin.common.model.dto.PosterTweetDto;
+import com.dgut.gq.www.admin.common.model.vo.CurriculumVitaeVo;
+import com.dgut.gq.www.admin.common.model.vo.LectureVo;
+import com.dgut.gq.www.admin.common.model.vo.UserVo;
 import com.dgut.gq.www.admin.service.BackendService;
-
-
 import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
+import com.dgut.gq.www.common.common.SystemResultList;
+import com.dgut.gq.www.common.db.entity.*;
+import com.dgut.gq.www.common.db.service.*;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
-import com.dgut.gq.www.common.db.entity.LoginUser;
-import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.common.util.JwtUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,12 +30,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 后台管理
@@ -54,16 +55,25 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    private UserClient userClient;
+    private GqUserLectureInfoService gqUserLectureInfoService;
 
     @Autowired
-    private LectureClient lectureClient;
+    private GqUserService gqUserService;
 
     @Autowired
-    private PosterClient posterClient;
+    private GqLectureService gqLectureService;
 
     @Autowired
-    private RecruitClient recruitClient;
+    private GqPosterTweetService gqPosterTweetService;
+
+    @Autowired
+    private GqDepartmentService gqDepartmentService;
+
+    @Autowired
+    private GqPositionService gqPositionService;
+
+    @Autowired
+    private GqCurriculumVitaeService gqCurriculumVitaeService;
 
     @Override
     public SystemJsonResponse login(String userName, String password) {
@@ -105,73 +115,232 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
-        return lectureClient.getAttendLectureUser(page, pageSize, id, status);
+        Page<UserLectureInfo> pageInfo  = gqUserLectureInfoService.getByLectureId(page, pageSize, id, status);
+        List<UserLectureInfo> records = pageInfo.getRecords();
+        List<String> userOpenidList = records.stream()
+                .map(UserLectureInfo::getOpenid)
+                .collect(Collectors.toList());
+        List<User> users = gqUserService.getByOpenIds(userOpenidList);
+        List<UserVo> userVoList = users.stream()
+                .map(user -> {
+                    UserVo userVo = new UserVo();
+                    BeanUtils.copyProperties(user, userVo);
+                    return userVo;
+                })
+                .collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(userVoList, (int) pageInfo.getTotal());
+
+        return SystemJsonResponse.success(systemResultList);
     }
 
     @Override
     public SystemJsonResponse updateOrSaveLecture(LectureDto lectureDto) {
-        return lectureClient.updateOrSaveLecture(lectureDto);
+        String key = RedisGlobalKey.UNSTART_LECTURE;
+        Lecture lecture = new Lecture();
+        BeanUtils.copyProperties(lectureDto, lecture);
+        lecture.setUpdateTime(LocalDateTime.now());
+        String id = lectureDto.getId();
+
+        String state;
+        //新增
+        if (id == null || id.equals("")) {
+            //插入数据库
+            lecture.setCreateTime(LocalDateTime.now());
+            gqLectureService.save(lecture);
+            //删除原来抢票的人
+            stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
+            //删除讲座
+            stringRedisTemplate.delete(RedisGlobalKey.UNSTART_LECTURE);
+            state = "新增成功";
+        } else {
+            gqLectureService.updateById(lecture);
+            //看redis的讲座是否要更新
+            Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
+                    .map(lec -> JSONUtil.toBean(lec, Lecture.class))
+                    .ifPresent(lec -> {
+                        if (lec.getId().equals(id)) {
+                            stringRedisTemplate.delete(key);
+                            //更新票的数量
+                            stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, lectureDto.getTicketNumber().toString());
+                        }
+                    });
+            state = "更新成功";
+        }
+        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), state);
     }
 
     @Override
     public SystemJsonResponse saveUpdatePosterTweet(PosterTweetDto posterTweetDto) {
-        return posterClient.saveUpdatePosterTweet(posterTweetDto);
+        String id = posterTweetDto.getId();
+        PosterTweet posterTweet = new PosterTweet();
+        BeanUtils.copyProperties(posterTweetDto, posterTweet);
+        posterTweet.setUpdateTime(LocalDateTime.now());
+        String state;
+        //新增
+        if (id == null || id.isEmpty()) {
+            //新增数据
+            posterTweet.setCreateTime(LocalDateTime.now());
+            gqPosterTweetService.save(posterTweet);
+            state = "新增成功";
+        } else {
+            gqPosterTweetService.updateById(posterTweet);
+            state = "更新成功";
+        }
+        stringRedisTemplate.delete(RedisGlobalKey.POSTER_TWEET + posterTweetDto.getType());
+        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), state);
     }
 
     @Override
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
-        return lectureClient.getLecture(page, pageSize, name);
+        Page<Lecture> pageInfo = gqLectureService.getBackendLectures(page, pageSize, name);
+        List<Lecture> records = pageInfo.getRecords();
+        List<Object> lectureVos = records.stream()
+                .map(lecture -> {
+                    LectureVo lectureVo = new LectureVo();
+                    BeanUtils.copyProperties(lecture, lectureVo);
+                    return lectureVo;
+                })
+                .collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
+
+        return SystemJsonResponse.success(systemResultList);
     }
 
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
-        return lectureClient.exportAttendLectureUser(id, status);
+        List<UserLectureInfo> records = gqUserLectureInfoService.getByLectureId(id, status);
+        List<String> userOpenidList = records.stream()
+                .map(UserLectureInfo::getOpenid)
+                .collect(Collectors.toList());
+        List<UserVo> userVoList = gqUserService.getByOpenIds(userOpenidList)
+                .stream()
+                .map(user -> {
+                    UserVo userVo = new UserVo();
+                    BeanUtils.copyProperties(user, userVo);
+                    return userVo;
+                })
+                .collect(Collectors.toList());
+        Integer count = userVoList.size();
+        SystemResultList systemResultList = new SystemResultList(userVoList, count);
+
+        return SystemJsonResponse.success(systemResultList);
     }
 
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
-        return recruitClient.exportCurriculumVitae(departmentId, term);
+        List<CurriculumVitae> curriculumVitaes = gqCurriculumVitaeService.getByDepartmentIdAndTerm(departmentId, term);
+        // TODO 批量查询
+        List<CurriculumVitaeVo> curriculumVitaeVoList = curriculumVitaes.stream().map(record -> {
+            User user = gqUserService.getByOpenid(record.getOpenid());
+            Department department = gqDepartmentService.getById(record.getDepartmentId());
+            Position position = gqPositionService.getById(record.getPositionId());
+            return buildCurriculumVitaeVo(record, user, department, position);
+        }).collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, curriculumVitaes.size());
+
+        return SystemJsonResponse.success(systemResultList);
     }
+
+    private CurriculumVitaeVo buildCurriculumVitaeVo(CurriculumVitae curriculumVitae, User user, Department department, Position position) {
+        CurriculumVitaeVo curriculumVitaeVo = new CurriculumVitaeVo();
+        BeanUtils.copyProperties(curriculumVitae, curriculumVitaeVo);
+        curriculumVitaeVo.setCollege(user.getCollege());
+        curriculumVitaeVo.setName(user.getName());
+        curriculumVitaeVo.setStudentId(user.getStudentId());
+        curriculumVitaeVo.setNaturalClass(user.getNaturalClass());
+        curriculumVitaeVo.setDepartmentName(department.getDepartmentName());
+        curriculumVitaeVo.setPositionName(position.getPositionName());
+        return curriculumVitaeVo;
+    }
+
 
     @Override
     public SystemJsonResponse deleteLecture(String id) {
-        return lectureClient.deleteLecture(id);
+        // 更新讲座记录
+        Lecture lecture = new Lecture();
+        lecture.setIsDeleted(1);
+        lecture.setId(id);
+        gqLectureService.updateById(lecture);
+        // 检查Redis中的讲座记录是否需要更新
+        Optional.ofNullable(stringRedisTemplate.opsForValue().get(RedisGlobalKey.UNSTART_LECTURE))
+                .map(lec -> JSONUtil.toBean(lec, Lecture.class))
+                .ifPresent(lec -> {
+                    if (lec.getId().equals(id)) {
+                        stringRedisTemplate.delete(RedisGlobalKey.IS_GRAB_TICKETS);
+                        stringRedisTemplate.delete(RedisGlobalKey.UNSTART_LECTURE);
+                        stringRedisTemplate.delete(RedisGlobalKey.TICKET_NUMBER);
+                    }
+                });
+
+        return SystemJsonResponse.success();
     }
 
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
-        return recruitClient.deleteDepartment(id);
+        Department department = new Department();
+        department.setIsDeleted(1);
+        department.setId(id);
+        gqDepartmentService.updateById(department);
+        return SystemJsonResponse.success();
     }
 
     @Override
     public SystemJsonResponse deletePosition(String id) {
-        return recruitClient.deletePosition(id);
+        Position position = new Position();
+        position.setIsDeleted(1);
+        position.setId(id);
+        gqPositionService.updateById(position);
+        return SystemJsonResponse.success();
     }
 
     @Override
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
-        return recruitClient.saveAndUpdateDep(departmentDto);
+        String id = departmentDto.getId();
+        Department department = new Department();
+        BeanUtils.copyProperties(departmentDto, department);
+        department.setUpdateTime(LocalDateTime.now());
+        String status;
+        //新增
+        if (id == null || id.isEmpty()) {
+            department.setCreateTime(LocalDateTime.now());
+            gqDepartmentService.save(department);
+            status = "新增成功";
+        } else {
+            gqDepartmentService.updateById(department);
+            status = "修改成功";
+        }
+        return SystemJsonResponse.success(status);
     }
 
     @Override
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
-        return recruitClient.saveAndUpdatePos(positionDto);
+        String id = positionDto.getId();
+        Position position = new Position();
+        BeanUtils.copyProperties(positionDto, position);
+        position.setUpdateTime(LocalDateTime.now());
+        String status;
+        if (id == null || id.isEmpty()) {
+            position.setCreateTime(LocalDateTime.now());
+            gqPositionService.save(position);
+            status = "新增成功";
+        } else {
+            gqPositionService.updateById(position);
+            status = "修改成功";
+        }
+        return SystemJsonResponse.success(status);
     }
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        //远程调用用户模块
-        User user = userClient.getUserByUserName(userName);
+        User user = gqUserService.getByUserName(userName);
         //判断用户是否存在数据库中
         Optional<User> optionalUser = Optional.ofNullable(user);
-
         //不存在就抛出异常
         if (!optionalUser.isPresent()) {
             throw new GlobalSystemException(
                     GlobalResponseCode.OPERATE_FAIL.getCode(),
                     "账户不存在");
         }
-
         //权限信息
         String permission = user.getPermission();
         List<String> list = new ArrayList<>();

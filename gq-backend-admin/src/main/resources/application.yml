@@ -63,13 +63,6 @@ mybatis-plus:
         #匹配数据库id增长
         id-type: ASSIGN_ID
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 3000 #单位毫秒
-        readTimeout: 3000 #单位毫秒
-
 logging:
   level:
     root: error

@@ -65,7 +65,7 @@ public class MvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         //中央认证登录拦截器配置不用拦截的接口
         registry.addInterceptor(new GqLoginInterceptor(stringRedisTemplate))
-                .excludePathPatterns("/recruitment/getAllCurriculumVitae", "/recruitment/getDepartment", "/recruitment/getPosition", "/feign-recruit/**", "/*.svg", "/*.png", "/*.js", "/*.css", "/*.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**", "/getLoginData", "/25fVBQwXXS.txt");
+                .excludePathPatterns("/recruitment/getAllCurriculumVitae", "/recruitment/getDepartment", "/recruitment/getPosition", "/*.svg", "/*.png", "/*.js", "/*.css", "/*.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**", "/getLoginData", "/25fVBQwXXS.txt");
     }
 
     @Bean

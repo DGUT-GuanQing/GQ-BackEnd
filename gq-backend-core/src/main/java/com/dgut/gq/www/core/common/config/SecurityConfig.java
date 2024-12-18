@@ -80,9 +80,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 对于登录接口 允许匿名访问
                 .antMatchers("/user/wxLogin/{code}").anonymous()
                 .antMatchers("/25fVBQwXXS.txt").permitAll()
-                .antMatchers("/feign-user/**").permitAll()
-                .antMatchers("/feign-lecture/**").permitAll()
-                .antMatchers("/feign-poster/**").permitAll()
                 //讲座全部信息所有人都可以访问
                 .antMatchers("/lecture/**").permitAll()
                 .antMatchers("/user/getUserInfo").permitAll()

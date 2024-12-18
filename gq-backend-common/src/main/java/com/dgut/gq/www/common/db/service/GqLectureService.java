@@ -34,4 +34,13 @@ public interface GqLectureService extends IService<Lecture> {
     Page<Lecture> getLectures(int page, int pageSize, String msg, int type);
 
     List<Lecture> getByIds(List<String> list);
+
+    /**
+     * 后台查询讲座
+     * @param page
+     * @param pageSize
+     * @param msg 搜索条件
+     * @return
+     */
+    Page<Lecture> getBackendLectures(int page, int pageSize, String msg);
 }

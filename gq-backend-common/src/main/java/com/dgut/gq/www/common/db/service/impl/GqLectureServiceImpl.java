@@ -1,6 +1,7 @@
 package com.dgut.gq.www.common.db.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -53,5 +54,22 @@ public class GqLectureServiceImpl extends ServiceImpl<LectureMapper, Lecture> im
                 .eq(Lecture::getIsDeleted, 0)
                 .last("ORDER BY FIELD(id," + s + ")")
                 .list();
+    }
+
+    @Override
+    public Page<Lecture> getBackendLectures(int page, int pageSize, String msg) {
+        LambdaQueryChainWrapper<Lecture> linkChainWrapper =  lambdaQuery();
+        Optional.ofNullable(msg).ifPresent(
+                n -> linkChainWrapper.and(
+                        wrapper -> wrapper
+                                .like(Lecture::getGuestName, msg)
+                                .or()
+                                .like(Lecture::getIntroduction, msg)
+                )
+        );
+        return linkChainWrapper
+                .eq(Lecture::getIsDeleted, 0)
+                .orderByDesc(Lecture::getCreateTime)
+                .page(new Page<>(page, pageSize));
     }
 }
