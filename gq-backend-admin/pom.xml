@@ -32,10 +32,6 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp-urlconnection</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
         <!--Jsoup: Response解析工具-->
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>

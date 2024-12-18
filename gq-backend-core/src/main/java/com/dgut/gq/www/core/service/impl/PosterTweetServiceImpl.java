@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.core.mapper.PosterTweetMapper;
+import com.dgut.gq.www.common.db.entity.PosterTweet;
+import com.dgut.gq.www.common.db.mapper.PosterTweetMapper;
+
 import com.dgut.gq.www.core.common.model.dto.PosterTweetDto;
-import com.dgut.gq.www.core.common.model.entity.PosterTweet;
+
 import com.dgut.gq.www.core.common.model.vo.PosterTweetVo;
 import com.dgut.gq.www.core.service.PosterTweetService;
 import org.springframework.beans.BeanUtils;

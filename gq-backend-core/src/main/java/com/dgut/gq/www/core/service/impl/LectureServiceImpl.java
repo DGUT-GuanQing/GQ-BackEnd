@@ -8,22 +8,24 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.common.SystemResultList;
+import com.dgut.gq.www.common.db.entity.Lecture;
+import com.dgut.gq.www.common.db.entity.User;
+import com.dgut.gq.www.common.db.entity.UserLectureInfo;
+import com.dgut.gq.www.common.db.mapper.LectureMapper;
+import com.dgut.gq.www.common.db.mapper.RecordRobTicketErrorMapper;
+import com.dgut.gq.www.common.db.mapper.UserLectureInfoMapper;
+import com.dgut.gq.www.common.db.mapper.UserMapper;
+import com.dgut.gq.www.common.db.service.GqLectureService;
+import com.dgut.gq.www.common.db.service.GqUserService;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
-import com.dgut.gq.www.common.model.entity.User;
 import com.dgut.gq.www.core.common.config.RabbitmqConfig;
 import com.dgut.gq.www.core.common.model.dto.LectureDto;
-import com.dgut.gq.www.core.common.model.entity.Lecture;
-import com.dgut.gq.www.core.common.model.entity.UserLectureInfo;
 import com.dgut.gq.www.core.common.model.vo.LectureReviewVo;
 import com.dgut.gq.www.core.common.model.vo.LectureTrailerVo;
 import com.dgut.gq.www.core.common.model.vo.LectureVo;
 import com.dgut.gq.www.core.common.model.vo.UserVo;
 import com.dgut.gq.www.core.common.mq.CustomCorrelationData;
 import com.dgut.gq.www.core.common.util.RecordRobTicketErrorUtil;
-import com.dgut.gq.www.core.mapper.LectureMapper;
-import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
-import com.dgut.gq.www.core.mapper.UserLectureInfoMapper;
-import com.dgut.gq.www.core.mapper.UserMapper;
 import com.dgut.gq.www.core.service.LectureService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -77,6 +79,12 @@ public class LectureServiceImpl implements LectureService {
     @Autowired
     private RecordRobTicketErrorMapper recordRobTicketErrorMapper;
 
+    @Autowired
+    private GqUserService gqUserService;
+
+    @Autowired
+    private GqLectureService gqLectureService;
+
     /**
      * 加载lua脚本代码
      *
@@ -105,18 +113,11 @@ public class LectureServiceImpl implements LectureService {
                 .map(s -> JSONUtil.toBean(s, LectureVo.class))
                 .orElseGet(() -> {
                     // 从数据库中查询最新未结束的讲座
-                    Lecture lecture = lectureMapper.selectOne(
-                            new LambdaQueryWrapper<Lecture>()
-                                    .orderByDesc(Lecture::getCreateTime)
-                                    .eq(Lecture::getIsDeleted, 0)
-                                    .last("LIMIT 1")
-                    );
-
+                    Lecture lecture = gqLectureService.getLatestUnStartLecture();
                     // 检查是否查询到讲座
                     if (lecture == null || lecture.getLectureName() == null) {
                         throw new GlobalSystemException(999, "还没新的讲座");
                     }
-
                     // 转换为LectureVo并存入Redis
                     LectureVo newLectureVo = new LectureVo();
                     BeanUtils.copyProperties(lecture, newLectureVo);
@@ -246,23 +247,8 @@ public class LectureServiceImpl implements LectureService {
      */
     @Override
     public SystemJsonResponse getLectureReview(int page, int pageSize, String name) {
-        Page<Lecture> pageInfo = new Page<>(page, pageSize);
-        LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
-
-        // 添加过滤条件 - 模糊查询
-        Optional.ofNullable(name).ifPresent(
-                n -> lectureLambdaQueryWrapper.and(
-                        wrapper -> wrapper
-                                .like(Lecture::getGuestName, name)
-                                .or()
-                                .like(Lecture::getReviewName, name)
-                )
-        );
-        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
-                .eq(Lecture::getIsDeleted, 0)
-                .ne(Lecture::getReviewName, "");
-
-        lectureMapper.selectPage(pageInfo, lectureLambdaQueryWrapper);
+        Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 0);
+        log.info("LectureServiceImpl getLectureReview data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
         List<LectureReviewVo> lectureVos = pageInfo.getRecords().stream()
                 .filter(record -> record.getReviewName() != null)
                 .map(record -> {
@@ -286,22 +272,8 @@ public class LectureServiceImpl implements LectureService {
      */
     @Override
     public SystemJsonResponse getLectureTrailer(int page, int pageSize, String name) {
-        Page<Lecture> pageInfo = new Page<>(page, pageSize);
-        LambdaQueryWrapper<Lecture> lectureLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        Optional.ofNullable(name).ifPresent(
-                n -> lectureLambdaQueryWrapper.and(
-                        wrapper -> wrapper
-                                .like(Lecture::getGuestName, name)
-                                .or()
-                                .like(Lecture::getLectureName, name)
-                )
-        );
-
-        lectureLambdaQueryWrapper.orderByDesc(Lecture::getCreateTime)
-                .eq(Lecture::getIsDeleted, 0);
-        lectureMapper.selectPage(pageInfo, lectureLambdaQueryWrapper);
-        Integer count = lectureMapper.selectCount(lectureLambdaQueryWrapper);
-
+        Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 1);
+        log.info("LectureServiceImpl getLectureTrailer data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
         List<LectureTrailerVo> lectureVos = pageInfo.getRecords().stream()
                 .filter(record -> record.getLectureName() != null)
                 .map(record -> {
@@ -310,7 +282,7 @@ public class LectureServiceImpl implements LectureService {
                     return lectureVo;
                 })
                 .collect(Collectors.toList());
-        SystemResultList systemResultList = new SystemResultList(lectureVos, count);
+        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
 
         return SystemJsonResponse.success(systemResultList);
     }

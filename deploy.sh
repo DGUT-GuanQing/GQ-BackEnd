@@ -9,3 +9,6 @@ mvn clean install package -DskipTests
 docker-compose build --no-cache
 docker-compose up -d
 
+# 清理无标签的镜像
+docker rmi $(docker images -f "dangling=true" -q)
+

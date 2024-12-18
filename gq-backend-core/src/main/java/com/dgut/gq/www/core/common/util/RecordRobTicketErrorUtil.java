@@ -1,8 +1,9 @@
 package com.dgut.gq.www.core.common.util;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.dgut.gq.www.core.common.model.entity.RecordRobTicketError;
-import com.dgut.gq.www.core.mapper.RecordRobTicketErrorMapper;
+import com.dgut.gq.www.common.db.entity.RecordRobTicketError;
+import com.dgut.gq.www.common.db.mapper.RecordRobTicketErrorMapper;
+
 
 import java.time.LocalDateTime;
 

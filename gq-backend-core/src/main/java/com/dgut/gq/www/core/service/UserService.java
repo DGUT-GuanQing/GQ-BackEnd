@@ -2,8 +2,10 @@ package com.dgut.gq.www.core.service;
 
 
 import com.dgut.gq.www.common.common.SystemJsonResponse;
-import com.dgut.gq.www.common.model.entity.User;
+import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.core.common.model.dto.UserDto;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface UserService {
     /**
@@ -75,4 +77,12 @@ public interface UserService {
      * @return
      */
     User getUserByUsername(String username);
+
+    /**
+     * 中央认证回调
+     * @param request
+     * @param id
+     * @return
+     */
+    SystemJsonResponse getLoginUserInfo(HttpServletRequest request, String id);
 }
