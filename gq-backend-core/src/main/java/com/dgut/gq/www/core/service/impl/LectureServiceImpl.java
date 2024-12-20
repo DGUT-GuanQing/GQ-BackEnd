@@ -134,7 +134,7 @@ public class LectureServiceImpl implements LectureService {
                         String.valueOf(lectureVo.getTicketNumber())
                 );
         lectureVo.setTicketNumber(Integer.parseInt(ticketNumberStr));
-
+        log.info("LectureServiceImpl findUnStartLecture data = {}", JSONUtil.toJsonStr(lectureVo));
         return SystemJsonResponse.success(lectureVo);
     }
 
@@ -159,26 +159,28 @@ public class LectureServiceImpl implements LectureService {
         try {
             b = lock.tryLock(5, 10, TimeUnit.SECONDS);
             if (!b) {
+                log.info("LectureServiceImpl robTicket 抢票频繁 openid = {}, lectureId = {}", openid, lectureId);
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
             }
         } catch (InterruptedException e) {
+            log.error("LectureServiceImpl robTicket 抢票失败 openid = {}, lectureId = {}", openid, lectureId);
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
         }
         try {
             //执行lua脚本
             Long execute = stringRedisTemplate.execute(
                     SECKILL_SCRIPT, Collections.emptyList(), lectureId, openid);
-
             assert execute != null;
             int re = execute.intValue();
+            String msg = re == 1 ? "抢票成功" : "抢票失败";
+            log.info("LectureServiceImpl robTicket openid = {}, lectureId = {}, msg = {}", openid, lectureId, msg);
             if (re != 0) {
-                return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), re == 1 ? "票已经抢光" : "不能重复抢票");
+                return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), msg);
             }
             SendMsg(openid, lectureId);
         } finally {
             lock.unlock();
         }
-
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), "抢票成功");
     }
 
