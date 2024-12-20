@@ -18,6 +18,7 @@ import com.dgut.gq.www.common.db.entity.*;
 import com.dgut.gq.www.common.db.service.*;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
  * @since 2022-10-8
  */
 @Service
+@Slf4j
 public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Autowired
@@ -77,6 +79,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse login(String userName, String password) {
+        log.info("BackendServiceImpl login userName = {}, password = {}", userName, password);
         //后台管理密码
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userName, password);
@@ -117,6 +120,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     public SystemJsonResponse getAttendLectureUser(int page, int pageSize, String id, Integer status) {
         Page<UserLectureInfo> pageInfo  = gqUserLectureInfoService.getByLectureId(page, pageSize, id, status);
         List<UserLectureInfo> records = pageInfo.getRecords();
+        log.info("BackendServiceImpl getAttendLectureUser lectureId = {}, userLectureInfos = {}", id, JSONUtil.toJsonStr(records));
         List<String> userOpenidList = records.stream()
                 .map(UserLectureInfo::getOpenid)
                 .collect(Collectors.toList());
@@ -128,6 +132,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
                     return userVo;
                 })
                 .collect(Collectors.toList());
+        log.info("BackendServiceImpl getAttendLectureUser lectureId = {}, userVoList = {}", id, JSONUtil.toJsonStr(userVoList));
         SystemResultList systemResultList = new SystemResultList(userVoList, (int) pageInfo.getTotal());
 
         return SystemJsonResponse.success(systemResultList);
@@ -135,6 +140,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse updateOrSaveLecture(LectureDto lectureDto) {
+        log.info("BackendServiceImpl updateOrSaveLecture lectureDto= {}", JSONUtil.toJsonStr(lectureDto));
         String key = RedisGlobalKey.UNSTART_LECTURE;
         Lecture lecture = new Lecture();
         BeanUtils.copyProperties(lectureDto, lecture);
@@ -143,7 +149,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
         String state;
         //新增
-        if (id == null || id.equals("")) {
+        if (id == null || id.isEmpty()) {
             //插入数据库
             lecture.setCreateTime(LocalDateTime.now());
             gqLectureService.save(lecture);
@@ -171,6 +177,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse saveUpdatePosterTweet(PosterTweetDto posterTweetDto) {
+        log.info("BackendServiceImpl saveUpdatePosterTweet posterTweetDto= {}", JSONUtil.toJsonStr(posterTweetDto));
         String id = posterTweetDto.getId();
         PosterTweet posterTweet = new PosterTweet();
         BeanUtils.copyProperties(posterTweetDto, posterTweet);
@@ -194,6 +201,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     public SystemJsonResponse getLecture(int page, int pageSize, String name) {
         Page<Lecture> pageInfo = gqLectureService.getBackendLectures(page, pageSize, name);
         List<Lecture> records = pageInfo.getRecords();
+        log.info("BackendServiceImpl getLecture lectures = {}", JSONUtil.toJsonStr(records));
         List<Object> lectureVos = records.stream()
                 .map(lecture -> {
                     LectureVo lectureVo = new LectureVo();
@@ -209,6 +217,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Override
     public SystemJsonResponse exportUser(String id, Integer status) {
         List<UserLectureInfo> records = gqUserLectureInfoService.getByLectureId(id, status);
+        log.info("BackendServiceImpl exportUser lectureId = {}, UserLectureInfos = {}", id, JSONUtil.toJsonStr(records));
         List<String> userOpenidList = records.stream()
                 .map(UserLectureInfo::getOpenid)
                 .collect(Collectors.toList());
@@ -220,6 +229,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
                     return userVo;
                 })
                 .collect(Collectors.toList());
+        log.info("BackendServiceImpl exportUser lectureId = {}, userVoList = {}", id, JSONUtil.toJsonStr(userVoList));
         Integer count = userVoList.size();
         SystemResultList systemResultList = new SystemResultList(userVoList, count);
 
@@ -229,6 +239,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     @Override
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
         List<CurriculumVitae> curriculumVitaes = gqCurriculumVitaeService.getByDepartmentIdAndTerm(departmentId, term);
+        log.info("BackendServiceImpl exportCurriculumVitae departmentId = {}, curriculumVitaes = {}", departmentId, JSONUtil.toJsonStr(curriculumVitaes));
         // TODO 批量查询
         List<CurriculumVitaeVo> curriculumVitaeVoList = curriculumVitaes.stream().map(record -> {
             User user = gqUserService.getByOpenid(record.getOpenid());
@@ -256,6 +267,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse deleteLecture(String id) {
+        log.info("BackendServiceImpl deleteLecture lectureId = {}", id);
         // 更新讲座记录
         Lecture lecture = new Lecture();
         lecture.setIsDeleted(1);
@@ -277,6 +289,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
+        log.info("BackendServiceImpl deleteDepartment departmentId = {}", id);
         Department department = new Department();
         department.setIsDeleted(1);
         department.setId(id);
@@ -286,6 +299,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse deletePosition(String id) {
+        log.info("BackendServiceImpl deletePosition positionId = {}", id);
         Position position = new Position();
         position.setIsDeleted(1);
         position.setId(id);
@@ -295,6 +309,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
+        log.info("BackendServiceImpl saveAndUpdateDep departmentDto = {}", JSONUtil.toJsonStr(departmentDto));
         String id = departmentDto.getId();
         Department department = new Department();
         BeanUtils.copyProperties(departmentDto, department);
@@ -314,6 +329,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
+        log.info("BackendServiceImpl saveAndUpdatePos positionDto = {}", JSONUtil.toJsonStr(positionDto));
         String id = positionDto.getId();
         Position position = new Position();
         BeanUtils.copyProperties(positionDto, position);

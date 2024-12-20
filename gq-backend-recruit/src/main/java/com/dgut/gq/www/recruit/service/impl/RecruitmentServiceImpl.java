@@ -1,5 +1,6 @@
 package com.dgut.gq.www.recruit.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
@@ -69,6 +70,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse updateOrSave(String openid, CurriculumVitaeDto curriculumVitaeDto) {
+        log.info("RecruitmentServiceImpl updateOrSave openid = {}, curriculumVitaeDto = {}", openid, curriculumVitaeDto);
         // 否上传过简历
         boolean isResumeExists = checkResumeExists(openid);
         CurriculumVitae curriculumVitae = createCurriculumVitae(curriculumVitaeDto, openid);
@@ -132,6 +134,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse getMyCurriculumVitae(String openid) {
+        log.info("RecruitmentServiceImpl getMyCurriculumVitae openid = {}", openid);
         CurriculumVitae curriculumVitae = queryCurriculumVitae(openid);
         if (!Optional.ofNullable(curriculumVitae).isPresent()) {
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "没有简历");
@@ -189,6 +192,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     @Override
     public SystemJsonResponse getAllCurriculumVitae(int page, int pageSize, String departmentId, Integer term) {
         Page<CurriculumVitae> pageInfo = new Page<>(page, pageSize);
+        log.info("RecruitmentServiceImpl getAllCurriculumVitae CurriculumVitaes = {}", JSONUtil.toJsonStr(pageInfo));
         LambdaQueryWrapper<CurriculumVitae> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CurriculumVitae::getIsDeleted, 0)
                 .orderByDesc(CurriculumVitae::getUpdateTime)
@@ -227,6 +231,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             BeanUtils.copyProperties(department, departmentVo);
             departmentVoList.add(departmentVo);
         }
+        log.info("RecruitmentServiceImpl getDepartment departmentVoList = {}", JSONUtil.toJsonStr(departmentVoList));
         return SystemJsonResponse.success(departmentVoList);
     }
 
@@ -250,6 +255,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             BeanUtils.copyProperties(position, positionVo);
             positionVos.add(positionVo);
         }
+        log.info("RecruitmentServiceImpl getPosition positionVos = {}", JSONUtil.toJsonStr(positionVos));
         return SystemJsonResponse.success(positionVos);
     }
 
@@ -277,7 +283,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             return buildCurriculumVitaeVo(record, user, department, position);
         }).collect(Collectors.toList());
         SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, count);
-
+        log.info("RecruitmentServiceImpl exportCurriculumVitae curriculumVitaeVoList = {}", JSONUtil.toJsonStr(curriculumVitaeVoList));
         return SystemJsonResponse.success(systemResultList);
     }
 
