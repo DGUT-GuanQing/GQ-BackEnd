@@ -113,7 +113,7 @@ public class LectureController {
         boolean flag = true;
         //获取票的数量
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.TICKET_NUMBER);
-        if (s == null || s.equals("")) {
+        if (s == null || s.isEmpty()) {
             flag = false;
         } else {
             int count = Integer.parseInt(s);
