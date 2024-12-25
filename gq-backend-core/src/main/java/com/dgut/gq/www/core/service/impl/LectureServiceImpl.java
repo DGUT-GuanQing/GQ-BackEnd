@@ -163,14 +163,12 @@ public class LectureServiceImpl implements LectureService {
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
             }
         } catch (InterruptedException e) {
-            log.error("LectureServiceImpl robTicket 抢票失败 openid = {}, lectureId = {}", openid, lectureId);
+            log.error("LectureServiceImpl robTicket 获取锁失败 openid = {}, lectureId = {}", openid, lectureId, e);
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
         }
         try {
             //执行lua脚本
-            Long execute = stringRedisTemplate.execute(
-                    SECKILL_SCRIPT, Collections.emptyList(), lectureId, openid);
-            assert execute != null;
+            Long execute = stringRedisTemplate.execute(SECKILL_SCRIPT, Collections.emptyList(), lectureId, openid);
             int re = execute.intValue();
             String msg = re == 1 ? "抢票成功" : "抢票失败";
             log.info("LectureServiceImpl robTicket openid = {}, lectureId = {}, msg = {}", openid, lectureId, msg);
@@ -178,6 +176,8 @@ public class LectureServiceImpl implements LectureService {
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), msg);
             }
             SendMsg(openid, lectureId);
+        } catch (Exception e) {
+            log.info("LectureServiceImpl robTicket 抢票失败 openid = {}, lectureId = {}", openid, lectureId, e);
         } finally {
             lock.unlock();
         }
