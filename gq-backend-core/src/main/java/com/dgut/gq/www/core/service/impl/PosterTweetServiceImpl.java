@@ -6,12 +6,11 @@ import com.dgut.gq.www.common.common.GlobalResponseCode;
 import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.db.entity.PosterTweet;
-import com.dgut.gq.www.common.db.mapper.PosterTweetMapper;
-
+import com.dgut.gq.www.common.db.service.GqPosterTweetService;
 import com.dgut.gq.www.core.common.model.dto.PosterTweetDto;
-
 import com.dgut.gq.www.core.common.model.vo.PosterTweetVo;
 import com.dgut.gq.www.core.service.PosterTweetService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,14 +21,14 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class PosterTweetServiceImpl implements PosterTweetService {
 
     @Autowired
-    private PosterTweetMapper posterTweetMapper;
-
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private GqPosterTweetService gqPosterTweetService;
 
     /**
      * 获取推文
@@ -40,26 +39,20 @@ public class PosterTweetServiceImpl implements PosterTweetService {
     @Override
     public SystemJsonResponse getByType(Integer type) {
         String key = RedisGlobalKey.POSTER_TWEET + type;
-
         PosterTweetVo posterTweetVo = Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
                 .map(s -> JSONUtil.toBean(s, PosterTweetVo.class))
                 .orElseGet(() -> {
                     LambdaQueryWrapper<PosterTweet> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                     //查询最新的推文
-                    lambdaQueryWrapper.orderByDesc(PosterTweet::getCreateTime);
-                    lambdaQueryWrapper.last("LIMIT 1");
-                    lambdaQueryWrapper.eq(PosterTweet::getIsDeleted, 0);
-                    lambdaQueryWrapper.eq(PosterTweet::getType, type);
-                    PosterTweet posterTweet = posterTweetMapper.selectOne(lambdaQueryWrapper);
+                    PosterTweet posterTweet = gqPosterTweetService.getLatestByType(type);
                     PosterTweetVo newPosterTweetVo = new PosterTweetVo();
-
                     //存入redis
                     BeanUtils.copyProperties(posterTweet, newPosterTweetVo);
                     stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newPosterTweetVo));
                     stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
-
                     return newPosterTweetVo;
                 });
+        log.info("PosterTweetServiceImpl getByType posterTweetVo = {}", JSONUtil.toJsonStr(posterTweetVo));
 
         return SystemJsonResponse.success(posterTweetVo);
     }
@@ -72,6 +65,7 @@ public class PosterTweetServiceImpl implements PosterTweetService {
      */
     @Override
     public SystemJsonResponse updatePosterTweet(PosterTweetDto posterTweetDto) {
+        log.info("PosterTweetServiceImpl updatePosterTweet posterTweetDto = {}", JSONUtil.toJsonStr(posterTweetDto));
         String id = posterTweetDto.getId();
         PosterTweet posterTweet = new PosterTweet();
         BeanUtils.copyProperties(posterTweetDto, posterTweet);
@@ -81,13 +75,14 @@ public class PosterTweetServiceImpl implements PosterTweetService {
         if (id == null || id.equals("")) {
             //新增数据
             posterTweet.setCreateTime(LocalDateTime.now());
-            posterTweetMapper.insert(posterTweet);
+            gqPosterTweetService.save(posterTweet);
             state = "新增成功";
         } else {
-            posterTweetMapper.updateById(posterTweet);
+            gqPosterTweetService.updateById(posterTweet);
             state = "更新成功";
         }
         stringRedisTemplate.delete(RedisGlobalKey.POSTER_TWEET + posterTweetDto.getType());
+
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), state);
     }
 
