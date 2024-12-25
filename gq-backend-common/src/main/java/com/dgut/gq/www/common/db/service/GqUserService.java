@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.dgut.gq.www.common.db.entity.User;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface GqUserService extends IService<User> {
 
