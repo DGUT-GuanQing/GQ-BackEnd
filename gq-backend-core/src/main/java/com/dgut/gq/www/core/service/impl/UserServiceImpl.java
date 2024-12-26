@@ -14,8 +14,6 @@ import com.dgut.gq.www.common.db.entity.Lecture;
 import com.dgut.gq.www.common.db.entity.LoginUser;
 import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.common.db.entity.UserLectureInfo;
-import com.dgut.gq.www.common.db.mapper.LectureMapper;
-import com.dgut.gq.www.common.db.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.common.db.mapper.UserMapper;
 import com.dgut.gq.www.common.db.service.GqLectureService;
 import com.dgut.gq.www.common.db.service.GqUserLectureInfoService;
@@ -55,13 +53,7 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Autowired
-    private LectureMapper lectureMapper;
-
-    @Autowired
     private StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private UserLectureInfoMapper userLectureInfoMapper;
 
     @Autowired
     private HttpUtil httpUtil;
