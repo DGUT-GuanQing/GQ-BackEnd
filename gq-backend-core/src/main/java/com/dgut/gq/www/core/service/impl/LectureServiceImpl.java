@@ -178,9 +178,9 @@ public class LectureServiceImpl implements LectureService {
             public void onSuccess(CorrelationData.Confirm result) {
                 //Future接收到回执的处理逻辑，参数中的result就是回执内容
                 if (result.isAck()) {
-                    log.debug("发送消息成功，收到 ack");
+                    log.debug("LectureServiceImpl SendMsg 发送消息成功，收到 ack");
                 } else { // result.getReason()，String类型，返回nack时的异常描述
-                    log.error("发送消息失败，收到 nack, reason : {}", result.getReason());
+                    log.error("LectureServiceImpl SendMsg 发送消息失败，收到 nack, reason = {}", result.getReason());
                     String openid;
                     String lectureId;
                     openid = correlationData.getOpenid();
@@ -191,8 +191,8 @@ public class LectureServiceImpl implements LectureService {
                     if (str != null) {
                         value = Integer.parseInt(str);
                     }
+                    // 重试了一次还失败就记录日志
                     if (value == 1) {
-                        //记录错误日志
                         RecordRobTicketErrorUtil.recordError(recordRobTicketErrorMapper, openid, lectureId, 0);
                     } else {
                         stringRedisTemplate.opsForValue().set(key, String.valueOf(value + 1));
