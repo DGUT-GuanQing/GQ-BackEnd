@@ -10,6 +10,7 @@ import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,11 +33,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/common")
 @Api(tags = "通用模块")
+@Slf4j
 public class CommonController {
-
-    String url = "C:\\Users\\waili\\Desktop\\usual\\Javaopenfile\\ssmheima\\photo\\";
-
-    String url2 = "/opt/image/";
 
     @Autowired
     private MinioClient minioClient;
@@ -73,10 +71,8 @@ public class CommonController {
         String s = UUID.randomUUID().toString();
         String extension = filename.substring(filename.lastIndexOf("."));
         s += extension;
-
         // 根据文件扩展名确定存储的子文件夹
         String subfolder = extension.equalsIgnoreCase(".pdf") ? "file" : "picture";
-
         try {
             // 上传文件到Minio
             ByteArrayInputStream bais = new ByteArrayInputStream(file.getBytes());
@@ -97,7 +93,6 @@ public class CommonController {
     @ApiOperation(value = "文件下载")
     @ApiImplicitParams({@ApiImplicitParam(value = "文件类型 0-图片 1-文件", name = "type", required = true), @ApiImplicitParam(value = "文件名", name = "name", required = true)})
     public void download(HttpServletResponse response, @RequestParam("type") Integer type, @RequestParam("name") String name) throws IOException {
-
         // 判断是文件还是图片
         String str = "";
         if (type == 0) {
@@ -112,28 +107,21 @@ public class CommonController {
         } else {
             throw new IllegalArgumentException("Unsupported type: " + str);
         }
-
         String subfolder;
         if (type == 0) {
             subfolder = "picture";
-        } else if (type == 1) {
-            subfolder = "file";
         } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            subfolder = "file";
         }
-
         try {
             InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket("gqfile").object(subfolder + "/" + name).build());
-
             // Set the content type and attachment header.
             response.addHeader("Content-disposition", "attachment;filename=" + name);
-
             // Copy the stream to the response's output stream.
             IOUtils.copy(stream, response.getOutputStream());
             response.flushBuffer();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("CommonController download error", e);
             throw new GlobalSystemException(GlobalResponseCode.OPERATE_FAIL.getCode(), "下载文文件失败");
         }
     }
