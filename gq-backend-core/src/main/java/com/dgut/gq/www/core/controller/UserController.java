@@ -2,7 +2,6 @@ package com.dgut.gq.www.core.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
-import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.common.db.mapper.UserMapper;
@@ -17,7 +16,6 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
-import org.jasig.cas.client.validation.Assertion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,8 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
 
 
 /**
