@@ -98,7 +98,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
             return SystemJsonResponse.success(JwtUtil.createJWT(userName));
         } catch (Exception e) {
-            log.error("BackendServiceImpl login error = {}", e.getMessage());
+            log.error("BackendServiceImpl login error", e);
             throw new GlobalSystemException(SYSTEM_TIMEOUT);
         }
     }

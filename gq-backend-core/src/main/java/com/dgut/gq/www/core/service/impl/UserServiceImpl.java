@@ -18,6 +18,7 @@ import com.dgut.gq.www.common.db.mapper.UserMapper;
 import com.dgut.gq.www.common.db.service.GqLectureService;
 import com.dgut.gq.www.common.db.service.GqUserLectureInfoService;
 import com.dgut.gq.www.common.db.service.GqUserService;
+import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.util.JwtUtil;
 import com.dgut.gq.www.core.common.model.dto.UserDto;
 import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
@@ -80,28 +81,33 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String wxLogin(String code) {
-        //获取用户的openid
-        String openid = httpUtil.getOpenid(code);
-        //String openid = code;
-        User user = gqUserService.getByOpenid(openid);
-        Optional<User> optionalUser = Optional.ofNullable(user);
-        //第一次登录
-        if (!optionalUser.isPresent()) {
-            user = createUser(openid);
-            gqUserService.save(user);
-        } else {
-            updateUser(user);
-        }
-        log.info("UserServiceImpl wxLogin user = {}", JSONUtil.toJsonStr(user));
-        // 把全部数据封装为LoginUser存入redis  方便后续权限的管理
-        LoginUser loginUser = createLoginUser(user);
-        //封装权限
-        String key = RedisGlobalKey.PERMISSION + openid;
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
-        stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
+        try {
+            //获取用户的openid
+            String openid = httpUtil.getOpenid(code);
+            //String openid = code;
+            User user = gqUserService.getByOpenid(openid);
+            Optional<User> optionalUser = Optional.ofNullable(user);
+            //第一次登录
+            if (!optionalUser.isPresent()) {
+                user = createUser(openid);
+                gqUserService.save(user);
+            } else {
+                updateUser(user);
+            }
+            log.info("UserServiceImpl wxLogin user = {}", JSONUtil.toJsonStr(user));
+            // 把全部数据封装为LoginUser存入redis  方便后续权限的管理
+            LoginUser loginUser = createLoginUser(user);
+            //封装权限
+            String key = RedisGlobalKey.PERMISSION + openid;
+            stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
+            stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
 
-        //加密openid，返回token
-        return JwtUtil.createJWT(openid);
+            //加密openid，返回token
+            return JwtUtil.createJWT(openid);
+        } catch (Exception e) {
+            log.error("UserServiceImpl wxLogin error", e);
+            throw new GlobalSystemException(GlobalResponseCode.SYSTEM_TIMEOUT);
+        }
     }
 
     private LoginUser createLoginUser(User user) {
