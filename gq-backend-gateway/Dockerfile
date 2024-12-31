@@ -9,7 +9,5 @@ RUN echo 'Asia/Shanghai' >/etc/timezone
 ADD target/gq-backend-gateway-0.0.1-SNAPSHOT.jar .
 # 暴露端口
 EXPOSE 8085
-# 创建日志目录
-RUN mkdir -p /app/logs
 # 启动命令
-ENTRYPOINT ["sh", "-c", "java -jar /app/gq-backend-gateway-0.0.1-SNAPSHOT.jar > /app/logs/gq-backend-gateway.log 2>&1"]
+ENTRYPOINT ["java","-jar","/app/gq-backend-gateway-0.0.1-SNAPSHOT.jar"]
