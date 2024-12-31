@@ -8,6 +8,4 @@ import java.util.List;
 public interface GqDepartmentService extends IService<Department> {
 
     List<Department> getAll();
-
-    List<Department> getByIds(List<String> ids);
 }

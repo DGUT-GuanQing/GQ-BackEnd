@@ -34,8 +34,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -184,42 +185,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         Page<CurriculumVitae> pageInfo = gqCurriculumVitaeService.pageByDepartmentIdAndTerm(page, pageSize, departmentId, term);
         List<CurriculumVitae> records = pageInfo.getRecords();
         Integer count = (int) pageInfo.getTotal();
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae CurriculumVitaes = {}", JSONUtil.toJsonStr(records));
-        Map<String, User> userMap = gqUserService.getByOpenIds(
-                records.stream()
-                        .filter(Objects::nonNull)
-                        .map(CurriculumVitae::getOpenid)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(
-                User::getOpenid,
-                Function.identity(),
-                (o1, o2) -> o1)
-        );
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, userMap = {}", departmentId, term, JSONUtil.toJsonStr(userMap));
-        Map<String, Department> departmentMap = gqDepartmentService.getByIds(
-                records.stream()
-                        .map(CurriculumVitae::getDepartmentId)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(Department::getId, Function.identity()));
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, departmentMap = {}", departmentId, term, JSONUtil.toJsonStr(departmentMap));
-        Map<String, Position> positionMap = gqPositionService.getByIds(
-                records.stream()
-                        .map(CurriculumVitae::getPositionId)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(Position::getId, Function.identity()));
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, positionMap = {}", departmentId, term, JSONUtil.toJsonStr(positionMap));
-        // 组装返还值
-        List<CurriculumVitaeVo> curriculumVitaeVoList = records.stream()
-                .filter(record -> userMap.containsKey(record.getOpenid())
-                        && departmentMap.containsKey(record.getDepartmentId())
-                        && positionMap.containsKey(record.getPositionId())
-                ).map(record -> {
-                    User user = userMap.get(record.getOpenid());
-                    Department department = departmentMap.get(record.getDepartmentId());
-                    Position position = positionMap.get(record.getPositionId());
-                    return buildCurriculumVitaeVo(record, user, department, position);
-                }).collect(Collectors.toList());
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, curriculumVitaeVoList = {}", departmentId, term, JSONUtil.toJsonStr(curriculumVitaeVoList));
+        log.info("RecruitmentServiceImpl getAllCurriculumVitae CurriculumVitaes = {}", JSONUtil.toJsonStr(pageInfo));
+        // TODO 批量查询
+        List<CurriculumVitaeVo> curriculumVitaeVoList = records.stream().map(record -> {
+            User user = queryUser(record.getOpenid());
+            Department department = queryDepartment(record.getDepartmentId());
+            Position position = queryPosition(record.getPositionId());
+            return buildCurriculumVitaeVo(record, user, department, position);
+        }).collect(Collectors.toList());
         SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, count);
 
         return SystemJsonResponse.success(systemResultList);

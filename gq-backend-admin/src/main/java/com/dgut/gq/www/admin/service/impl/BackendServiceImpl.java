@@ -32,9 +32,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -238,43 +240,16 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
     public SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term) {
         List<CurriculumVitae> curriculumVitaes = gqCurriculumVitaeService.getByDepartmentIdAndTerm(departmentId, term);
         log.info("BackendServiceImpl exportCurriculumVitae departmentId = {}, curriculumVitaes = {}", departmentId, JSONUtil.toJsonStr(curriculumVitaes));
-        Map<String, User> userMap = gqUserService.getByOpenIds(
-                curriculumVitaes.stream()
-                        .filter(Objects::nonNull)
-                        .map(CurriculumVitae::getOpenid)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(
-                        User::getOpenid,
-                        Function.identity(),
-                        (o1, o2) -> o1)
-        );
-        log.info("BackendServiceImpl exportCurriculumVitae departmentId = {}, term = {}, userMap = {}", departmentId, term, JSONUtil.toJsonStr(userMap));
-        Map<String, Department> departmentMap = gqDepartmentService.getByIds(
-                curriculumVitaes.stream()
-                        .map(CurriculumVitae::getDepartmentId)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(Department::getId, Function.identity()));
-        log.info("BackendServiceImpl exportCurriculumVitae departmentId = {}, term = {}, departmentMap = {}", departmentId, term, JSONUtil.toJsonStr(departmentMap));
-        Map<String, Position> positionMap = gqPositionService.getByIds(
-                curriculumVitaes.stream()
-                        .map(CurriculumVitae::getPositionId)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(Position::getId, Function.identity()));
-        log.info("BackendServiceImpl exportCurriculumVitae departmentId = {}, term = {}, positionMap = {}", departmentId, term, JSONUtil.toJsonStr(positionMap));
-        // 组装返还值
-        List<CurriculumVitaeVo> curriculumVitaeVoList = curriculumVitaes.stream()
-                .filter(record -> userMap.containsKey(record.getOpenid())
-                        && departmentMap.containsKey(record.getDepartmentId())
-                        && positionMap.containsKey(record.getPositionId())
-                ).map(record -> {
-                    User user = userMap.get(record.getOpenid());
-                    Department department = departmentMap.get(record.getDepartmentId());
-                    Position position = positionMap.get(record.getPositionId());
-                    return buildCurriculumVitaeVo(record, user, department, position);
-                }).collect(Collectors.toList());
-        log.info("BackendServiceImpl exportCurriculumVitae departmentId = {}, term = {}, curriculumVitaeVoList = {}", departmentId, term, JSONUtil.toJsonStr(curriculumVitaeVoList));
+        // TODO 批量查询
+        List<CurriculumVitaeVo> curriculumVitaeVoList = curriculumVitaes.stream().map(record -> {
+            User user = gqUserService.getByOpenid(record.getOpenid());
+            Department department = gqDepartmentService.getById(record.getDepartmentId());
+            Position position = gqPositionService.getById(record.getPositionId());
+            return buildCurriculumVitaeVo(record, user, department, position);
+        }).collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, curriculumVitaes.size());
 
-        return SystemJsonResponse.success(new SystemResultList(curriculumVitaeVoList, curriculumVitaes.size()));
+        return SystemJsonResponse.success(systemResultList);
     }
 
     private CurriculumVitaeVo buildCurriculumVitaeVo(CurriculumVitae curriculumVitae, User user, Department department, Position position) {
