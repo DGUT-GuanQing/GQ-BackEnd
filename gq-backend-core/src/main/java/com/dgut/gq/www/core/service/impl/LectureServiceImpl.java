@@ -86,36 +86,42 @@ public class LectureServiceImpl implements LectureService {
      */
     @Override
     public SystemJsonResponse findUnStartLecture() {
-        // 尝试从Redis获取讲座信息
-        String key = RedisGlobalKey.UNSTART_LECTURE;
-        String str = stringRedisTemplate.opsForValue().get(key);
-        LectureVo lectureVo = Optional.ofNullable(str)
-                .map(s -> JSONUtil.toBean(s, LectureVo.class))
-                .orElseGet(() -> {
-                    // 从数据库中查询最新未结束的讲座
-                    Lecture lecture = gqLectureService.getLatestUnStartLecture();
-                    // 检查是否查询到讲座
-                    if (lecture == null || lecture.getLectureName() == null) {
-                        throw new GlobalSystemException(999, "还没新的讲座");
-                    }
-                    // 转换为LectureVo并存入Redis
-                    LectureVo newLectureVo = new LectureVo();
-                    BeanUtils.copyProperties(lecture, newLectureVo);
-                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newLectureVo));
-                    stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, newLectureVo.getTicketNumber().toString());
+        try {
+            // 尝试从Redis获取讲座信息
+            String key = RedisGlobalKey.UNSTART_LECTURE;
+            String str = stringRedisTemplate.opsForValue().get(key);
+            LectureVo lectureVo = Optional.ofNullable(str)
+                    .map(s -> JSONUtil.toBean(s, LectureVo.class))
+                    .orElseGet(() -> {
+                        // 从数据库中查询最新未结束的讲座
+                        Lecture lecture = gqLectureService.getLatestUnStartLecture();
+                        // 检查是否查询到讲座
+                        if (lecture == null || lecture.getLectureName() == null) {
+                            throw new GlobalSystemException(999, "还没新的讲座");
+                        }
+                        // 转换为LectureVo并存入Redis
+                        LectureVo newLectureVo = new LectureVo();
+                        BeanUtils.copyProperties(lecture, newLectureVo);
+                        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newLectureVo));
+                        stringRedisTemplate.opsForValue().set(RedisGlobalKey.TICKET_NUMBER, newLectureVo.getTicketNumber().toString());
 
-                    return newLectureVo;
-                });
+                        return newLectureVo;
+                    });
 
-        // 获取票的数量
-        String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue()
-                        .get(RedisGlobalKey.TICKET_NUMBER))
-                .orElse(
-                        String.valueOf(lectureVo.getTicketNumber())
-                );
-        lectureVo.setTicketNumber(Integer.parseInt(ticketNumberStr));
-        log.info("LectureServiceImpl findUnStartLecture data = {}", JSONUtil.toJsonStr(lectureVo));
-        return SystemJsonResponse.success(lectureVo);
+            // 获取票的数量
+            String ticketNumberStr = Optional.ofNullable(stringRedisTemplate.opsForValue()
+                            .get(RedisGlobalKey.TICKET_NUMBER))
+                    .orElse(
+                            String.valueOf(lectureVo.getTicketNumber())
+                    );
+            lectureVo.setTicketNumber(Integer.parseInt(ticketNumberStr));
+            log.info("LectureServiceImpl findUnStartLecture data = {}", JSONUtil.toJsonStr(lectureVo));
+
+            return SystemJsonResponse.success(lectureVo);
+        } catch (Exception e) {
+            log.error("LectureServiceImpl findUnStartLecture error", e);
+            return SystemJsonResponse.fail();
+        }
     }
 
     /**
@@ -131,7 +137,7 @@ public class LectureServiceImpl implements LectureService {
         String str = stringRedisTemplate.opsForValue().get(key);
         LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
         if (grabTicketsStart.isAfter(LocalDateTime.now())) {
-            log.info("LectureServiceImpl robTickek 抢票时间未到， openid = {}, lectuerId = {}", openid, lectureId);
+            log.info("LectureServiceImpl robTicket 抢票时间未到， openid = {}, lectureId = {}", openid, lectureId);
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票时间未到");
         }
         RLock lock = redissonClient.getLock(key + openid);
@@ -228,18 +234,22 @@ public class LectureServiceImpl implements LectureService {
      */
     @Override
     public SystemJsonResponse getLectureReview(int page, int pageSize, String name) {
-        Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 0);
-        log.info("LectureServiceImpl getLectureReview data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
-        List<LectureReviewVo> lectureVos = pageInfo.getRecords().stream()
-                .filter(record -> record.getReviewName() != null)
-                .map(record -> {
-                    LectureReviewVo lectureVo = new LectureReviewVo();
-                    BeanUtils.copyProperties(record, lectureVo);
-                    return lectureVo;
-                })
-                .collect(Collectors.toList());
-
-        return SystemJsonResponse.success(new SystemResultList<>(Collections.singletonList(lectureVos), (int) pageInfo.getTotal()));
+        try {
+            Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 0);
+            log.info("LectureServiceImpl getLectureReview data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
+            List<LectureReviewVo> lectureVos = pageInfo.getRecords().stream()
+                    .filter(record -> record.getReviewName() != null)
+                    .map(record -> {
+                        LectureReviewVo lectureVo = new LectureReviewVo();
+                        BeanUtils.copyProperties(record, lectureVo);
+                        return lectureVo;
+                    })
+                    .collect(Collectors.toList());
+            return SystemJsonResponse.success(new SystemResultList<>(Collections.singletonList(lectureVos), (int) pageInfo.getTotal()));
+        } catch (Exception e) {
+            log.error("LectureServiceImpl getLectureReview error name = {}", name, e);
+            return SystemJsonResponse.fail();
+        }
     }
 
     /**
@@ -252,18 +262,22 @@ public class LectureServiceImpl implements LectureService {
      */
     @Override
     public SystemJsonResponse getLectureTrailer(int page, int pageSize, String name) {
-        Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 1);
-        log.info("LectureServiceImpl getLectureTrailer data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
-        List<LectureTrailerVo> lectureVos = pageInfo.getRecords().stream()
-                .filter(record -> record.getLectureName() != null)
-                .map(record -> {
-                    LectureTrailerVo lectureVo = new LectureTrailerVo();
-                    BeanUtils.copyProperties(record, lectureVo);
-                    return lectureVo;
-                })
-                .collect(Collectors.toList());
-
-        return SystemJsonResponse.success(new SystemResultList<>(lectureVos, (int) pageInfo.getTotal()));
+        try {
+            Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 1);
+            log.info("LectureServiceImpl getLectureTrailer data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
+            List<LectureTrailerVo> lectureVos = pageInfo.getRecords().stream()
+                    .filter(record -> record.getLectureName() != null)
+                    .map(record -> {
+                        LectureTrailerVo lectureVo = new LectureTrailerVo();
+                        BeanUtils.copyProperties(record, lectureVo);
+                        return lectureVo;
+                    })
+                    .collect(Collectors.toList());
+            return SystemJsonResponse.success(new SystemResultList<>(lectureVos, (int) pageInfo.getTotal()));
+        } catch (Exception e) {
+            log.error("LectureServiceImpl getLectureTrailer error name = {}", name, e);
+            return SystemJsonResponse.fail();
+        }
     }
 }
 
