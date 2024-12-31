@@ -131,18 +131,19 @@ public class LectureServiceImpl implements LectureService {
         String str = stringRedisTemplate.opsForValue().get(key);
         LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
         if (grabTicketsStart.isAfter(LocalDateTime.now())) {
-            log.info("LectureServiceImpl robTickek 抢票时间未到， openid = {}, lectuerId = {}", openid, lectureId);
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票时间未到");
         }
+
         RLock lock = redissonClient.getLock(key + openid);
+        boolean b;
         try {
-            boolean lockRes = lock.tryLock(5, 10, TimeUnit.SECONDS);
-            if (!lockRes) {
+            b = lock.tryLock(5, 10, TimeUnit.SECONDS);
+            if (!b) {
                 log.info("LectureServiceImpl robTicket 抢票频繁 openid = {}, lectureId = {}", openid, lectureId);
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
             }
         } catch (InterruptedException e) {
-            log.error("LectureServiceImpl robTicket 获取锁异常 openid = {}, lectureId = {}", openid, lectureId, e);
+            log.error("LectureServiceImpl robTicket 获取锁失败 openid = {}, lectureId = {}", openid, lectureId, e);
             return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
         }
         try {
