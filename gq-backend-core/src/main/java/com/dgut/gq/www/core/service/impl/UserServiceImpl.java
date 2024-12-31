@@ -100,7 +100,6 @@ public class UserServiceImpl implements UserService {
         } else {
             updateUser(user);
         }
-        log.info("UserServiceImpl wxLogin user = {}", JSONUtil.toJsonStr(user));
         // 把全部数据封装为LoginUser存入redis  方便后续权限的管理
         LoginUser loginUser = createLoginUser(user);
         //封装权限
@@ -170,7 +169,7 @@ public class UserServiceImpl implements UserService {
     public SystemJsonResponse getMyLecture(String openid, Integer page, Integer pageSize) {
         Page<UserLectureInfo> pageInfo = gqUserLectureInfoService.getByOpenid(openid, page, pageSize);
         List<UserLectureInfo> records = pageInfo.getRecords();
-        log.info("UserServiceImpl getMyLecture openid = {}, UserLectureInfoRecords = {}", openid, JSONUtil.toJsonStr(records));
+        log.info("UserServiceImpl getMyLecture UserLectureInfoRecords = {}", JSONUtil.toJsonStr(records));
         // 记录当前讲座的观看情况
         HashMap<String, Integer> map = new HashMap<>();
         List<String> list = new ArrayList<>();
@@ -180,7 +179,7 @@ public class UserServiceImpl implements UserService {
         }
         // 查询讲座信息
         List<Lecture> lectures = gqLectureService.getByIds(list);
-        log.info("UserServiceImpl getMyLecture openid = {}, lectures = {}", openid, JSONUtil.toJsonStr(lectures));
+        log.info("UserServiceImpl getMyLecture lectures = {}", JSONUtil.toJsonStr(lectures));
         List<MyLectureVo> lectureVos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(lectures)) {
             lectureVos = lectures.stream().map(lecture -> {
