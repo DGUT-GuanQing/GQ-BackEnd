@@ -10,6 +10,8 @@ services:
       - "8085:8085"
     networks:
       - gq
+    volumes:
+      - /opt/gq-backend/logs:/app/logs
 
   gq-backend-core:
     container_name: gq-backend-core
@@ -21,6 +23,8 @@ services:
       - "8086:8086"
     networks:
       - gq
+    volumes:
+      - /opt/gq-backend/logs:/app/logs
 
   gq-backend-recruit:
     image: gq-backend-recruit
@@ -32,6 +36,8 @@ services:
       - "8087:8087"
     networks:
       - gq
+    volumes:
+      - /opt/gq-backend/logs:/app/logs
 
   gq-backend-admin:
     image: gq-backend-admin
@@ -43,6 +49,8 @@ services:
       - "8088:8088"
     networks:
       - gq
+    volumes:
+      - /opt/gq-backend/logs:/app/logs
 
 # 网络，不定义的话就是默认网络
 networks:

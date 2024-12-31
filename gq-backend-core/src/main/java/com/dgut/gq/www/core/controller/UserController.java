@@ -2,10 +2,9 @@ package com.dgut.gq.www.core.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dgut.gq.www.common.common.GlobalResponseCode;
-import com.dgut.gq.www.common.common.RedisGlobalKey;
 import com.dgut.gq.www.common.common.SystemJsonResponse;
 import com.dgut.gq.www.common.db.entity.User;
-import com.dgut.gq.www.common.db.mapper.UserMapper;
+import com.dgut.gq.www.common.db.service.GqUserService;
 import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.util.ParseToken;
 import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
@@ -17,9 +16,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
-import org.jasig.cas.client.validation.Assertion;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
 
 
 /**
@@ -47,13 +42,10 @@ import java.util.Optional;
 public class UserController {
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
-    private UserMapper userMapper;
+    private GqUserService gqUserService;
 
     /**
      * 用户实现微信登录
@@ -137,11 +129,7 @@ public class UserController {
     public SystemJsonResponse getId(HttpServletRequest request) {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
-        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        User user = new User();
-        user.setOpenid(openid);
-        lambdaQueryWrapper.eq(User::getOpenid, openid);
-        String uuid = userMapper.selectOne(lambdaQueryWrapper).getUuid();
+        String uuid = gqUserService.getByOpenid(openid).getUuid();
         return SystemJsonResponse.success(uuid);
     }
 
@@ -162,17 +150,14 @@ public class UserController {
         try {
             int width = 300; // QR Code的宽度
             int height = 300; // QR Code的高度
-
             // 使用ZXing库生成QR Code
             BitMatrix bitMatrix = new MultiFormatWriter().encode(openid, BarcodeFormat.QR_CODE, width, height);
             // 将QR Code转换为BufferedImage
             BufferedImage image = MatrixToImageWriter.toBufferedImage(bitMatrix);
-
             // 将QR Code转换为字节数组
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
             byte[] bytes = baos.toByteArray();
-
             // 将QR Code的字节数组回显给前端
             response.setContentType("image/png");
             response.setContentLength(bytes.length);

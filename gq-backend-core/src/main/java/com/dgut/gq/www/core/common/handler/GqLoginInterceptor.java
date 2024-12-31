@@ -43,7 +43,7 @@ public class GqLoginInterceptor implements HandlerInterceptor {
         String token = request.getHeader("token");
         String openid = ParseToken.getOpenid(token);
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.DGUT_LOGIN + openid);
-        if (s == null || s.equals("") || !s.equals(openid)) {
+        if (s == null || s.isEmpty() || !s.equals(openid)) {
             throw new GlobalSystemException(GlobalResponseCode.GQ_USER_ACCOUNT_OVERDUE.getCode(), GlobalResponseCode.GQ_USER_ACCOUNT_OVERDUE.getMessage());
         }
         return true;

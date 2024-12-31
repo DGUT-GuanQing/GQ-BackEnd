@@ -14,12 +14,11 @@ import com.dgut.gq.www.common.db.entity.Lecture;
 import com.dgut.gq.www.common.db.entity.LoginUser;
 import com.dgut.gq.www.common.db.entity.User;
 import com.dgut.gq.www.common.db.entity.UserLectureInfo;
-import com.dgut.gq.www.common.db.mapper.LectureMapper;
-import com.dgut.gq.www.common.db.mapper.UserLectureInfoMapper;
 import com.dgut.gq.www.common.db.mapper.UserMapper;
 import com.dgut.gq.www.common.db.service.GqLectureService;
 import com.dgut.gq.www.common.db.service.GqUserLectureInfoService;
 import com.dgut.gq.www.common.db.service.GqUserService;
+import com.dgut.gq.www.common.excetion.GlobalSystemException;
 import com.dgut.gq.www.common.util.JwtUtil;
 import com.dgut.gq.www.core.common.model.dto.UserDto;
 import com.dgut.gq.www.core.common.model.vo.MyLectureVo;
@@ -55,13 +54,7 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Autowired
-    private LectureMapper lectureMapper;
-
-    @Autowired
     private StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private UserLectureInfoMapper userLectureInfoMapper;
 
     @Autowired
     private HttpUtil httpUtil;
@@ -88,27 +81,33 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String wxLogin(String code) {
-        //获取用户的openid
-        String openid = httpUtil.getOpenid(code);
-        //String openid = code;
-        User user = gqUserService.getByOpenid(openid);
-        Optional<User> optionalUser = Optional.ofNullable(user);
-        //第一次登录
-        if (!optionalUser.isPresent()) {
-            user = createUser(openid);
-            gqUserService.save(user);
-        } else {
-            updateUser(user);
-        }
-        // 把全部数据封装为LoginUser存入redis  方便后续权限的管理
-        LoginUser loginUser = createLoginUser(user);
-        //封装权限
-        String key = RedisGlobalKey.PERMISSION + openid;
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
-        stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
+        try {
+            //获取用户的openid
+            String openid = httpUtil.getOpenid(code);
+            //String openid = code;
+            User user = gqUserService.getByOpenid(openid);
+            Optional<User> optionalUser = Optional.ofNullable(user);
+            //第一次登录
+            if (!optionalUser.isPresent()) {
+                user = createUser(openid);
+                gqUserService.save(user);
+            } else {
+                updateUser(user);
+            }
+            log.info("UserServiceImpl wxLogin user = {}", JSONUtil.toJsonStr(user));
+            // 把全部数据封装为LoginUser存入redis  方便后续权限的管理
+            LoginUser loginUser = createLoginUser(user);
+            //封装权限
+            String key = RedisGlobalKey.PERMISSION + openid;
+            stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(loginUser));
+            stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
 
-        //加密openid，返回token
-        return JwtUtil.createJWT(openid);
+            //加密openid，返回token
+            return JwtUtil.createJWT(openid);
+        } catch (Exception e) {
+            log.error("UserServiceImpl wxLogin error", e);
+            throw new GlobalSystemException(GlobalResponseCode.SYSTEM_TIMEOUT);
+        }
     }
 
     private LoginUser createLoginUser(User user) {
@@ -169,7 +168,7 @@ public class UserServiceImpl implements UserService {
     public SystemJsonResponse getMyLecture(String openid, Integer page, Integer pageSize) {
         Page<UserLectureInfo> pageInfo = gqUserLectureInfoService.getByOpenid(openid, page, pageSize);
         List<UserLectureInfo> records = pageInfo.getRecords();
-        log.info("UserServiceImpl getMyLecture UserLectureInfoRecords = {}", JSONUtil.toJsonStr(records));
+        log.info("UserServiceImpl getMyLecture openid = {}, UserLectureInfoRecords = {}", openid, JSONUtil.toJsonStr(records));
         // 记录当前讲座的观看情况
         HashMap<String, Integer> map = new HashMap<>();
         List<String> list = new ArrayList<>();
@@ -179,7 +178,7 @@ public class UserServiceImpl implements UserService {
         }
         // 查询讲座信息
         List<Lecture> lectures = gqLectureService.getByIds(list);
-        log.info("UserServiceImpl getMyLecture lectures = {}", JSONUtil.toJsonStr(lectures));
+        log.info("UserServiceImpl getMyLecture openid = {}, lectures = {}", openid, JSONUtil.toJsonStr(lectures));
         List<MyLectureVo> lectureVos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(lectures)) {
             lectureVos = lectures.stream().map(lecture -> {
