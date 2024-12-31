@@ -10,7 +10,7 @@ public interface PosterTweetService {
     /**
      * 获取推文
      *
-     * @param type 0-活动 1-招新
+     * @param type
      * @return
      */
     SystemJsonResponse getByType(Integer type);

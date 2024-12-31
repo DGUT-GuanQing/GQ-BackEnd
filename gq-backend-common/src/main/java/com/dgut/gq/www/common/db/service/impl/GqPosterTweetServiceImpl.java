@@ -9,13 +9,4 @@ import org.springframework.stereotype.Service;
 @Service
 public class GqPosterTweetServiceImpl
         extends ServiceImpl<PosterTweetMapper, PosterTweet> implements GqPosterTweetService {
-    @Override
-    public PosterTweet getLatestByType(Integer type) {
-        return lambdaQuery()
-                .eq(PosterTweet::getType, type)
-                .eq(PosterTweet::getIsDeleted, 0)
-                .orderByDesc(PosterTweet::getCreateTime)
-                .last("limit 1")
-                .one();
-    }
 }
