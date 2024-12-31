@@ -52,4 +52,44 @@ public interface RecruitmentService {
      * @return
      */
     SystemJsonResponse getPosition(String departmentId);
+
+    /**
+     * 导出简历
+     *
+     * @param departmentId
+     * @param term
+     */
+    SystemJsonResponse exportCurriculumVitae(String departmentId, Integer term);
+
+    /**
+     * 删除部门
+     *
+     * @param id
+     * @return
+     */
+    SystemJsonResponse deleteDepartment(String id);
+
+    /**
+     * 删除职位
+     *
+     * @param id
+     * @return
+     */
+    SystemJsonResponse deletePosition(String id);
+
+    /**
+     * 新增或者更新部门
+     *
+     * @param departmentDto
+     * @return
+     */
+    SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto);
+
+    /**
+     * 新增或者更新职位
+     *
+     * @param positionDto
+     * @return
+     */
+    SystemJsonResponse saveAndUpdatePos(PositionDto positionDto);
 }
