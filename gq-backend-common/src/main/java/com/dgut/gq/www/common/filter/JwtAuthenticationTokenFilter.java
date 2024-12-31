@@ -49,26 +49,31 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
         //解析token
+        String openid;
         Claims claims = null;
         try {
             claims = JwtUtil.parseJWT(token);
         } catch (Exception e) {
             return;
         }
-        String openid = claims.getSubject();
+        openid = claims.getSubject();
+
         //从redis中获取信息，查看是否登录并且授予权限
         String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION + openid);
         LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
         if (Objects.isNull(loginUser) || Objects.isNull(loginUser.getUser())) {
             return;
         }
+
         //获取权限信息封装到Authentication中
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginUser, null, (loginUser).getAuthorities());
 
         //将信息存入 SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
         filterChain.doFilter(request, response);
     }
 
