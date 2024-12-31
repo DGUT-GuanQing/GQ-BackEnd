@@ -65,7 +65,7 @@ mybatis-plus:
 
 logging:
   level:
-    root: info
+    root: error
 
 jwt:
   secret: ${gq.jwt.secret}
