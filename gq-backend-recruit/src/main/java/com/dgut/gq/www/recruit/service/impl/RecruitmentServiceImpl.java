@@ -214,8 +214,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     return buildCurriculumVitaeVo(record, user, department, position);
                 }).collect(Collectors.toList());
         log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, curriculumVitaeVoList = {}", departmentId, term, JSONUtil.toJsonStr(curriculumVitaeVoList));
+        SystemResultList systemResultList = new SystemResultList(curriculumVitaeVoList, count);
 
-        return SystemJsonResponse.success(new SystemResultList(curriculumVitaeVoList, count));
+        return SystemJsonResponse.success(systemResultList);
     }
 
     /**
