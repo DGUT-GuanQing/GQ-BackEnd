@@ -238,8 +238,9 @@ public class LectureServiceImpl implements LectureService {
                     return lectureVo;
                 })
                 .collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(Collections.singletonList(lectureVos), (int) pageInfo.getTotal());
 
-        return SystemJsonResponse.success(new SystemResultList<>(Collections.singletonList(lectureVos), (int) pageInfo.getTotal()));
+        return SystemJsonResponse.success(systemResultList);
     }
 
     /**
@@ -262,8 +263,9 @@ public class LectureServiceImpl implements LectureService {
                     return lectureVo;
                 })
                 .collect(Collectors.toList());
+        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
 
-        return SystemJsonResponse.success(new SystemResultList<>(lectureVos, (int) pageInfo.getTotal()));
+        return SystemJsonResponse.success(systemResultList);
     }
 }
 

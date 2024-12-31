@@ -177,6 +177,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     public SystemJsonResponse getAllCurriculumVitae(int page, int pageSize, String departmentId, Integer term) {
         Page<CurriculumVitae> pageInfo = gqCurriculumVitaeService.pageByDepartmentIdAndTerm(page, pageSize, departmentId, term);
         List<CurriculumVitae> records = pageInfo.getRecords();
+        Integer count = (int) pageInfo.getTotal();
         log.info("RecruitmentServiceImpl getAllCurriculumVitae CurriculumVitaes = {}", JSONUtil.toJsonStr(records));
         Map<String, User> userMap = gqUserService.getByOpenIds(
                 records.stream()
@@ -214,7 +215,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 }).collect(Collectors.toList());
         log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, curriculumVitaeVoList = {}", departmentId, term, JSONUtil.toJsonStr(curriculumVitaeVoList));
 
-        return SystemJsonResponse.success(new SystemResultList<>(curriculumVitaeVoList, (int) pageInfo.getTotal()));
+        return SystemJsonResponse.success(new SystemResultList(curriculumVitaeVoList, count));
     }
 
     /**
