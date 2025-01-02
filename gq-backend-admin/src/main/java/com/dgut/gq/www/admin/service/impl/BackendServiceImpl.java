@@ -98,7 +98,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
             return SystemJsonResponse.success(JwtUtil.createJWT(userName));
         } catch (Exception e) {
-            log.error("BackendServiceImpl login error", e);
+            log.error("BackendServiceImpl login userName = {}, password = {}", userName, password, e);
             throw new GlobalSystemException(SYSTEM_TIMEOUT);
         }
     }
@@ -108,7 +108,6 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
         //获取 SecurityContextHolder信息
         UsernamePasswordAuthenticationToken authentication =
                 (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         String userName = loginUser.getUser().getUserName();
         //删除redis对应信息
@@ -135,7 +134,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
                     .collect(Collectors.toList());
             log.info("BackendServiceImpl getAttendLectureUser lectureId = {}, userVoList = {}", id, JSONUtil.toJsonStr(userVoList));
 
-            return SystemJsonResponse.success(new SystemResultList(userVoList, (int) pageInfo.getTotal()));
+            return SystemJsonResponse.success(new SystemResultList<>(userVoList, (int) pageInfo.getTotal()));
         } catch (Exception e) {
             log.error("BackendServiceImpl getAttendLectureUser error id = {}", id, e);
             return SystemJsonResponse.fail();
@@ -179,7 +178,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
             }
             return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), state);
         } catch (Exception e) {
-            log.error("BackendServiceImpl updateOrSaveLecture error lectureDto = {}", lectureDto, e);
+            log.error("BackendServiceImpl updateOrSaveLecture error lectureDto = {}", JSONUtil.toJsonStr(lectureDto), e);
             return SystemJsonResponse.fail();
         }
     }
@@ -207,7 +206,7 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
             return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), state);
         } catch (Exception e) {
-            log.error("BackendServiceImpl saveUpdatePosterTweet error posterTweetDto = {}", posterTweetDto, e);
+            log.error("BackendServiceImpl saveUpdatePosterTweet error posterTweetDto = {}", JSONUtil.toJsonStr(posterTweetDto), e);
             return SystemJsonResponse.fail();
         }
     }
@@ -348,80 +347,106 @@ public class BackendServiceImpl implements BackendService, UserDetailsService {
 
     @Override
     public SystemJsonResponse deleteDepartment(String id) {
-        log.info("BackendServiceImpl deleteDepartment departmentId = {}", id);
-        Department department = new Department();
-        department.setIsDeleted(1);
-        department.setId(id);
-        gqDepartmentService.updateById(department);
-        return SystemJsonResponse.success();
+        try {
+            log.info("BackendServiceImpl deleteDepartment departmentId = {}", id);
+            Department department = new Department();
+            department.setIsDeleted(1);
+            department.setId(id);
+            gqDepartmentService.updateById(department);
+            return SystemJsonResponse.success();
+        } catch (Exception e) {
+            log.error("BackendServiceImpl deleteDepartment departmentId = {}", id, e);
+            return SystemJsonResponse.fail();
+        }
     }
 
     @Override
     public SystemJsonResponse deletePosition(String id) {
-        log.info("BackendServiceImpl deletePosition positionId = {}", id);
-        Position position = new Position();
-        position.setIsDeleted(1);
-        position.setId(id);
-        gqPositionService.updateById(position);
-        return SystemJsonResponse.success();
+        try {
+            log.info("BackendServiceImpl deletePosition positionId = {}", id);
+            Position position = new Position();
+            position.setIsDeleted(1);
+            position.setId(id);
+            gqPositionService.updateById(position);
+            return SystemJsonResponse.success();
+        } catch (Exception e) {
+            log.error("BackendServiceImpl deletePosition positionId = {}", id, e);
+            return SystemJsonResponse.fail();
+        }
     }
 
     @Override
     public SystemJsonResponse saveAndUpdateDep(DepartmentDto departmentDto) {
-        log.info("BackendServiceImpl saveAndUpdateDep departmentDto = {}", JSONUtil.toJsonStr(departmentDto));
-        String id = departmentDto.getId();
-        Department department = new Department();
-        BeanUtils.copyProperties(departmentDto, department);
-        department.setUpdateTime(LocalDateTime.now());
-        String status;
-        //新增
-        if (id == null || id.isEmpty()) {
-            department.setCreateTime(LocalDateTime.now());
-            gqDepartmentService.save(department);
-            status = "新增成功";
-        } else {
-            gqDepartmentService.updateById(department);
-            status = "修改成功";
+        try {
+            log.info("BackendServiceImpl saveAndUpdateDep departmentDto = {}", JSONUtil.toJsonStr(departmentDto));
+            String id = departmentDto.getId();
+            Department department = new Department();
+            BeanUtils.copyProperties(departmentDto, department);
+            department.setUpdateTime(LocalDateTime.now());
+            String status;
+            //新增
+            if (id == null || id.isEmpty()) {
+                department.setCreateTime(LocalDateTime.now());
+                gqDepartmentService.save(department);
+                status = "新增成功";
+            } else {
+                gqDepartmentService.updateById(department);
+                status = "修改成功";
+            }
+            return SystemJsonResponse.success(status);
+        } catch (Exception e) {
+            log.error("BackendServiceImpl saveAndUpdateDep departmentDto = {}", JSONUtil.toJsonStr(departmentDto), e);
+            return SystemJsonResponse.fail();
         }
-        return SystemJsonResponse.success(status);
     }
 
     @Override
     public SystemJsonResponse saveAndUpdatePos(PositionDto positionDto) {
-        log.info("BackendServiceImpl saveAndUpdatePos positionDto = {}", JSONUtil.toJsonStr(positionDto));
-        String id = positionDto.getId();
-        Position position = new Position();
-        BeanUtils.copyProperties(positionDto, position);
-        position.setUpdateTime(LocalDateTime.now());
-        String status;
-        if (id == null || id.isEmpty()) {
-            position.setCreateTime(LocalDateTime.now());
-            gqPositionService.save(position);
-            status = "新增成功";
-        } else {
-            gqPositionService.updateById(position);
-            status = "修改成功";
+        try {
+            log.info("BackendServiceImpl saveAndUpdatePos positionDto = {}", JSONUtil.toJsonStr(positionDto));
+            String id = positionDto.getId();
+            Position position = new Position();
+            BeanUtils.copyProperties(positionDto, position);
+            position.setUpdateTime(LocalDateTime.now());
+            String status;
+            if (id == null || id.isEmpty()) {
+                position.setCreateTime(LocalDateTime.now());
+                gqPositionService.save(position);
+                status = "新增成功";
+            } else {
+                gqPositionService.updateById(position);
+                status = "修改成功";
+            }
+            return SystemJsonResponse.success(status);
+        } catch (Exception e) {
+            log.error("BackendServiceImpl saveAndUpdatePos positionDto = {}", JSONUtil.toJsonStr(positionDto), e);
+            return SystemJsonResponse.fail();
         }
-        return SystemJsonResponse.success(status);
     }
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        User user = gqUserService.getByUserName(userName);
-        //判断用户是否存在数据库中
-        Optional<User> optionalUser = Optional.ofNullable(user);
-        //不存在就抛出异常
-        if (!optionalUser.isPresent()) {
+        try {
+            User user = gqUserService.getByUserName(userName);
+            //判断用户是否存在数据库中
+            Optional<User> optionalUser = Optional.ofNullable(user);
+            //不存在就抛出异常
+            if (!optionalUser.isPresent()) {
+                throw new GlobalSystemException(
+                        GlobalResponseCode.OPERATE_FAIL.getCode(),
+                        "账户不存在");
+            }
+            //权限信息
+            String permission = user.getPermission();
+            List<String> list = new ArrayList<>();
+            list.add(permission);
+            return new LoginUser(user, list);
+        } catch (Exception e) {
+            log.error("BackendServiceImpl loadUserByUsername userName = {}", userName, e);
             throw new GlobalSystemException(
                     GlobalResponseCode.OPERATE_FAIL.getCode(),
-                    "账户不存在");
+                    "系统异常");
         }
-        //权限信息
-        String permission = user.getPermission();
-        List<String> list = new ArrayList<>();
-        list.add(permission);
-
-        return new LoginUser(user, list);
     }
 }
 

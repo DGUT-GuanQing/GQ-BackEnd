@@ -42,16 +42,6 @@ public interface UserService {
      */
     SystemJsonResponse isGrabTicket(String openid);
 
-
-    /**
-     * 中央认证
-     *
-     * @param userDto
-     * @return
-     */
-    SystemJsonResponse dgutLogin(UserDto userDto, String openid);
-
-
     /**
      * 签到
      *
@@ -69,14 +59,6 @@ public interface UserService {
      * @return
      */
     SystemJsonResponse isBlack(String openid);
-
-    /**
-     * 根据用户名获取用户信息
-     *
-     * @param username
-     * @return
-     */
-    User getUserByUsername(String username);
 
     /**
      * 中央认证回调

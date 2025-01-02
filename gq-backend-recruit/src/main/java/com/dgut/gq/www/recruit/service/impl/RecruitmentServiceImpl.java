@@ -67,23 +67,28 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse updateOrSave(String openid, CurriculumVitaeDto curriculumVitaeDto) {
-        log.info("RecruitmentServiceImpl updateOrSave openid = {}, curriculumVitaeDto = {}", openid, curriculumVitaeDto);
-        // 否上传过简历
-        boolean isResumeExists = checkResumeExists(openid);
-        CurriculumVitae curriculumVitae = createCurriculumVitae(curriculumVitaeDto, openid);
-        String msg;
-        if (!isResumeExists) {
-            initializeNewCurriculumVitae(curriculumVitae);
-            gqCurriculumVitaeService.save(curriculumVitae);
-            msg = "上传成功";
-        } else {
-            updateExistingCurriculumVitae(curriculumVitae, openid);
-            msg = "修改成功";
-        }
-        // 更新用户班级信息，中央认证拿不到班级，这里是通过用户上传间接拿到他填的班级
-        updateUserClassInfo(openid, curriculumVitaeDto.getNaturalClass());
+        try {
+            log.info("RecruitmentServiceImpl updateOrSave openid = {}, curriculumVitaeDto = {}", openid, JSONUtil.toJsonStr(curriculumVitaeDto));
+            // 否上传过简历
+            boolean isResumeExists = checkResumeExists(openid);
+            CurriculumVitae curriculumVitae = createCurriculumVitae(curriculumVitaeDto, openid);
+            String msg;
+            if (!isResumeExists) {
+                initializeNewCurriculumVitae(curriculumVitae);
+                gqCurriculumVitaeService.save(curriculumVitae);
+                msg = "上传成功";
+            } else {
+                updateExistingCurriculumVitae(curriculumVitae, openid);
+                msg = "修改成功";
+            }
+            // 更新用户班级信息，中央认证拿不到班级，这里是通过用户上传间接拿到他填的班级
+            updateUserClassInfo(openid, curriculumVitaeDto.getNaturalClass());
 
-        return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), msg);
+            return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), msg);
+        } catch (Exception e) {
+            log.error("RecruitmentServiceImpl updateOrSave error openid = {}, curriculumVitaeDto = {}", openid, JSONUtil.toJsonStr(curriculumVitaeDto), e);
+            return SystemJsonResponse.fail();
+        }
     }
 
     private void updateUserClassInfo(String openid, String naturalClass) {
@@ -128,16 +133,22 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse getMyCurriculumVitae(String openid) {
-        CurriculumVitae curriculumVitae = queryCurriculumVitae(openid);
-        if (!Optional.ofNullable(curriculumVitae).isPresent()) {
-            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "没有简历");
+        try {
+            CurriculumVitae curriculumVitae = queryCurriculumVitae(openid);
+            if (!Optional.ofNullable(curriculumVitae).isPresent()) {
+                return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "没有简历");
+            }
+            User user = queryUser(openid);
+            Department department = queryDepartment(curriculumVitae.getDepartmentId());
+            Position position = queryPosition(curriculumVitae.getPositionId());
+            CurriculumVitaeVo curriculumVitaeVo = buildCurriculumVitaeVo(curriculumVitae, user, department, position);
+            log.info("RecruitmentServiceImpl getMyCurriculumVitae openid = {}, curriculumVitaeVo = {}", openid, JSONUtil.toJsonStr(curriculumVitaeVo));
+
+            return SystemJsonResponse.success(curriculumVitaeVo);
+        } catch (Exception e) {
+            log.error("RecruitmentServiceImpl getMyCurriculumVitae error openid = {}", openid, e);
+            return SystemJsonResponse.fail();
         }
-        User user = queryUser(openid);
-        Department department = queryDepartment(curriculumVitae.getDepartmentId());
-        Position position = queryPosition(curriculumVitae.getPositionId());
-        CurriculumVitaeVo curriculumVitaeVo = buildCurriculumVitaeVo(curriculumVitae, user, department, position);
-        log.info("RecruitmentServiceImpl getMyCurriculumVitae openid = {}, curriculumVitaeVo = {}", openid, JSONUtil.toJsonStr(curriculumVitaeVo));
-        return SystemJsonResponse.success(curriculumVitaeVo);
     }
 
     private CurriculumVitae queryCurriculumVitae(String openid) {
@@ -175,46 +186,51 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse getAllCurriculumVitae(int page, int pageSize, String departmentId, Integer term) {
-        Page<CurriculumVitae> pageInfo = gqCurriculumVitaeService.pageByDepartmentIdAndTerm(page, pageSize, departmentId, term);
-        List<CurriculumVitae> records = pageInfo.getRecords();
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae CurriculumVitaes = {}", JSONUtil.toJsonStr(records));
-        Map<String, User> userMap = gqUserService.getByOpenIds(
-                records.stream()
-                        .filter(Objects::nonNull)
-                        .map(CurriculumVitae::getOpenid)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(
-                User::getOpenid,
-                Function.identity(),
-                (o1, o2) -> o1)
-        );
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, userMap = {}", departmentId, term, JSONUtil.toJsonStr(userMap));
-        Map<String, Department> departmentMap = gqDepartmentService.getByIds(
-                records.stream()
-                        .map(CurriculumVitae::getDepartmentId)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(Department::getId, Function.identity()));
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, departmentMap = {}", departmentId, term, JSONUtil.toJsonStr(departmentMap));
-        Map<String, Position> positionMap = gqPositionService.getByIds(
-                records.stream()
-                        .map(CurriculumVitae::getPositionId)
-                        .collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(Position::getId, Function.identity()));
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, positionMap = {}", departmentId, term, JSONUtil.toJsonStr(positionMap));
-        // 组装返还值
-        List<CurriculumVitaeVo> curriculumVitaeVoList = records.stream()
-                .filter(record -> userMap.containsKey(record.getOpenid())
-                        && departmentMap.containsKey(record.getDepartmentId())
-                        && positionMap.containsKey(record.getPositionId())
-                ).map(record -> {
-                    User user = userMap.get(record.getOpenid());
-                    Department department = departmentMap.get(record.getDepartmentId());
-                    Position position = positionMap.get(record.getPositionId());
-                    return buildCurriculumVitaeVo(record, user, department, position);
-                }).collect(Collectors.toList());
-        log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, curriculumVitaeVoList = {}", departmentId, term, JSONUtil.toJsonStr(curriculumVitaeVoList));
+        try {
+            Page<CurriculumVitae> pageInfo = gqCurriculumVitaeService.pageByDepartmentIdAndTerm(page, pageSize, departmentId, term);
+            List<CurriculumVitae> records = pageInfo.getRecords();
+            log.info("RecruitmentServiceImpl getAllCurriculumVitae CurriculumVitaes = {}", JSONUtil.toJsonStr(records));
+            Map<String, User> userMap = gqUserService.getByOpenIds(
+                    records.stream()
+                            .filter(Objects::nonNull)
+                            .map(CurriculumVitae::getOpenid)
+                            .collect(Collectors.toList())
+            ).stream().collect(Collectors.toMap(
+                    User::getOpenid,
+                    Function.identity(),
+                    (o1, o2) -> o1)
+            );
+            log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, userMap = {}", departmentId, term, JSONUtil.toJsonStr(userMap));
+            Map<String, Department> departmentMap = gqDepartmentService.getByIds(
+                    records.stream()
+                            .map(CurriculumVitae::getDepartmentId)
+                            .collect(Collectors.toList())
+            ).stream().collect(Collectors.toMap(Department::getId, Function.identity()));
+            log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, departmentMap = {}", departmentId, term, JSONUtil.toJsonStr(departmentMap));
+            Map<String, Position> positionMap = gqPositionService.getByIds(
+                    records.stream()
+                            .map(CurriculumVitae::getPositionId)
+                            .collect(Collectors.toList())
+            ).stream().collect(Collectors.toMap(Position::getId, Function.identity()));
+            log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, positionMap = {}", departmentId, term, JSONUtil.toJsonStr(positionMap));
+            // 组装返还值
+            List<CurriculumVitaeVo> curriculumVitaeVoList = records.stream()
+                    .filter(record -> userMap.containsKey(record.getOpenid())
+                            && departmentMap.containsKey(record.getDepartmentId())
+                            && positionMap.containsKey(record.getPositionId())
+                    ).map(record -> {
+                        User user = userMap.get(record.getOpenid());
+                        Department department = departmentMap.get(record.getDepartmentId());
+                        Position position = positionMap.get(record.getPositionId());
+                        return buildCurriculumVitaeVo(record, user, department, position);
+                    }).collect(Collectors.toList());
+            log.info("RecruitmentServiceImpl getAllCurriculumVitae departmentId = {}, term = {}, curriculumVitaeVoList = {}", departmentId, term, JSONUtil.toJsonStr(curriculumVitaeVoList));
 
-        return SystemJsonResponse.success(new SystemResultList<>(curriculumVitaeVoList, (int) pageInfo.getTotal()));
+            return SystemJsonResponse.success(new SystemResultList<>(curriculumVitaeVoList, (int) pageInfo.getTotal()));
+        } catch (Exception e) {
+            log.error("RecruitmentServiceImpl getAllCurriculumVitae error departmentId = {}, term = {}", departmentId, term, e);
+            return SystemJsonResponse.fail();
+        }
     }
 
     /**
@@ -224,15 +240,20 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse getDepartment() {
-        List<Department> departments = gqDepartmentService.getAll();
-        List<DepartmentVo> departmentVoList = new ArrayList<>();
-        for (Department department : departments) {
-            DepartmentVo departmentVo = new DepartmentVo();
-            BeanUtils.copyProperties(department, departmentVo);
-            departmentVoList.add(departmentVo);
+        try {
+            List<Department> departments = gqDepartmentService.getAll();
+            List<DepartmentVo> departmentVoList = new ArrayList<>();
+            for (Department department : departments) {
+                DepartmentVo departmentVo = new DepartmentVo();
+                BeanUtils.copyProperties(department, departmentVo);
+                departmentVoList.add(departmentVo);
+            }
+            log.info("RecruitmentServiceImpl getDepartment departmentVoList = {}", JSONUtil.toJsonStr(departmentVoList));
+            return SystemJsonResponse.success(departmentVoList);
+        } catch (Exception e) {
+            log.error("RecruitmentServiceImpl getDepartment error", e);
+            return SystemJsonResponse.fail();
         }
-        log.info("RecruitmentServiceImpl getDepartment departmentVoList = {}", JSONUtil.toJsonStr(departmentVoList));
-        return SystemJsonResponse.success(departmentVoList);
     }
 
     /**
@@ -243,14 +264,19 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     public SystemJsonResponse getPosition(String departmentId) {
-        List<Position> positions = gqPositionService.getByDepartmentId(departmentId);
-        List<PositionVo> positionVos = new ArrayList<>();
-        for (Position position : positions) {
-            PositionVo positionVo = new PositionVo();
-            BeanUtils.copyProperties(position, positionVo);
-            positionVos.add(positionVo);
+        try {
+            List<Position> positions = gqPositionService.getByDepartmentId(departmentId);
+            List<PositionVo> positionVos = new ArrayList<>();
+            for (Position position : positions) {
+                PositionVo positionVo = new PositionVo();
+                BeanUtils.copyProperties(position, positionVo);
+                positionVos.add(positionVo);
+            }
+            log.info("RecruitmentServiceImpl getPosition positionVos = {}", JSONUtil.toJsonStr(positionVos));
+            return SystemJsonResponse.success(positionVos);
+        } catch (Exception e) {
+            log.error("RecruitmentServiceImpl getPosition error", e);
+            return SystemJsonResponse.fail();
         }
-        log.info("RecruitmentServiceImpl getPosition positionVos = {}", JSONUtil.toJsonStr(positionVos));
-        return SystemJsonResponse.success(positionVos);
     }
 }
