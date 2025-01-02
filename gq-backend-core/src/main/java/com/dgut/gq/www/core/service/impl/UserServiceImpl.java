@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
             //加密openid，返回token
             return JwtUtil.createJWT(openid);
         } catch (Exception e) {
-            log.error("UserServiceImpl wxLogin error", e);
+            log.error("UserServiceImpl wxLogin error code = {}", code, e);
             throw new GlobalSystemException(GlobalResponseCode.SYSTEM_TIMEOUT);
         }
     }
@@ -142,20 +142,26 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse getMe(String openid) {
-        String key = RedisGlobalKey.USER_MESSAGE + openid;
-        UserVo userVo = Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
-                .map(user -> JSONUtil.toBean(user, UserVo.class))
-                .orElseGet(() -> {
-                    User user = gqUserService.getByOpenid(openid);
-                    UserVo newUserVo = new UserVo();
-                    BeanUtils.copyProperties(user, newUserVo);
-                    //存入redis
-                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newUserVo));
-                    stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
-                    return newUserVo;
-                });
-        log.info("UserServiceImpl getMe = {}", JSONUtil.toJsonStr(userVo));
-        return SystemJsonResponse.success(userVo);
+        try {
+            String key = RedisGlobalKey.USER_MESSAGE + openid;
+            UserVo userVo = Optional.ofNullable(stringRedisTemplate.opsForValue().get(key))
+                    .map(user -> JSONUtil.toBean(user, UserVo.class))
+                    .orElseGet(() -> {
+                        User user = gqUserService.getByOpenid(openid);
+                        UserVo newUserVo = new UserVo();
+                        BeanUtils.copyProperties(user, newUserVo);
+                        //存入redis
+                        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(newUserVo));
+                        stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
+                        return newUserVo;
+                    });
+            log.info("UserServiceImpl getMe userVo = {}", JSONUtil.toJsonStr(userVo));
+
+            return SystemJsonResponse.success(userVo);
+        } catch (Exception e) {
+            log.error("UserServiceImpl getMe error openid = {}", openid, e);
+            throw new GlobalSystemException(GlobalResponseCode.SYSTEM_TIMEOUT);
+        }
     }
 
     /**
@@ -166,30 +172,34 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse getMyLecture(String openid, Integer page, Integer pageSize) {
-        Page<UserLectureInfo> pageInfo = gqUserLectureInfoService.getByOpenid(openid, page, pageSize);
-        List<UserLectureInfo> records = pageInfo.getRecords();
-        log.info("UserServiceImpl getMyLecture openid = {}, UserLectureInfoRecords = {}", openid, JSONUtil.toJsonStr(records));
-        // 记录当前讲座的观看情况
-        HashMap<String, Integer> map = new HashMap<>();
-        List<String> list = new ArrayList<>();
-        for (UserLectureInfo record : records) {
-            list.add(record.getLectureId());
-            map.put(record.getLectureId(), record.getStatus());
+        try {
+            Page<UserLectureInfo> pageInfo = gqUserLectureInfoService.getByOpenid(openid, page, pageSize);
+            List<UserLectureInfo> records = pageInfo.getRecords();
+            log.info("UserServiceImpl getMyLecture openid = {}, UserLectureInfoRecords = {}", openid, JSONUtil.toJsonStr(records));
+            // 记录当前讲座的观看情况
+            HashMap<String, Integer> map = new HashMap<>();
+            List<String> list = new ArrayList<>();
+            for (UserLectureInfo record : records) {
+                list.add(record.getLectureId());
+                map.put(record.getLectureId(), record.getStatus());
+            }
+            // 查询讲座信息
+            List<Lecture> lectures = gqLectureService.getByIds(list);
+            log.info("UserServiceImpl getMyLecture openid = {}, lectures = {}", openid, JSONUtil.toJsonStr(lectures));
+            List<MyLectureVo> lectureVos = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(lectures)) {
+                lectureVos = lectures.stream().map(lecture -> {
+                    MyLectureVo lectureVo = new MyLectureVo();
+                    BeanUtil.copyProperties(lecture, lectureVo);
+                    lectureVo.setStatus(map.get(lecture.getId()));
+                    return lectureVo;
+                }).collect(Collectors.toList());
+            }
+            return SystemJsonResponse.success(new SystemResultList<>(lectureVos, (int) pageInfo.getTotal()));
+        } catch (Exception e) {
+            log.error("UserServiceImpl getMyLecture error openid = {}", openid, e);
+            throw new GlobalSystemException(GlobalResponseCode.SYSTEM_TIMEOUT);
         }
-        // 查询讲座信息
-        List<Lecture> lectures = gqLectureService.getByIds(list);
-        log.info("UserServiceImpl getMyLecture openid = {}, lectures = {}", openid, JSONUtil.toJsonStr(lectures));
-        List<MyLectureVo> lectureVos = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(lectures)) {
-            lectureVos = lectures.stream().map(lecture -> {
-                MyLectureVo lectureVo = new MyLectureVo();
-                BeanUtil.copyProperties(lecture, lectureVo);
-                lectureVo.setStatus(map.get(lecture.getId()));
-                return lectureVo;
-            }).collect(Collectors.toList());
-        }
-        SystemResultList systemResultList = new SystemResultList(lectureVos, (int) pageInfo.getTotal());
-        return SystemJsonResponse.success(systemResultList);
     }
 
     /**
@@ -200,32 +210,16 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse isGrabTicket(String openid) {
-        String key = RedisGlobalKey.IS_GRAB_TICKETS;
-        Boolean member = stringRedisTemplate.opsForSet().isMember(key, openid);
-        boolean flag = member != null && member;
-        return SystemJsonResponse.success(flag);
-    }
-
-    /**
-     * 中央认证登陆
-     *
-     * @param userDto
-     * @return
-     */
-    @Override
-    public SystemJsonResponse dgutLogin(UserDto userDto, String openid) {
-        //将中央认证信息更新到数据库
-        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(User::getOpenid, openid);
-        User user = new User();
-        BeanUtils.copyProperties(userDto, user);
-        userMapper.update(user, lambdaQueryWrapper);
-        //删除redis中的信息
-        String key = RedisGlobalKey.USER_MESSAGE + openid;
-        stringRedisTemplate.delete(key);
-        //设置中央认证缓存
-        stringRedisTemplate.opsForValue().set(RedisGlobalKey.DGUT_LOGIN + openid, openid);
-        return SystemJsonResponse.success();
+        try {
+            log.info("UserServiceImpl isGrabTicket openid = {}", openid);
+            String key = RedisGlobalKey.IS_GRAB_TICKETS;
+            Boolean member = stringRedisTemplate.opsForSet().isMember(key, openid);
+            boolean flag = member != null && member;
+            return SystemJsonResponse.success(flag);
+        } catch (Exception e) {
+            log.error("UserServiceImpl isGrabTicket error openid = {}", openid, e);
+            return SystemJsonResponse.success(true);
+        }
     }
 
     /**
@@ -240,7 +234,6 @@ public class UserServiceImpl implements UserService {
         LambdaQueryWrapper<UserLectureInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(UserLectureInfo::getLectureId, lectureId);
         lambdaQueryWrapper.eq(UserLectureInfo::getOpenid, openid);
-
         //先查询用户有没有抢到讲座
         UserLectureInfo userLectureInfo = gqUserLectureInfoService.getByLectureAndOpenid(lectureId, openid);
         if (userLectureInfo == null) {
@@ -262,30 +255,28 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SystemJsonResponse isBlack(String openid) {
-        boolean flag = false;
-        String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION + openid);
-        LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
-        String permission;
+        try {
+            boolean flag = false;
+            String s = stringRedisTemplate.opsForValue().get(RedisGlobalKey.PERMISSION + openid);
+            LoginUser loginUser = JSONUtil.toBean(s, LoginUser.class);
+            String permission;
 
-        if (Objects.isNull(loginUser) || Objects.isNull(loginUser.getUser())) {
-            LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(User::getOpenid, openid);
-            User user = gqUserService.getByOpenid(openid);
-            permission = user.getPermission();
-        } else {
-            permission = loginUser.getPermission().get(0);
+            if (Objects.isNull(loginUser) || Objects.isNull(loginUser.getUser())) {
+                LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(User::getOpenid, openid);
+                User user = gqUserService.getByOpenid(openid);
+                permission = user.getPermission();
+            } else {
+                permission = loginUser.getPermission().get(0);
+            }
+            if (permission.equals("black")) {
+                flag = true;
+            }
+            return SystemJsonResponse.success(flag);
+        } catch (Exception e) {
+            log.error("UserServiceImpl isBlack error openid = {}", openid, e);
+            return SystemJsonResponse.success(true);
         }
-        if (permission.equals("black")) {
-            flag = true;
-        }
-        return SystemJsonResponse.success(flag);
-    }
-
-    @Override
-    public User getUserByUsername(String username) {
-        LambdaQueryWrapper<User> lq = new LambdaQueryWrapper<>();
-        lq.eq(User::getUserName, username);
-        return userMapper.selectOne(lq);
     }
 
     @Override
