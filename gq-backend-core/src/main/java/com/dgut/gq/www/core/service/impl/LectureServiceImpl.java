@@ -144,7 +144,7 @@ public class LectureServiceImpl implements LectureService {
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票时间未到");
             }
             lock = redissonClient.getLock(key + openid);
-            boolean lockRes = lock.tryLock(5, 10, TimeUnit.SECONDS);
+            boolean lockRes = lock.tryLock(10, TimeUnit.SECONDS);
             if (!lockRes) {
                 log.info("LectureServiceImpl robTicket 抢票频繁 openid = {}, lectureId = {}", openid, lectureId);
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
