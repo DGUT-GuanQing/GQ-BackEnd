@@ -35,19 +35,19 @@
         <jsoup.version>1.15.3</jsoup.version>
         <mysql-connector-java.version>5.1.47</mysql-connector-java.version>
         <mybatis-plus-boot-starter.version>3.4.2</mybatis-plus-boot-starter.version>
-        <fastjson.version>1.2.79</fastjson.version> <!-- Please ensure to use a single version across your project -->
+        <fastjson.version>1.2.83</fastjson.version> <!-- Please ensure to use a single version across your project -->
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
         <druid-spring-boot-starter.version>1.2.16</druid-spring-boot-starter.version>
         <okhttp.version>4.7.2</okhttp.version>
         <jjwt.version>0.9.0</jjwt.version>
         <commons-pool2.version>2.7.0</commons-pool2.version>
-        <hutool-all.version>5.7.17</hutool-all.version>
-        <springfox-swagger-ui.version>2.9.2</springfox-swagger-ui.version>
+        <hutool-all.version>5.8.21</hutool-all.version>
+        <springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
         <minio>8.4.3</minio>
         <cas-client-core>3.5.0</cas-client-core>
         <core>3.4.1</core>
-        <redisson>3.17.7</redisson>
-        <guava>30.1-jre</guava>
+        <redisson>3.22.0</redisson>
+        <guava>32.0.0-jre</guava>
     </properties>
 
 
