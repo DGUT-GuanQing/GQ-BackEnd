@@ -42,7 +42,7 @@
         <jjwt.version>0.9.0</jjwt.version>
         <commons-pool2.version>2.7.0</commons-pool2.version>
         <hutool-all.version>5.7.17</hutool-all.version>
-        <springfox-swagger-ui.version>2.9.2</springfox-swagger-ui.version>
+        <springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
         <minio>8.4.3</minio>
         <cas-client-core>3.5.0</cas-client-core>
         <core>3.4.1</core>
