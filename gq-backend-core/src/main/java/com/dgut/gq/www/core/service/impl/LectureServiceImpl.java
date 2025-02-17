@@ -133,25 +133,22 @@ public class LectureServiceImpl implements LectureService {
      */
     @Override
     public SystemJsonResponse robTicket(String openid, String lectureId) {
-        String key = RedisGlobalKey.UNSTART_LECTURE;
-        String str = stringRedisTemplate.opsForValue().get(key);
-        LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
-        if (grabTicketsStart.isAfter(LocalDateTime.now())) {
-            log.info("LectureServiceImpl robTicket 抢票时间未到， openid = {}, lectureId = {}", openid, lectureId);
-            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票时间未到");
-        }
-        RLock lock = redissonClient.getLock(key + openid);
+        RLock lock = null;
         try {
-            boolean lockRes = lock.tryLock(5, 10, TimeUnit.SECONDS);
+            String key = RedisGlobalKey.UNSTART_LECTURE;
+            String str = stringRedisTemplate.opsForValue().get(key);
+            LocalDateTime grabTicketsStart = JSONUtil.toBean(str, LectureVo.class).getGrabTicketsStart();
+            // 判断抢票时间
+            if (grabTicketsStart.isAfter(LocalDateTime.now())) {
+                log.info("LectureServiceImpl robTicket 抢票时间未到， openid = {}, lectureId = {}", openid, lectureId);
+                return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票时间未到");
+            }
+            lock = redissonClient.getLock(key + openid);
+            boolean lockRes = lock.tryLock(10, TimeUnit.SECONDS);
             if (!lockRes) {
                 log.info("LectureServiceImpl robTicket 抢票频繁 openid = {}, lectureId = {}", openid, lectureId);
                 return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
             }
-        } catch (InterruptedException e) {
-            log.error("LectureServiceImpl robTicket 获取锁异常 openid = {}, lectureId = {}", openid, lectureId, e);
-            return SystemJsonResponse.fail(GlobalResponseCode.OPERATE_FAIL.getCode(), "抢票失败");
-        }
-        try {
             //执行lua脚本
             Long execute = stringRedisTemplate.execute(SECKILL_SCRIPT, Collections.emptyList(), lectureId, openid);
             int re = execute.intValue();
@@ -162,9 +159,11 @@ public class LectureServiceImpl implements LectureService {
             }
             SendMsg(openid, lectureId);
         } catch (Exception e) {
-            log.info("LectureServiceImpl robTicket 抢票失败 openid = {}, lectureId = {}", openid, lectureId, e);
+            log.error("LectureServiceImpl robTicket error openid = {}, lectureId = {}", openid, lectureId, e);
         } finally {
-            lock.unlock();
+            if (lock != null) {
+                lock.unlock();
+            }
         }
         return SystemJsonResponse.success(GlobalResponseCode.OPERATE_SUCCESS.getCode(), "抢票成功");
     }
@@ -184,7 +183,7 @@ public class LectureServiceImpl implements LectureService {
             public void onSuccess(CorrelationData.Confirm result) {
                 //Future接收到回执的处理逻辑，参数中的result就是回执内容
                 if (result.isAck()) {
-                    log.debug("LectureServiceImpl SendMsg 发送消息成功，收到 ack");
+                    log.info("LectureServiceImpl SendMsg 发送消息成功，收到 ack");
                 } else { // result.getReason()，String类型，返回nack时的异常描述
                     log.error("LectureServiceImpl SendMsg 发送消息失败，收到 nack, reason = {}", result.getReason());
                     String openid;
@@ -236,7 +235,7 @@ public class LectureServiceImpl implements LectureService {
     public SystemJsonResponse getLectureReview(int page, int pageSize, String name) {
         try {
             Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 0);
-            log.info("LectureServiceImpl getLectureReview data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
+            log.info("LectureServiceImpl getLectureReview name = {}, data = {}", name, JSONUtil.toJsonStr(pageInfo.getRecords()));
             List<LectureReviewVo> lectureVos = pageInfo.getRecords().stream()
                     .filter(record -> record.getReviewName() != null)
                     .map(record -> {
@@ -264,7 +263,7 @@ public class LectureServiceImpl implements LectureService {
     public SystemJsonResponse getLectureTrailer(int page, int pageSize, String name) {
         try {
             Page<Lecture> pageInfo = gqLectureService.getLectures(page, pageSize, name, 1);
-            log.info("LectureServiceImpl getLectureTrailer data = {}", JSONUtil.toJsonStr(pageInfo.getRecords()));
+            log.info("LectureServiceImpl getLectureTrailer name = {} data = {}", name, JSONUtil.toJsonStr(pageInfo.getRecords()));
             List<LectureTrailerVo> lectureVos = pageInfo.getRecords().stream()
                     .filter(record -> record.getLectureName() != null)
                     .map(record -> {
